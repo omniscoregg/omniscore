@@ -151,7 +151,13 @@ function renderTeamDetail(team, teamName, recentMatches, upcomingMatches, colors
   // Header équipe
   // Mettre le pays sous le nom
   const countryEl = document.getElementById('td-country');
-  if (countryEl && team?.location) countryEl.textContent = '📍 ' + team.location;
+  const countryNames = {
+  AF:'Afghanistan',AL:'Albanie',DZ:'Algérie',AR:'Argentine',AU:'Australie',AT:'Autriche',BE:'Belgique',BR:'Brésil',BG:'Bulgarie',CA:'Canada',CL:'Chili',CN:'Chine',CO:'Colombie',HR:'Croatie',CZ:'République Tchèque',DK:'Danemark',EG:'Égypte',FI:'Finlande',FR:'France',DE:'Allemagne',GR:'Grèce',HK:'Hong Kong',HU:'Hongrie',IN:'Inde',ID:'Indonésie',IR:'Iran',IL:'Israël',IT:'Italie',JP:'Japon',KZ:'Kazakhstan',KR:'Corée du Sud',MX:'Mexique',MN:'Mongolie',MA:'Maroc',NL:'Pays-Bas',NZ:'Nouvelle-Zélande',NO:'Norvège',PH:'Philippines',PL:'Pologne',PT:'Portugal',RO:'Roumanie',RU:'Russie',SA:'Arabie Saoudite',SG:'Singapour',ZA:'Afrique du Sud',ES:'Espagne',SE:'Suède',CH:'Suisse',TW:'Taïwan',TH:'Thaïlande',TR:'Turquie',UA:'Ukraine',GB:'Royaume-Uni',US:'États-Unis',VN:'Vietnam',
+};
+if (countryEl && team?.location) {
+  const code = team.location.toUpperCase();
+  countryEl.textContent = countryNames[code] || team.location;
+}
 
   html += '<div class="td-header">';
   html += '<div class="td-header-info">';
@@ -216,7 +222,7 @@ function renderTeamDetail(team, teamName, recentMatches, upcomingMatches, colors
 
   // Roster
   if (team?.players?.length > 0) {
-    html += '<div class="td-section"><div class="td-section-title">👥 Roster</div>';
+    html += '<div class="td-section" style="margin-top:16px"><div class="td-section-title">Roster</div>';
     html += '<div class="td-roster">';
     team.players.forEach(p => {
       const avatar = p.image_url
@@ -234,23 +240,29 @@ function renderTeamDetail(team, teamName, recentMatches, upcomingMatches, colors
     html += '</div></div>';
   }
 
-  // Derniers matchs
+  // Historique enrichi depuis recentMatches
   if (recentMatches.length > 0) {
-    html += '<div class="td-section"><div class="td-section-title">📋 Derniers résultats</div>';
+    html += '<div class="td-section" style="margin-top:16px"><div class="td-section-title">Historique</div>';
     recentMatches.forEach(m => {
-      const ops  = m.opponents || [];
-      const res  = m.results   || [];
-      const idx  = ops.findIndex(o => o.opponent?.name?.toLowerCase() === teamName.toLowerCase());
-      const opp  = ops[1 - idx]?.opponent;
-      const myS  = res[idx]?.score ?? '?';
-      const oppS = res[1 - idx]?.score ?? '?';
-      const won  = myS > oppS;
-      const date = m.scheduled_at ? new Date(m.scheduled_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '—';
-      html += '<div class="td-match-row">'
-        + '<span class="td-result ' + (won ? 'win' : 'loss') + '">' + (won ? 'V' : 'D') + '</span>'
-        + '<span class="td-match-score">' + myS + ' - ' + oppS + '</span>'
-        + '<span class="td-match-opp">vs ' + (opp?.name || '?') + '</span>'
-        + '<span class="td-match-date">' + date + '</span>'
+      const ops        = m.opponents || [];
+      const res        = m.results   || [];
+      const idx        = ops.findIndex(o => o.opponent?.name?.toLowerCase() === teamName.toLowerCase());
+      const opp        = ops[1 - idx]?.opponent;
+      const myS        = res[idx]?.score ?? '?';
+      const oppS       = res[1 - idx]?.score ?? '?';
+      const won        = myS > oppS;
+      const date       = m.scheduled_at ? new Date(m.scheduled_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '—';
+      const tournament = m.league?.name || '—';
+      const logoHtml   = opp?.image_url
+        ? '<img src="' + opp.image_url + '" class="form-row-logo" onerror="this.style.display=\'none\'">'
+        : '';
+      html += '<div class="h2h-row">'
+        + '<div class="h2h-row-meta">' + tournament + ' · ' + date + '</div>'
+        + '<div class="h2h-row-match">'
+        + '<span class="h2h-score ' + (won ? 'win' : 'loss') + '">' + myS + ' - ' + oppS + '</span>'
+        + logoHtml
+        + '<span class="h2h-team right">' + (opp?.name || '?') + '</span>'
+        + '</div>'
         + '</div>';
     });
     html += '</div>';
@@ -258,7 +270,7 @@ function renderTeamDetail(team, teamName, recentMatches, upcomingMatches, colors
 
   // Prochains matchs style H2H
   if (upcomingMatches.length > 0) {
-    html += '<div class="td-section" style="margin-top:16px"><div class="td-section-title">🕐 Prochains matchs</div>';
+    html += '<div class="td-section" style="margin-top:16px"><div class="td-section-title">Prochains matchs</div>';
     upcomingMatches.forEach(m => {
       const ops      = m.opponents || [];
       const idx      = ops.findIndex(o => o.opponent?.name?.toLowerCase() === teamName.toLowerCase());
