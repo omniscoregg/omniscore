@@ -69,12 +69,12 @@ document.body.style.overflow = 'hidden';
       </div>
 
       <div id="md-h2h" class="md-h2h">
-        <div class="md-h2h-title">🆚 Confrontations directes</div>
+        <div class="md-h2h-title">Confrontations directes</div>
         <div id="md-h2h-content"><div class="md-pred-loading">Chargement...</div></div>
       </div>
 
       <div class="md-predictions">
-        <div class="md-pred-title">🎯 Prédictions de la communauté</div>
+        <div class="md-pred-title">Prédictions de la communauté</div>
         <div id="md-pred-bar"><div class="md-pred-loading">Chargement...</div></div>
         <div id="md-pred-action"></div>
       </div>
@@ -190,9 +190,18 @@ function renderForm(formData) {
   if (!formData || formData.length === 0) return '<span class="form-unavailable">—</span>';
   const wins = formData.filter(m => m.won).length;
   const dots = formData.map(m =>
-    '<span class="form-dot ' + (m.won ? 'win' : 'loss') + '" title="' + (m.won ? 'V' : 'D') + ' vs ' + m.opponent + ' (' + m.score + ')">' + (m.won ? 'V' : 'D') + '</span>'
+    '<span class="form-dot ' + (m.won ? 'win' : 'loss') + '">' + (m.won ? 'V' : 'D') + '</span>'
   ).join('');
-  return '<div class="form-dots">' + dots + '</div><div class="form-record">' + wins + 'V ' + (formData.length - wins) + 'D</div>';
+  const rows = formData.map(m => {
+    const [s1, s2] = m.score.split(':');
+    return '<div class="form-row ' + (m.won ? 'win' : 'loss') + '">'
+      + '<span class="form-row-score">' + s1 + ' - ' + s2 + '</span>'
+      + '<span class="form-row-opp">' + m.opponent + '</span>'
+      + '</div>';
+  }).join('');
+  return '<div class="form-dots">' + dots + '</div>'
+    + '<div class="form-record">' + wins + 'V ' + (formData.length - wins) + 'D</div>'
+    + '<div class="form-rows">' + rows + '</div>';
 }
 
 // ----------------------------------------------------------
@@ -239,10 +248,12 @@ function renderH2H(matches, team1, team2) {
     const isT1win = m.winner === team1;
     const dateStr = m.date ? new Date(m.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
     return '<div class="h2h-row">'
+      + '<div class="h2h-row-meta">' + m.tournament + ' · ' + dateStr + '</div>'
+      + '<div class="h2h-row-match">'
       + '<span class="h2h-team ' + (isT1win ? 'winner' : '') + '">' + team1 + '</span>'
       + '<span class="h2h-score">' + m.score1 + ' : ' + m.score2 + '</span>'
       + '<span class="h2h-team right ' + (!isT1win ? 'winner' : '') + '">' + team2 + '</span>'
-      + '<span class="h2h-meta">' + m.tournament + ' · ' + dateStr + '</span>'
+      + '</div>'
       + '</div>';
   }).join('');
 
@@ -355,7 +366,7 @@ async function loadPredAction(match, colors, isUpcoming = true) {
   // Formulaire de prédiction avec score
   const maxScore = match.format === 'Bo5' ? 3 : match.format === 'Bo1' ? 1 : 2;
   el.innerHTML = '<div class="md-pred-full">'
-    + '<div class="md-pred-winner-label">🎯 Qui va gagner ?</div>'
+    +'<div class="md-pred-winner-label">Qui va gagner ?</div>'
     + '<div class="md-pred-winner-btns">'
     + '<button class="md-pred-btn" id="detail-btn-t1" style="border-color:' + colors.accent + '" onclick="selectDetailWinner(this,\'' + match.team1.name + '\',\'' + match.id + '\',\'' + match.format + '\')">' + match.team1.name + '</button>'
     + '<button class="md-pred-btn" id="detail-btn-t2" style="border-color:' + colors.accent + '" onclick="selectDetailWinner(this,\'' + match.team2.name + '\',\'' + match.id + '\',\'' + match.format + '\')">' + match.team2.name + '</button>'

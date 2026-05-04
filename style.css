@@ -2504,3 +2504,65 @@ body {
   .landing-features-grid { grid-template-columns: 1fr; }
   .landing-ranks-strip { gap: 4px; font-size: 11px; }
 }
+
+/* ----------------------------------------------------------
+   Form rows — dernières rencontres
+   ---------------------------------------------------------- */
+.form-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 6px;
+  width: 100%;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.form-row.win {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.06);
+}
+
+.form-row.loss {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.06);
+}
+
+.form-row-score {
+  font-weight: 700;
+  min-width: 28px;
+  text-align: center;
+}
+
+.form-row-opp {
+  color: var(--text2);
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+/* ----------------------------------------------------------
+   H2H rows — tournoi au dessus
+   ---------------------------------------------------------- */
+.h2h-row-meta {
+  font-size: 10px;
+  color: var(--text3);
+  text-align: center;
+  margin-bottom: 3px;
+}
+
+.h2h-row-match {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
