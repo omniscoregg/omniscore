@@ -2553,6 +2553,13 @@ body {
 /* ----------------------------------------------------------
    H2H rows — tournoi au dessus
    ---------------------------------------------------------- */
+.h2h-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
 .h2h-row-meta {
   font-size: 10px;
   color: var(--text3);
@@ -2565,4 +2572,12 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
+}
+
+.form-row-logo {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  border-radius: 3px;
+  flex-shrink: 0;
 }

@@ -181,7 +181,7 @@ async function getTeamForm(teamName, game) {
         const res      = m.results || [];
         const myScore  = res[idx]?.score ?? 0;
         const oppScore = res[1 - idx]?.score ?? 0;
-        return { won: myScore > oppScore, score: myScore + ':' + oppScore, opponent: ops[1 - idx]?.opponent?.name || '?' };
+        return { won: myScore > oppScore, score: myScore + ':' + oppScore, opponent: ops[1 - idx]?.opponent?.name || '?', opponentLogo: ops[1 - idx]?.opponent?.image_url || null };
       });
   } catch(e) { return null; }
 }
@@ -194,9 +194,12 @@ function renderForm(formData) {
   ).join('');
   const rows = formData.map(m => {
     const [s1, s2] = m.score.split(':');
+    const logoHtml = m.opponentLogo
+      ? '<img src="' + m.opponentLogo + '" class="form-row-logo" onerror="this.style.display=\'none\'">'
+      : '<span class="form-row-opp">' + m.opponent + '</span>';
     return '<div class="form-row ' + (m.won ? 'win' : 'loss') + '">'
       + '<span class="form-row-score">' + s1 + ' - ' + s2 + '</span>'
-      + '<span class="form-row-opp">' + m.opponent + '</span>'
+      + logoHtml
       + '</div>';
   }).join('');
   return '<div class="form-dots">' + dots + '</div>'
