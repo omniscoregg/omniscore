@@ -351,7 +351,8 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
 //  Sidebar droite — matchs à venir
 // ----------------------------------------------------------
 function renderUpcoming() {
-  const el   = document.getElementById('upcoming-list');
+  const el = document.getElementById('upcoming-list');
+  if (!el) return;
   const list = state.upcoming.slice(0, 8);
   if (list.length === 0) {
     el.innerHTML = `<div class="empty-state small">${i18n.t('noUpcoming')}</div>`;
