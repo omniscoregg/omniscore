@@ -211,6 +211,12 @@ function selectGame(key) {
   updateGameHighlight(state.selectedGame);
   savePreferences();
   renderMatches();
+  // Fermer le drawer mobile et débloquer le scroll
+  const drawer  = document.getElementById('games-drawer');
+  const overlay = document.getElementById('drawer-overlay');
+  if (drawer)  drawer.classList.remove('open');
+  if (overlay) overlay.classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 function updateGameHighlight(activeKey) {
