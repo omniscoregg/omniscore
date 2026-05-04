@@ -588,7 +588,6 @@ if (isOpen) {
     document.body.style.overflow = 'hidden';
   }
 }
-
 function closeGameDrawer() {
   document.getElementById('games-drawer')?.classList.remove('open');
   document.getElementById('drawer-overlay')?.classList.remove('open');
