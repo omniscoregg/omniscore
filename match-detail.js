@@ -17,6 +17,7 @@ async function showMatchDetail(match, fromFavorites = false) {
   const modal = document.createElement('div');
   modal.id        = 'match-detail-modal';
   modal.className = 'modal-overlay';
+document.body.style.overflow = 'hidden';
   modal.innerHTML = `
     <div class="modal-box wide match-detail-box">
       <div class="modal-header">
@@ -410,6 +411,7 @@ async function confirmDetailPred(matchId, game, team1, team2, format) {
 function closeMatchDetail() {
   if (predUnsubscribe) { predUnsubscribe(); predUnsubscribe = null; }
   document.getElementById('match-detail-modal')?.remove();
+  document.body.style.overflow = '';
 }
 
 // ----------------------------------------------------------

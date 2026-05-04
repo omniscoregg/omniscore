@@ -577,17 +577,15 @@ function mobileNav(tab, btn) {
 }
 window.mobileNav = mobileNav;
 
-function toggleGameDrawer() {
-  const drawer  = document.getElementById('games-drawer');
-  const overlay = document.getElementById('drawer-overlay');
-  const isOpen  = drawer.classList.contains('open');
-  if (isOpen) {
+if (isOpen) {
     drawer.classList.remove('open');
     overlay.classList.remove('open');
+    document.body.style.overflow = '';
   } else {
     renderDrawerGames();
     drawer.classList.add('open');
     overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
   }
 }
 
