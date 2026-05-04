@@ -2587,3 +2587,46 @@ body {
   color: var(--text3);
   margin-top: 2px;
 }
+
+/* ----------------------------------------------------------
+   Fiche match — header mobile reorganisé
+   ---------------------------------------------------------- */
+@media (max-width: 600px) {
+  .modal-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .modal-header > div:first-child {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .md-header-actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .md-game {
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .md-tournament {
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .back-btn {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+  }
+}
