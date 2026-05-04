@@ -577,7 +577,11 @@ function mobileNav(tab, btn) {
 }
 window.mobileNav = mobileNav;
 
-if (isOpen) {
+function toggleGameDrawer() {
+  const drawer  = document.getElementById('games-drawer');
+  const overlay = document.getElementById('drawer-overlay');
+  const isOpen  = drawer.classList.contains('open');
+  if (isOpen) {
     drawer.classList.remove('open');
     overlay.classList.remove('open');
     document.body.style.overflow = '';
