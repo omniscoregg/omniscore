@@ -139,13 +139,11 @@ function applyTranslations() {
 function renderLangSwitcher() {
   const el = document.getElementById('lang-switcher');
   if (!el) return;
-  el.innerHTML = Object.entries(TRANSLATIONS).map(([code, tr]) => `
-    <button
-      class="lang-btn ${code === currentLang ? 'active' : ''}"
-      onclick="setLang('${code}')"
-      title="${tr.name}"
-    >${tr.flag}</button>
-  `).join('');
+ el.innerHTML = Object.entries(TRANSLATIONS).map(([code, tr]) => {
+    const flag = tr.flag || code;
+    const active = code === currentLang ? 'active' : '';
+    return '<button class="lang-btn ' + active + '" onclick="setLang(\'' + code + '\')" title="' + tr.name + '">' + flag + '</button>';
+  }).join('');
 }
 
 window.i18n = { t, setLang, currentLang: () => currentLang, renderLangSwitcher, applyTranslations };
