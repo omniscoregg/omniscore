@@ -21,6 +21,7 @@ async function showTeamDetail(teamName, game, fromMatch = null, teamLogo = '') {
           <div>
             <div class="md-game" style="color:${colors.accent}">${cfg?.label || game}</div>
             <div class="td-team-name" id="td-name">Chargement...</div>
+            <div class="td-country" id="td-country"></div>
           </div>
         </div>
         <div class="md-header-actions">
@@ -148,12 +149,12 @@ function renderTeamDetail(team, teamName, recentMatches, upcomingMatches, colors
   let html = '';
 
   // Header équipe
+  // Mettre le pays sous le nom
+  const countryEl = document.getElementById('td-country');
+  if (countryEl && team?.location) countryEl.textContent = '📍 ' + team.location;
+
   html += '<div class="td-header">';
-  if (team?.image_url) {
-    html += '<img src="' + team.image_url + '" class="td-logo" onerror="this.style.display=\'none\'">';
-  }
   html += '<div class="td-header-info">';
-  if (team?.location) html += '<span class="ti-country">📍 ' + team.location + '</span>';
 
   // Stats — calculées depuis les matchs en mémoire
   const storedMatches = window.matchStore ? [...window.matchStore.values()].filter(m =>
@@ -178,10 +179,28 @@ function renderTeamDetail(team, teamName, recentMatches, upcomingMatches, colors
   const wr = (w + l) > 0 ? Math.round((w / (w + l)) * 100) : 0;
   if (w + l > 0 || team) {
     html += '<div class="ti-stats">'
-      + '<span class="ti-stat win">' + w + 'V</span>'
-      + '<span class="ti-stat loss">' + l + 'D</span>'
       + '<span class="ti-stat wr">' + wr + '% WR</span>'
       + '</div>';
+  }
+
+  // Form rows depuis storedMatches
+  if (storedMatches.length > 0) {
+    html += '<div class="form-rows">';
+    storedMatches.slice(0, 5).forEach(m => {
+      const isT1 = m.team1.name.toLowerCase() === teamName.toLowerCase();
+      const won  = isT1 ? m.winner === 1 : m.winner === 2;
+      const myS  = isT1 ? m.score1 : m.score2;
+      const oppS = isT1 ? m.score2 : m.score1;
+      const opp  = isT1 ? m.team2 : m.team1;
+      const logoHtml = opp.logo
+        ? '<img src="' + opp.logo + '" class="form-row-logo" onerror="this.style.display=\'none\'">'
+        : '<span class="form-row-opp">' + opp.name + '</span>';
+      html += '<div class="form-row ' + (won ? 'win' : 'loss') + '">'
+        + '<span class="form-row-score">' + myS + ' - ' + oppS + '</span>'
+        + logoHtml
+        + '</div>';
+    });
+    html += '</div>';
   }
 
   // Réseaux sociaux
@@ -237,19 +256,24 @@ function renderTeamDetail(team, teamName, recentMatches, upcomingMatches, colors
     html += '</div>';
   }
 
-  // Prochains matchs
+  // Prochains matchs style H2H
   if (upcomingMatches.length > 0) {
-    html += '<div class="td-section"><div class="td-section-title">🕐 Prochains matchs</div>';
+    html += '<div class="td-section" style="margin-top:16px"><div class="td-section-title">🕐 Prochains matchs</div>';
     upcomingMatches.forEach(m => {
-      const ops  = m.opponents || [];
-      const idx  = ops.findIndex(o => o.opponent?.name?.toLowerCase() === teamName.toLowerCase());
-      const opp  = ops[1 - idx]?.opponent;
-      const date = m.scheduled_at ? new Date(m.scheduled_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '—';
-      const time = m.scheduled_at ? new Date(m.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-      html += '<div class="td-match-row upcoming">'
-        + '<span class="td-result upcoming">🕐</span>'
-        + '<span class="td-match-opp">vs ' + (opp?.name || '?') + '</span>'
-        + '<span class="td-match-date">' + date + (time ? ' · ' + time : '') + '</span>'
+      const ops      = m.opponents || [];
+      const idx      = ops.findIndex(o => o.opponent?.name?.toLowerCase() === teamName.toLowerCase());
+      const opp      = ops[1 - idx]?.opponent;
+      const myTeam   = ops[idx]?.opponent;
+      const date     = m.scheduled_at ? new Date(m.scheduled_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '—';
+      const time     = m.scheduled_at ? new Date(m.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+      const tournament = m.league?.name || '—';
+      html += '<div class="h2h-row">'
+        + '<div class="h2h-row-meta">' + tournament + ' · ' + date + (time ? ' · ' + time : '') + '</div>'
+        + '<div class="h2h-row-match">'
+        + '<span class="h2h-team">' + (myTeam?.name || teamName) + '</span>'
+        + '<span class="h2h-score">vs</span>'
+        + '<span class="h2h-team right">' + (opp?.name || '?') + '</span>'
+        + '</div>'
         + '</div>';
     });
     html += '</div>';
