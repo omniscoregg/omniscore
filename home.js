@@ -142,21 +142,24 @@ async function renderHomeLeaderboard() {
       return;
     }
 
-    const medals = ['🥇', '🥈', '🥉', '4', '5'];
+    const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
     const rows = [];
     let rank = 1;
     snap.forEach(doc => {
       const d = doc.data();
-      const name = d.displayName || d.email?.split('@')[0] || 'Joueur';
-      const pts  = d.points || 0;
+      const name     = d.username || d.email?.split('@')[0] || 'Joueur';
+      const pts      = d.points || 0;
+      const streak   = d.streak || 0;
       const rankInfo = window.getRankInfo ? getRankInfo(pts) : { label: '', icon: '' };
-      const medal = medals[rank - 1];
-      const isTop3 = rank <= 3;
+      const medal    = medals[rank - 1];
+      const isTop3   = rank <= 3;
       rows.push(`
         <div class="home-lb-row ${isTop3 ? 'top3' : ''}">
           <span class="home-lb-rank">${medal}</span>
-          <span class="home-lb-name">${name}</span>
-          <span class="home-lb-rank-badge">${rankInfo.icon || ''} ${rankInfo.label || ''}</span>
+          <div class="home-lb-info">
+            <span class="home-lb-name">${name}</span>
+            <span class="home-lb-meta">${rankInfo.icon || ''} ${rankInfo.label || ''}${streak > 0 ? ` · 🔥 ${streak}` : ''}</span>
+          </div>
           <span class="home-lb-pts">${pts} <small>pts</small></span>
         </div>
       `);

@@ -3090,7 +3090,6 @@ body {
   padding: 10px 12px;
   background: var(--surface2);
   border-radius: var(--radius);
-  font-size: 13px;
   transition: background 0.15s;
 }
 .home-lb-row:hover { background: var(--border); }
@@ -3104,24 +3103,38 @@ body {
   text-align: center;
   flex-shrink: 0;
 }
-.home-lb-name {
+
+.home-lb-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.home-lb-name {
+  font-size: 13px;
   font-weight: 600;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.home-lb-rank-badge {
+
+.home-lb-meta {
   font-size: 11px;
   color: var(--text3);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 .home-lb-pts {
   font-size: 14px;
   font-weight: 700;
   color: var(--accent);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .home-lb-pts small {
   font-size: 10px;
