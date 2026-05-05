@@ -186,16 +186,39 @@ function renderHomeLive() {
   }
 
   el.innerHTML = live.slice(0, 6).map(m => {
-    const colors = GENRE_COLORS[m.genre] || { accent: '#a78bfa' };
+    const colors  = GENRE_COLORS[m.genre] || { accent: '#a78bfa' };
     const storeKey = `match_${m.id}`;
+
+    const logo1 = m.team1.logo
+      ? `<img src="${m.team1.logo}" alt="${m.team1.name}" class="home-live-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      : '';
+    const abbr1 = `<div class="home-live-logo-abbr" style="background:${colors.bg||'#1a1e2c'};color:${colors.accent};${m.team1.logo?'display:none':''}">${m.team1.name.split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase()}</div>`;
+
+    const logo2 = m.team2.logo
+      ? `<img src="${m.team2.logo}" alt="${m.team2.name}" class="home-live-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      : '';
+    const abbr2 = `<div class="home-live-logo-abbr" style="background:${colors.bg||'#1a1e2c'};color:${colors.accent};${m.team2.logo?'display:none':''}">${m.team2.name.split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase()}</div>`;
+
     return `
       <div class="home-live-card" style="border-color:${colors.accent}40" onclick="hideHomePage();openMatchDetail('${storeKey}')">
-        <div class="home-live-badge"><span class="live-dot-small"></span> LIVE</div>
-        <div class="home-live-game" style="color:${colors.accent}">${m.gameLabel}</div>
-        <div class="home-live-teams">
-          <span>${m.team1.name}</span>
-          <span class="home-live-score">${m.score1 ?? '–'} : ${m.score2 ?? '–'}</span>
-          <span>${m.team2.name}</span>
+        <div class="home-live-header">
+          <div class="home-live-badge"><span class="live-dot-small"></span> LIVE</div>
+          <div class="home-live-game" style="color:${colors.accent}">${m.gameLabel}</div>
+        </div>
+        <div class="home-live-matchup">
+          <div class="home-live-team">
+            <div class="home-live-logo-wrap">${logo1}${abbr1}</div>
+            <span class="home-live-team-name">${m.team1.name}</span>
+          </div>
+          <div class="home-live-vs">
+            <span class="home-live-score">${m.score1 ?? '0'}</span>
+            <span class="home-live-sep">:</span>
+            <span class="home-live-score">${m.score2 ?? '0'}</span>
+          </div>
+          <div class="home-live-team">
+            <div class="home-live-logo-wrap">${logo2}${abbr2}</div>
+            <span class="home-live-team-name">${m.team2.name}</span>
+          </div>
         </div>
         <div class="home-live-tourney">${m.tournament}</div>
       </div>
