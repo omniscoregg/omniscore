@@ -12,12 +12,11 @@ const GENRE_COLORS = {
 };
 
 const state = {
-  selectedGame:        null,
-  selectedGenre:       'all',
-  activeTab:           'results', // 'results' | 'upcoming'
-  allMatches:          [],
-  upcoming:            [],
-  selectedTournaments: {}, // { [game]: Set<tournamentName> } — null = tout afficher
+  selectedGame:  null,
+  selectedGenre: 'all',
+  activeTab:     'results', // 'results' | 'upcoming'
+  allMatches:    [],
+  upcoming:      [],
 };
 
 // Store des matchs par index pour éviter les problèmes de sérialisation JSON
@@ -29,16 +28,19 @@ const matchStore = new Map();
 async function init() {
   i18n.renderLangSwitcher();
   renderGameFilters();
-  loadPreferences();
-  loadTournamentPrefs();
+  loadPreferences(); // Charger les préférences sauvegardées
   showSkeleton();
   await loadAllData();
   renderMainTabs();
-  renderTournamentFilter();
   renderMatches();
   renderUpcoming();
   i18n.applyTranslations();
-  setTimeout(() => { if (window.initPredictions) initPredictions(); if (window.loadGameFavButtons) loadGameFavButtons(); }, 600);
+  setTimeout(() => {
+    if (window.initPredictions) initPredictions();
+    if (window.loadGameFavButtons) loadGameFavButtons();
+    if (window.initHomeNavigation) initHomeNavigation();
+    if (window.showHomePage) showHomePage(); // Afficher la page d'accueil au démarrage
+  }, 600);
 }
 
 async function loadAllData() {
@@ -94,7 +96,6 @@ function setMainTab(tab) {
   state.activeTab     = tab === 'upcoming' ? 'upcoming' : 'results';
   savePreferences();
   renderMainTabs();
-  renderTournamentFilter();
   renderMatches();
 }
 
@@ -214,7 +215,6 @@ function selectGame(key) {
   }
   updateGameHighlight(state.selectedGame);
   savePreferences();
-  renderTournamentFilter();
   renderMatches();
   // Fermer le drawer mobile et débloquer le scroll
   const drawer  = document.getElementById('games-drawer');
@@ -255,11 +255,6 @@ async function renderMatches() {
   // Filtrer par jeu ou genre
   if (state.selectedGame) {
     source = source.filter(m => m.game === state.selectedGame);
-    // Filtre compétitions
-    const activeTourneys = state.selectedTournaments[state.selectedGame];
-    if (activeTourneys && activeTourneys.size > 0) {
-      source = source.filter(m => activeTourneys.has(m.tournament));
-    }
   } else if (state.selectedGenre !== 'all') {
     source = source.filter(m => m.genre === state.selectedGenre);
   }
@@ -519,211 +514,6 @@ function openMatchDetail(key) {
   } catch(e) { console.error(e); }
 }
 
-
-// ----------------------------------------------------------
-//  Filtre par compétition
-// ----------------------------------------------------------
-
-// Flag pour savoir si le dropdown est ouvert (évite de recréer le DOM en permanence)
-let _tourneyDropdownOpen = false;
-
-function getTournamentsForCurrentGame() {
-  if (!state.selectedGame) return [];
-  let source = [];
-  if (state.activeMainTab === 'live') source = state.liveMatches || [];
-  else if (state.activeMainTab === 'upcoming') source = state.upcoming || [];
-  else source = state.allMatches || [];
-  const all = source.filter(m => m.game === state.selectedGame).map(m => m.tournament).filter(Boolean);
-  return [...new Set(all)].sort();
-}
-
-function renderTournamentFilter() {
-  const old = document.getElementById('tournament-filter-bar');
-  if (old) old.remove();
-  _tourneyDropdownOpen = false;
-
-  if (!state.selectedGame) return;
-
-  const tournaments = getTournamentsForCurrentGame();
-  if (tournaments.length <= 1) return;
-
-  const game = state.selectedGame;
-  const activeTourneys = state.selectedTournaments[game];
-  const allSelected = !activeTourneys || activeTourneys.size === 0;
-
-  const bar = document.createElement('div');
-  bar.id = 'tournament-filter-bar';
-  bar.className = 'tournament-filter-bar';
-
-  bar.innerHTML = `
-    <button class="tourney-filter-btn" id="tourney-filter-toggle">
-      🏆 Compétitions
-      ${!allSelected ? `<span class="tourney-active-count">${activeTourneys.size}</span>` : ''}
-      <span class="tourney-chevron" id="tourney-chevron">▾</span>
-    </button>
-    <div class="tourney-dropdown" id="tourney-dropdown" style="display:none">
-      <div class="tourney-dropdown-inner" id="tourney-dropdown-inner"></div>
-    </div>
-  `;
-
-  const mainTabs = document.getElementById('main-tabs');
-  if (mainTabs) mainTabs.after(bar);
-  else {
-    const main = document.querySelector('.main-content');
-    if (main) main.insertBefore(bar, main.firstChild);
-  }
-
-  // Remplir les options
-  _renderTourneyOptions(game, tournaments);
-
-  // Bouton toggle — stopPropagation pour ne pas déclencher le listener document
-  document.getElementById('tourney-filter-toggle').addEventListener('click', function(e) {
-    e.stopPropagation();
-    toggleTournamentDropdown();
-  });
-
-  // Fermer en cliquant en dehors
-  document.addEventListener('click', _closeTourneyOnOutsideClick);
-}
-
-function _renderTourneyOptions(game, tournaments) {
-  const inner = document.getElementById('tourney-dropdown-inner');
-  if (!inner) return;
-  const activeTourneys = state.selectedTournaments[game];
-  const allSelected = !activeTourneys || activeTourneys.size === 0;
-
-  inner.innerHTML = `
-    <label class="tourney-option ${allSelected ? 'checked' : ''}">
-      <span class="tourney-checkbox">${allSelected ? '✓' : ''}</span>
-      <span>Toutes les compétitions</span>
-    </label>
-    <div class="tourney-divider"></div>
-    ${tournaments.map(t => {
-      const checked = !allSelected && activeTourneys.has(t);
-      return `
-        <label class="tourney-option ${checked ? 'checked' : ''}" data-tourney="${t.replace(/"/g, '&quot;')}">
-          <span class="tourney-checkbox">${checked ? '✓' : ''}</span>
-          <span>${t}</span>
-        </label>
-      `;
-    }).join('')}
-  `;
-
-  // Listener "Toutes les compétitions"
-  inner.querySelector('.tourney-option:not([data-tourney])').addEventListener('click', function(e) {
-    e.stopPropagation();
-    setAllTournaments(game);
-  });
-
-  // Listeners sur chaque compétition via data-tourney
-  inner.querySelectorAll('.tourney-option[data-tourney]').forEach(function(el) {
-    el.addEventListener('click', function(e) {
-      e.stopPropagation();
-      toggleTournament(game, el.dataset.tourney);
-    });
-  });
-}
-
-function _closeTourneyOnOutsideClick(e) {
-  const bar = document.getElementById('tournament-filter-bar');
-  if (!bar || !bar.contains(e.target)) {
-    const dd = document.getElementById('tourney-dropdown');
-    const chevron = document.getElementById('tourney-chevron');
-    if (dd) dd.style.display = 'none';
-    if (chevron) chevron.textContent = '▾';
-    _tourneyDropdownOpen = false;
-    document.removeEventListener('click', _closeTourneyOnOutsideClick);
-  }
-}
-
-function toggleTournamentDropdown() {
-  const dd = document.getElementById('tourney-dropdown');
-  const chevron = document.getElementById('tourney-chevron');
-  if (!dd) return;
-  _tourneyDropdownOpen = !_tourneyDropdownOpen;
-  dd.style.display = _tourneyDropdownOpen ? 'block' : 'none';
-  if (chevron) chevron.textContent = _tourneyDropdownOpen ? '▴' : '▾';
-}
-
-function setAllTournaments(game) {
-  delete state.selectedTournaments[game];
-  saveTournamentPrefs();
-  // Mettre à jour les options sans fermer le dropdown
-  _refreshTourneyOptions(game);
-  renderMatches();
-}
-
-function toggleTournament(game, tournament) {
-  if (!state.selectedTournaments[game]) {
-    // Première sélection : on coche uniquement celle-là
-    state.selectedTournaments[game] = new Set([tournament]);
-  } else {
-    const set = state.selectedTournaments[game];
-    if (set.has(tournament)) {
-      set.delete(tournament);
-      if (set.size === 0) delete state.selectedTournaments[game];
-    } else {
-      set.add(tournament);
-    }
-  }
-  saveTournamentPrefs();
-  // Mettre à jour les options sans fermer le dropdown
-  _refreshTourneyOptions(game);
-  renderMatches();
-}
-
-function _refreshTourneyOptions(game) {
-  // Met à jour le badge sur le bouton + les checkboxes sans recréer tout le DOM
-  const activeTourneys = state.selectedTournaments[game];
-  const allSelected = !activeTourneys || activeTourneys.size === 0;
-
-  // Badge
-  const btn = document.getElementById('tourney-filter-toggle');
-  if (btn) {
-    let badge = btn.querySelector('.tourney-active-count');
-    if (!allSelected) {
-      if (!badge) {
-        badge = document.createElement('span');
-        badge.className = 'tourney-active-count';
-        btn.insertBefore(badge, btn.querySelector('.tourney-chevron'));
-      }
-      badge.textContent = activeTourneys.size;
-    } else if (badge) {
-      badge.remove();
-    }
-  }
-
-  // Rechargement des options (dropdown reste ouvert)
-  const tournaments = getTournamentsForCurrentGame();
-  _renderTourneyOptions(game, tournaments);
-}
-
-function saveTournamentPrefs() {
-  try {
-    const serialized = {};
-    for (const [game, set] of Object.entries(state.selectedTournaments)) {
-      if (set instanceof Set) serialized[game] = [...set];
-    }
-    localStorage.setItem('omniscore_tourney_prefs', JSON.stringify(serialized));
-  } catch(e) {}
-}
-
-function loadTournamentPrefs() {
-  try {
-    const saved = localStorage.getItem('omniscore_tourney_prefs');
-    if (!saved) return;
-    const parsed = JSON.parse(saved);
-    for (const [game, arr] of Object.entries(parsed)) {
-      if (Array.isArray(arr) && arr.length > 0) {
-        state.selectedTournaments[game] = new Set(arr);
-      }
-    }
-  } catch(e) {}
-}
-
-window.toggleTournamentDropdown = toggleTournamentDropdown;
-window.setAllTournaments = setAllTournaments;
-window.toggleTournament = toggleTournament;
 
 // ----------------------------------------------------------
 //  Préférences utilisateur (localStorage)
