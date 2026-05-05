@@ -3020,22 +3020,24 @@ body {
 
 .home-upcoming-card {
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--surface2);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.home-upcoming-card:hover {
+  background: var(--border);
+  transform: translateX(2px);
+}
+
+.home-upcoming-top {
+  display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 10px 12px;
-  background: var(--surface2);
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.home-upcoming-card:hover { background: var(--border); }
-
-.home-upcoming-left {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+  gap: 8px;
 }
 .home-upcoming-game {
   font-size: 10px;
@@ -3043,37 +3045,85 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-.home-upcoming-teams {
-  font-size: 13px;
+.home-upcoming-tourney {
+  font-size: 10px;
+  color: var(--text3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+}
+
+/* Matchup avec logos */
+.home-upcoming-matchup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.home-up-team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+.home-up-team.right {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.home-up-logo-wrap {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.home-up-logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+.home-up-logo-abbr {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.home-up-name {
+  font-size: 12px;
   font-weight: 600;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.home-upcoming-tourney {
-  font-size: 11px;
-  color: var(--text3);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.home-upcoming-right {
+
+.home-up-vs {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
+  align-items: center;
+  gap: 1px;
   flex-shrink: 0;
+  padding: 0 6px;
 }
-.home-upcoming-date {
-  font-size: 12px;
-  color: var(--text2);
-  font-weight: 600;
-}
-.home-upcoming-time {
+.home-up-time {
   font-size: 13px;
-  color: var(--accent);
   font-weight: 700;
+  color: var(--accent);
+}
+.home-up-date {
+  font-size: 10px;
+  color: var(--text3);
 }
 
 /* ── Leaderboard ── */

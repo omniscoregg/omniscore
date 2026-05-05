@@ -256,19 +256,39 @@ function renderHomeUpcoming() {
   el.innerHTML = upcoming.slice(0, 6).map(m => {
     const colors  = GENRE_COLORS[m.genre] || { accent: '#a78bfa' };
     const storeKey = `match_${m.id}`;
-    const date = new Date(m.date);
+    const date    = new Date(m.date);
     const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const dateStr = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+
+    const logo1 = m.team1.logo
+      ? `<img src="${m.team1.logo}" alt="" class="home-up-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      : '';
+    const abbr1 = `<div class="home-up-logo-abbr" style="background:${colors.bg||'#1a1e2c'};color:${colors.accent};${m.team1.logo?'display:none':''}">${m.team1.name.split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase()}</div>`;
+
+    const logo2 = m.team2.logo
+      ? `<img src="${m.team2.logo}" alt="" class="home-up-logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      : '';
+    const abbr2 = `<div class="home-up-logo-abbr" style="background:${colors.bg||'#1a1e2c'};color:${colors.accent};${m.team2.logo?'display:none':''}">${m.team2.name.split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase()}</div>`;
+
     return `
       <div class="home-upcoming-card" onclick="hideHomePage();openMatchDetail('${storeKey}')">
-        <div class="home-upcoming-left">
+        <div class="home-upcoming-top">
           <span class="home-upcoming-game" style="color:${colors.accent}">${m.gameLabel}</span>
-          <span class="home-upcoming-teams">${m.team1.name} <span style="color:var(--text3)">vs</span> ${m.team2.name}</span>
           <span class="home-upcoming-tourney">${m.tournament}</span>
         </div>
-        <div class="home-upcoming-right">
-          <span class="home-upcoming-date">${dateStr}</span>
-          <span class="home-upcoming-time">${timeStr}</span>
+        <div class="home-upcoming-matchup">
+          <div class="home-up-team">
+            <div class="home-up-logo-wrap">${logo1}${abbr1}</div>
+            <span class="home-up-name">${m.team1.name}</span>
+          </div>
+          <div class="home-up-vs">
+            <span class="home-up-time">${timeStr}</span>
+            <span class="home-up-date">${dateStr}</span>
+          </div>
+          <div class="home-up-team right">
+            <div class="home-up-logo-wrap">${logo2}${abbr2}</div>
+            <span class="home-up-name">${m.team2.name}</span>
+          </div>
         </div>
       </div>
     `;
