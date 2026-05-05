@@ -123,9 +123,17 @@ function buildHomeHTML() {
   `;
 }
 
-// ----------------------------------------------------------
-//  Leaderboard top 5 (Firebase)
-// ----------------------------------------------------------
+function _getHomeRank(pts) {
+  if (window.getRankInfo) return getRankInfo(pts);
+  // Fallback inline si ranks.js pas encore chargé
+  if (pts < 100)  return { icon: '🥉', label: 'Bronze' };
+  if (pts < 300)  return { icon: '🥈', label: 'Argent' };
+  if (pts < 700)  return { icon: '🥇', label: 'Or' };
+  if (pts < 1500) return { icon: '💎', label: 'Platine' };
+  if (pts < 3000) return { icon: '💠', label: 'Diamant' };
+  if (pts < 7000) return { icon: '🔮', label: 'Maître' };
+  return { icon: '👑', label: 'Champion' };
+}
 async function renderHomeLeaderboard() {
   const el = document.getElementById('home-leaderboard');
   if (!el) return;
@@ -150,7 +158,7 @@ async function renderHomeLeaderboard() {
       const name     = d.username || d.email?.split('@')[0] || 'Joueur';
       const pts      = d.points || 0;
       const streak   = d.streak || 0;
-      const rankInfo = window.getRankInfo ? getRankInfo(pts) : { label: '', icon: '' };
+      const rankInfo = _getHomeRank(pts);
       const medal    = medals[rank - 1];
       const isTop3   = rank <= 3;
       rows.push(`
