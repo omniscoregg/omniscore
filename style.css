@@ -1700,6 +1700,7 @@ body {
   border-radius: var(--radius);
   padding: 12px;
   text-align: center;
+  flex: 1;
 }
 .profile-stat-value { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
 .profile-stat-label { font-size: 11px; color: var(--text3); }
