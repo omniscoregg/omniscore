@@ -3129,3 +3129,144 @@ body {
   .home-live-list { grid-template-columns: 1fr; }
   .home-competitions { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   Filtre par compétition — v3
+   ============================================================ */
+.tournament-filter-bar {
+  position: relative;
+  padding: 10px 24px 4px;
+  z-index: 50;
+}
+
+.tourney-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  color: var(--text2);
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  user-select: none;
+}
+.tourney-filter-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--surface2);
+}
+
+.tourney-active-count {
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 1px 7px;
+  line-height: 1.5;
+}
+
+.tourney-chevron {
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+/* Dropdown */
+.tourney-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 24px;
+  min-width: 240px;
+  max-width: 320px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(167,139,250,0.08);
+  z-index: 200;
+  overflow: hidden;
+  animation: tourney-fade-in 0.12s ease;
+}
+
+@keyframes tourney-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tourney-dropdown-inner {
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 6px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+.tourney-dropdown-inner::-webkit-scrollbar { width: 4px; }
+.tourney-dropdown-inner::-webkit-scrollbar-track { background: transparent; }
+.tourney-dropdown-inner::-webkit-scrollbar-thumb {
+  background: var(--border2);
+  border-radius: 2px;
+}
+
+/* Options */
+.tourney-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text2);
+  transition: background 0.12s, color 0.12s;
+  user-select: none;
+}
+.tourney-option:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+.tourney-option.checked {
+  color: var(--text);
+}
+
+.tourney-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--border2);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  flex-shrink: 0;
+  color: var(--accent);
+  background: transparent;
+  transition: border-color 0.12s, background 0.12s;
+}
+.tourney-option.checked .tourney-checkbox {
+  border-color: var(--accent);
+  background: rgba(167,139,250,0.2);
+}
+.tourney-option:hover .tourney-checkbox {
+  border-color: var(--accent);
+}
+
+.tourney-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 12px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .tournament-filter-bar { padding: 10px 16px 4px; }
+  .tourney-dropdown {
+    left: 16px;
+    right: 16px;
+    max-width: none;
+    min-width: 0;
+  }
+}
