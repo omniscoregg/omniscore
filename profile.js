@@ -76,19 +76,15 @@ async function loadProfileContent(user) {
 
       <div class="daily-streak-wrap" id="daily-streak-section"></div>
 
-      <!-- Stats -->
-      <div class="profile-stats" style="grid-template-columns: repeat(3, 1fr)">
+      <!-- Ligne 1 : Prédictions / Réussite / Série -->
+      <div class="profile-stats-row">
         <div class="profile-stat">
-          <div class="profile-stat-value" style="color:#a78bfa">⭐ ${profile.points}</div>
-          <div class="profile-stat-label">Points</div>
+          <div class="profile-stat-value">${total}</div>
+          <div class="profile-stat-label">Prédictions</div>
         </div>
         <div class="profile-stat">
           <div class="profile-stat-value" style="color:#4ade80">${pct}%</div>
           <div class="profile-stat-label">Réussite</div>
-        </div>
-        <div class="profile-stat">
-          <div class="profile-stat-value">${total}</div>
-          <div class="profile-stat-label">Prédictions</div>
         </div>
         <div class="profile-stat">
           <div class="profile-stat-value" style="color:#fbbf24">🔥 ${streak}</div>
@@ -96,8 +92,16 @@ async function loadProfileContent(user) {
         </div>
       </div>
 
-      <!-- Détail prédictions -->
-      <div class="profile-pred-detail">
+      <!-- Ligne 2 : Points centré -->
+      <div class="profile-points-row">
+        <div class="profile-stat">
+          <div class="profile-stat-value" style="color:#a78bfa;font-size:28px">⭐ ${profile.points}</div>
+          <div class="profile-stat-label">Points</div>
+        </div>
+      </div>
+
+      <!-- Détail prédictions centré -->
+      <div class="profile-pred-detail centered">
         <span class="pred-detail-item correct">✅ ${correct} correctes</span>
         <span class="pred-detail-item perfect">🏆 ${perfect} parfaites</span>
         <span class="pred-detail-item wrong">❌ ${wrong} manquées</span>

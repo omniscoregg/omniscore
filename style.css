@@ -2630,3 +2630,27 @@ body {
     left: 12px;
   }
 }
+
+/* ----------------------------------------------------------
+   Profil — stats réorganisées
+   ---------------------------------------------------------- */
+.profile-stats-row {
+  display: flex;
+  justify-content: space-around;
+  gap: 12px;
+  margin: 16px 0 8px;
+}
+
+.profile-points-row {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0;
+}
+
+.profile-pred-detail.centered {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
