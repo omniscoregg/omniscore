@@ -598,35 +598,34 @@ function _renderTourneyOptions(game, tournaments) {
   const allSelected = !activeTourneys || activeTourneys.size === 0;
 
   inner.innerHTML = `
-    <label class="tourney-option ${allSelected ? 'checked' : ''}">
+    <div class="tourney-option ${allSelected ? 'checked' : ''}" data-action="all">
       <span class="tourney-checkbox">${allSelected ? '✓' : ''}</span>
       <span>Toutes les compétitions</span>
-    </label>
+    </div>
     <div class="tourney-divider"></div>
     ${tournaments.map(t => {
       const checked = !allSelected && activeTourneys.has(t);
+      const tEsc = t.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
       return `
-        <label class="tourney-option ${checked ? 'checked' : ''}" data-tourney="${t.replace(/"/g, '&quot;')}">
+        <div class="tourney-option ${checked ? 'checked' : ''}" data-action="toggle" data-tourney="${tEsc}">
           <span class="tourney-checkbox">${checked ? '✓' : ''}</span>
           <span>${t}</span>
-        </label>
+        </div>
       `;
     }).join('')}
   `;
 
-  // Listener "Toutes les compétitions"
-  inner.querySelector('.tourney-option:not([data-tourney])').addEventListener('click', function(e) {
+  // Délégation unique sur le conteneur — plus de listeners individuels
+  inner.onclick = function(e) {
     e.stopPropagation();
-    setAllTournaments(game);
-  });
-
-  // Listeners sur chaque compétition via data-tourney
-  inner.querySelectorAll('.tourney-option[data-tourney]').forEach(function(el) {
-    el.addEventListener('click', function(e) {
-      e.stopPropagation();
-      toggleTournament(game, el.dataset.tourney);
-    });
-  });
+    const opt = e.target.closest('.tourney-option');
+    if (!opt) return;
+    if (opt.dataset.action === 'all') {
+      setAllTournaments(game);
+    } else if (opt.dataset.action === 'toggle') {
+      toggleTournament(game, opt.dataset.tourney);
+    }
+  };
 }
 
 function _closeTourneyOnOutsideClick(e) {
