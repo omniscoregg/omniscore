@@ -609,16 +609,17 @@ function _renderTourneyOptions(game, tournaments) {
     }).join('')}
   `;
 
-  // Listeners sur les options (stopPropagation pour garder le dropdown ouvert)
-  const options = inner.querySelectorAll('.tourney-option');
-  options[0].addEventListener('click', function(e) {
+  // Listener "Toutes les compétitions"
+  inner.querySelector('.tourney-option:not([data-tourney])').addEventListener('click', function(e) {
     e.stopPropagation();
     setAllTournaments(game);
   });
-  tournaments.forEach((t, i) => {
-    options[i + 2].addEventListener('click', function(e) { // +2 car divider est entre les deux
+
+  // Listeners sur chaque compétition via data-tourney
+  inner.querySelectorAll('.tourney-option[data-tourney]').forEach(function(el) {
+    el.addEventListener('click', function(e) {
       e.stopPropagation();
-      toggleTournament(game, t);
+      toggleTournament(game, el.dataset.tourney);
     });
   });
 }
