@@ -42,7 +42,14 @@ async function init() {
     if (window.initPredictions) initPredictions();
     if (window.loadGameFavButtons) loadGameFavButtons();
     if (window.initHomeNavigation) initHomeNavigation();
-    if (window.showHomePage) showHomePage();
+    if (window.showHomePage) {
+      const today = new Date().toISOString().slice(0, 10); // "2026-05-11"
+      const lastSeen = localStorage.getItem('omniscore_home_seen');
+      if (lastSeen !== today) {
+        localStorage.setItem('omniscore_home_seen', today);
+        showHomePage();
+      }
+    }
   }, 600);
 }
 
