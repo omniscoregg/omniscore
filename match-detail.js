@@ -202,7 +202,8 @@ function renderForm(formData) {
       + logoHtml
       + '</div>';
   }).join('');
-  return '<div class="form-dots">' + dots + '</div>'
+  return '<div class="form-label">Forme récente</div>'
+    + '<div class="form-dots">' + dots + '</div>'
     + '<div class="form-record">' + wins + 'V ' + (formData.length - wins) + 'D</div>'
     + '<div class="form-rows">' + rows + '</div>';
 }

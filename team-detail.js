@@ -189,7 +189,8 @@ if (countryEl && team?.location) {
 
   const wr = (w + l) > 0 ? Math.round((w / (w + l)) * 100) : 0;
   if (w + l > 0 || team) {
-    html += '<div class="ti-stats">'
+    html += '<div class="form-label">Forme récente</div>'
+      + '<div class="ti-stats">'
       + '<span class="ti-stat wr">' + wr + '% WR</span>'
       + '<span class="ti-stat">' + w + 'V ' + l + 'D</span>'
       + '</div>';
