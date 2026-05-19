@@ -269,9 +269,38 @@ async function renderMatches() {
 
   try {
     const isUpcomingTab = state.activeMainTab === 'upcoming';
-  const isLiveTab     = state.activeMainTab === 'live';
-  const cards = await Promise.all(source.map(m => renderMatchCard(m, isUpcomingTab, isLiveTab)));
-    el.innerHTML = cards.join('');
+    const isLiveTab     = state.activeMainTab === 'live';
+    const cards = await Promise.all(source.map(m => renderMatchCard(m, isUpcomingTab, isLiveTab)));
+
+    // Séparateurs de date uniquement sur les onglets "à venir" et "résultats"
+    if (!isLiveTab) {
+      const toDay = d => { const x = new Date(d); return new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime(); };
+      const today = toDay(new Date());
+      let lastDay = null;
+      const parts = [];
+      source.forEach((m, i) => {
+        const day = toDay(m.date);
+        if (day !== lastDay) {
+          lastDay = day;
+          const diff = Math.round((day - today) / 86400000);
+          let label;
+          if      (diff === 0)  label = "Aujourd'hui";
+          else if (diff === 1)  label = 'Demain';
+          else if (diff === -1) label = 'Hier';
+          else if (diff > 1 && diff < 7) {
+            label = new Date(day).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+            label = label.charAt(0).toUpperCase() + label.slice(1);
+          } else {
+            label = new Date(day).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+          }
+          parts.push(`<div class="date-separator"><span>${label}</span></div>`);
+        }
+        parts.push(cards[i]);
+      });
+      el.innerHTML = parts.join('');
+    } else {
+      el.innerHTML = cards.join('');
+    }
   } catch(err) {
     console.error('renderMatches error DETAIL:', err.message, err.stack);
     // Fallback sans prédictions
