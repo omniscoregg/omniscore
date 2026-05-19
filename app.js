@@ -328,7 +328,7 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
   let predBtn = '';
   try {
     if (isUpcoming && window.renderPredictionBtn) {
-      predBtn = await window.renderPredictionBtn(m.id, m.game, m.team1.name, m.team2.name, m.status);
+      predBtn = await window.renderPredictionBtn(m.id, m.game, m.team1.name, m.team2.name, m.status, m.format || 'Bo3');
     }
   } catch(e) { predBtn = ''; }
 
@@ -346,8 +346,8 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
       const t1 = String(m.team1.name);
       const t2 = String(m.team2.name);
       const fmt = m.format || 'Bo3';
-      tapBtn1 = '<button class="onetap-btn predict" data-id="' + id + '" data-game="' + gm + '" data-t1="' + t1 + '" data-t2="' + t2 + '" data-winner="' + t1 + '" data-format="' + fmt + '" onclick="event.stopPropagation();handleOnetap(this)" title="Prédire ' + t1 + '">👈</button>';
-      tapBtn2 = '<button class="onetap-btn predict" data-id="' + id + '" data-game="' + gm + '" data-t1="' + t1 + '" data-t2="' + t2 + '" data-winner="' + t2 + '" data-format="' + fmt + '" onclick="event.stopPropagation();handleOnetap(this)" title="Prédire ' + t2 + '">👉</button>';
+      tapBtn1 = '<button class="onetap-btn predict" data-id="' + id + '" data-game="' + gm + '" data-t1="' + t1 + '" data-t2="' + t2 + '" data-winner="' + t1 + '" data-format="' + fmt + '" onclick="event.stopPropagation();selectPredTeam(this,\'' + id + '\',\'' + gm + '\',\'' + t1 + '\',\'' + t2 + '\',\'' + t1 + '\',\'' + fmt + '\')" title="Prédire ' + t1 + '">👈</button>';
+      tapBtn2 = '<button class="onetap-btn predict" data-id="' + id + '" data-game="' + gm + '" data-t1="' + t1 + '" data-t2="' + t2 + '" data-winner="' + t2 + '" data-format="' + fmt + '" onclick="event.stopPropagation();selectPredTeam(this,\'' + id + '\',\'' + gm + '\',\'' + t1 + '\',\'' + t2 + '\',\'' + t2 + '\',\'' + fmt + '\')" title="Prédire ' + t2 + '">👉</button>';
     } else if (predBtn.includes('pred-existing') || predBtn.includes('Prédit')) {
       tapBtn1 = '<span class="onetap-done">✓</span>';
       tapBtn2 = '<span class="onetap-done">✓</span>';
