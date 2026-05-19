@@ -149,7 +149,6 @@ async function getUserPredictionsLocal(uid) {
     const snap = await firebase.firestore().collection('predictions')
       .where('uid', '==', uid)
       .orderBy('createdAt', 'desc')
-      .limit(50)
       .get();
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch(e) { return []; }

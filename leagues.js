@@ -39,24 +39,24 @@ async function joinLeague(uid, username, code) {
     throw new Error('Vous êtes déjà membre de cette ligue !');
   }
 
-  // Calculer les stats actuelles de l'utilisateur
-  const userSnap = await firebase.firestore().collection('users').doc(uid).get();
-  const userData = userSnap.data() || {};
-
-  // Récupérer les prédictions pour exclure les "pending" du calcul
-  const predSnap = await firebase.firestore().collection('predictions')
+  // Recompter depuis la collection predictions (même logique que profile.js)
+  const userSnap  = await firebase.firestore().collection('users').doc(uid).get();
+  const userData  = userSnap.data() || {};
+  const predSnap  = await firebase.firestore().collection('predictions')
     .where('uid', '==', uid).get();
-  const preds   = predSnap.docs.map(d => d.data());
-  const pending = preds.filter(p => p.result === null).length;
-  const resolved = (userData.predictions || 0) - pending;
-  const pct = resolved > 0 ? Math.round(((userData.correct || 0) / resolved) * 100) : 0;
+  const preds     = predSnap.docs.map(d => d.data());
+  const total     = preds.length;
+  const correct   = preds.filter(p => p.result === 'correct' || p.result === 'perfect').length;
+  const pending   = preds.filter(p => p.result === null).length;
+  const resolved  = total - pending;
+  const pct       = resolved > 0 ? Math.round((correct / resolved) * 100) : 0;
 
   await leagueDoc.ref.update({
     members: firebase.firestore.FieldValue.arrayUnion({
       uid, username,
-      points:      userData.points      || 0,
-      correct:     userData.correct     || 0,
-      predictions: userData.predictions || 0,
+      points:      userData.points || 0,
+      correct,
+      predictions: total,
       pct,
     })
   });
@@ -85,13 +85,15 @@ async function refreshLeagueMember(uid, leagueId) {
   const userSnap   = await firebase.firestore().collection('users').doc(uid).get();
   const userData   = userSnap.data() || {};
 
-  // Exclure les prédictions en attente du calcul du %
+  // Recompter depuis la collection predictions (même logique que profile.js)
   const predSnap  = await firebase.firestore().collection('predictions')
     .where('uid', '==', uid).get();
   const preds     = predSnap.docs.map(d => d.data());
+  const total     = preds.length;
+  const correct   = preds.filter(p => p.result === 'correct' || p.result === 'perfect').length;
   const pending   = preds.filter(p => p.result === null).length;
-  const resolved  = (userData.predictions || 0) - pending;
-  const pct       = resolved > 0 ? Math.round(((userData.correct || 0) / resolved) * 100) : 0;
+  const resolved  = total - pending;
+  const pct       = resolved > 0 ? Math.round((correct / resolved) * 100) : 0;
 
   const leagueRef  = firebase.firestore().collection('leagues').doc(leagueId);
   const leagueSnap = await leagueRef.get();
@@ -101,9 +103,9 @@ async function refreshLeagueMember(uid, leagueId) {
     if (m.uid !== uid) return m;
     return {
       ...m,
-      points:      userData.points      || 0,
-      correct:     userData.correct     || 0,
-      predictions: userData.predictions || 0,
+      points:      userData.points || 0,
+      correct,
+      predictions: total,
       pct,
     };
   });
