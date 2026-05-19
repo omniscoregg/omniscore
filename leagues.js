@@ -43,13 +43,21 @@ async function joinLeague(uid, username, code) {
   const userSnap = await firebase.firestore().collection('users').doc(uid).get();
   const userData = userSnap.data() || {};
 
+  // Récupérer les prédictions pour exclure les "pending" du calcul
+  const predSnap = await firebase.firestore().collection('predictions')
+    .where('uid', '==', uid).get();
+  const preds   = predSnap.docs.map(d => d.data());
+  const pending = preds.filter(p => p.result === null).length;
+  const resolved = (userData.predictions || 0) - pending;
+  const pct = resolved > 0 ? Math.round(((userData.correct || 0) / resolved) * 100) : 0;
+
   await leagueDoc.ref.update({
     members: firebase.firestore.FieldValue.arrayUnion({
       uid, username,
       points:      userData.points      || 0,
       correct:     userData.correct     || 0,
       predictions: userData.predictions || 0,
-      pct:         userData.predictions > 0 ? Math.round((userData.correct / userData.predictions) * 100) : 0,
+      pct,
     })
   });
 
@@ -76,6 +84,15 @@ async function getUserLeagues(uid) {
 async function refreshLeagueMember(uid, leagueId) {
   const userSnap   = await firebase.firestore().collection('users').doc(uid).get();
   const userData   = userSnap.data() || {};
+
+  // Exclure les prédictions en attente du calcul du %
+  const predSnap  = await firebase.firestore().collection('predictions')
+    .where('uid', '==', uid).get();
+  const preds     = predSnap.docs.map(d => d.data());
+  const pending   = preds.filter(p => p.result === null).length;
+  const resolved  = (userData.predictions || 0) - pending;
+  const pct       = resolved > 0 ? Math.round(((userData.correct || 0) / resolved) * 100) : 0;
+
   const leagueRef  = firebase.firestore().collection('leagues').doc(leagueId);
   const leagueSnap = await leagueRef.get();
   if (!leagueSnap.exists) return;
@@ -87,7 +104,7 @@ async function refreshLeagueMember(uid, leagueId) {
       points:      userData.points      || 0,
       correct:     userData.correct     || 0,
       predictions: userData.predictions || 0,
-      pct:         userData.predictions > 0 ? Math.round((userData.correct / userData.predictions) * 100) : 0,
+      pct,
     };
   });
   await leagueRef.update({ members });
