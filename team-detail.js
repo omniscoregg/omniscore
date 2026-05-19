@@ -101,45 +101,52 @@ async function fetchTeamData(teamName, game, token, cfg) {
 }
 
 // ----------------------------------------------------------
-//  Récupérer les matchs d'une équipe via le cache Worker
+//  Récupérer les matchs d'une équipe via l'API (même logique que match-detail.js)
 // ----------------------------------------------------------
 async function fetchTeamMatches(teamName, game, token, cfg, status, count) {
-  // Utiliser les matchs déjà en mémoire dans matchStore
+  // Toujours appeler l'API pour avoir un historique complet et cohérent
+  if (token && token !== 'VOTRE_CLE_ICI' && cfg && cfg.source === 'pandascore') {
+    try {
+      const apiStatus = status === 'past' ? 'past' : 'upcoming';
+      const params = new URLSearchParams({
+        game, slug: cfg.slug, status: apiStatus, count: '50', token,
+      });
+      const res  = await fetch('https://omniscore-cache.omniscoregg.workers.dev?' + params);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          const filtered = data
+            .filter(m => (m.opponents || []).some(
+              o => o.opponent?.name?.toLowerCase() === teamName.toLowerCase()
+            ))
+            .slice(0, count);
+          if (filtered.length > 0) return filtered;
+        }
+      }
+    } catch(e) {
+      console.warn('[fetchTeamMatches] API error:', e);
+    }
+  }
+
+  // Fallback : matchStore en mémoire
   const stored = window.matchStore ? [...window.matchStore.values()] : [];
-  const filtered = stored.filter(m => {
+  return stored.filter(m => {
     if (m.game !== game) return false;
     if (status === 'upcoming') return m.status === 'upcoming';
-    if (status === 'past') return m.status === 'finished';
-    if (status === 'running') return m.status === 'running';
+    if (status === 'past')     return m.status === 'finished';
     return true;
   }).filter(m =>
     m.team1.name.toLowerCase() === teamName.toLowerCase() ||
     m.team2.name.toLowerCase() === teamName.toLowerCase()
-  ).slice(0, count);
-
-  // Si pas assez de matchs en mémoire, essayer le Worker
-  if (filtered.length > 0) return filtered.map(m => ({
+  ).slice(0, count).map(m => ({
     opponents: [
       { opponent: { name: m.team1.name, image_url: m.team1.logo } },
       { opponent: { name: m.team2.name, image_url: m.team2.logo } },
     ],
-    results: [{ score: m.score1 }, { score: m.score2 }],
+    results:      [{ score: m.score1 }, { score: m.score2 }],
     scheduled_at: m.date,
-    league: { name: m.tournament },
+    league:       { name: m.tournament },
   }));
-
-  // Fallback Worker
-  if (!token || token === 'VOTRE_CLE_ICI' || !cfg || cfg.source !== 'pandascore') return [];
-  try {
-    const params = new URLSearchParams({ game, slug: cfg.slug, status, count: String(count * 5), token });
-    const res    = await fetch('https://omniscore-cache.omniscoregg.workers.dev?' + params);
-    if (!res.ok) return [];
-    const data = await res.json();
-    if (!Array.isArray(data)) return [];
-    return data
-      .filter(m => (m.opponents || []).some(o => o.opponent?.name?.toLowerCase() === teamName.toLowerCase()))
-      .slice(0, count);
-  } catch(e) { return []; }
 }
 
 // ----------------------------------------------------------
@@ -162,23 +169,21 @@ if (countryEl && team?.location) {
   html += '<div class="td-header">';
   html += '<div class="td-header-info">';
 
-  // Stats — calculées depuis les matchs en mémoire
-  const storedMatches = window.matchStore ? [...window.matchStore.values()].filter(m =>
-    m.game === game && m.status === 'finished' &&
-    (m.team1.name.toLowerCase() === teamName.toLowerCase() ||
-     m.team2.name.toLowerCase() === teamName.toLowerCase())
-  ) : [];
-
+  // Stats WinRate — calculées depuis les matchs API (recentMatches)
   let w = 0, l = 0;
-  storedMatches.forEach(m => {
-    const isT1 = m.team1.name.toLowerCase() === teamName.toLowerCase();
-    const won  = isT1 ? m.winner === 1 : m.winner === 2;
-    if (won) w++; else l++;
+  recentMatches.forEach(m => {
+    const ops = m.opponents || [];
+    const res = m.results   || [];
+    const idx = ops.findIndex(o => o.opponent?.name?.toLowerCase() === teamName.toLowerCase());
+    if (idx === -1) return;
+    const myS  = res[idx]?.score ?? 0;
+    const oppS = res[1 - idx]?.score ?? 0;
+    if (myS > oppS) w++; else l++;
   });
 
-  // Fallback sur les données API si pas de matchs en mémoire
-  if (storedMatches.length === 0 && team) {
-    w = team.wins || 0;
+  // Fallback sur les données API team si pas de matchs récents
+  if (w + l === 0 && team) {
+    w = team.wins   || 0;
     l = team.losses || 0;
   }
 
@@ -186,27 +191,8 @@ if (countryEl && team?.location) {
   if (w + l > 0 || team) {
     html += '<div class="ti-stats">'
       + '<span class="ti-stat wr">' + wr + '% WR</span>'
+      + '<span class="ti-stat">' + w + 'V ' + l + 'D</span>'
       + '</div>';
-  }
-
-  // Form rows depuis storedMatches
-  if (storedMatches.length > 0) {
-    html += '<div class="form-rows">';
-    storedMatches.slice(0, 5).forEach(m => {
-      const isT1 = m.team1.name.toLowerCase() === teamName.toLowerCase();
-      const won  = isT1 ? m.winner === 1 : m.winner === 2;
-      const myS  = isT1 ? m.score1 : m.score2;
-      const oppS = isT1 ? m.score2 : m.score1;
-      const opp  = isT1 ? m.team2 : m.team1;
-      const logoHtml = opp.logo
-        ? '<img src="' + opp.logo + '" class="form-row-logo" onerror="this.style.display=\'none\'">'
-        : '<span class="form-row-opp">' + opp.name + '</span>';
-      html += '<div class="form-row ' + (won ? 'win' : 'loss') + '">'
-        + '<span class="form-row-score">' + myS + ' - ' + oppS + '</span>'
-        + logoHtml
-        + '</div>';
-    });
-    html += '</div>';
   }
 
   // Réseaux sociaux
