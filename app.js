@@ -366,15 +366,15 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
       </div>
       <div class="match-body">
         <div class="team-block ${w1class}">
-          ${tapBtn1}
-          ${logo1}
           <span class="team-name">${m.team1.name}</span>
+          ${logo1}
+          ${tapBtn1}
         </div>
         <div class="match-score">${score}</div>
         <div class="team-block right ${w2class}">
-          <span class="team-name">${m.team2.name}</span>
-          ${logo2}
           ${tapBtn2}
+          ${logo2}
+          <span class="team-name">${m.team2.name}</span>
         </div>
       </div>
       ${timeInfo ? `<div class="match-time">${timeInfo}</div>` : ''}
@@ -508,9 +508,9 @@ function renderMatchCardSimple(m, isUpcoming = false, isLive = false) {
         ${isLive ? '<span class="live-pill"><span class="live-dot-small"></span> LIVE</span>' : ''}
       </div>
       <div class="match-body">
-        <div class="team-block ${w1class}">${logo1}<span class="team-name">${m.team1.name}</span></div>
+        <div class="team-block ${w1class}"><span class="team-name">${m.team1.name}</span>${logo1}</div>
         <div class="match-score">${score}</div>
-        <div class="team-block right ${w2class}"><span class="team-name">${m.team2.name}</span>${logo2}</div>
+        <div class="team-block right ${w2class}">${logo2}<span class="team-name">${m.team2.name}</span></div>
       </div>
       ${timeInfo ? `<div class="match-time">${timeInfo}</div>` : ''}
     </div>
