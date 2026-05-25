@@ -35,38 +35,38 @@ document.body.style.overflow = 'hidden';
             <button class="modal-close" onclick="closeMatchDetail()">✕</button>
           </div>
         </div>
+      </div>
 
-        <div class="md-teams">
-          <div class="md-team left">
-            <div class="td-clickable" onclick="showTeamDetail('${match.team1.name}','${match.game}',true,'${match.team1.logo || ''}')">
-              ${match.team1.logo
-                ? `<img src="${match.team1.logo}" class="md-logo" onerror="this.style.display='none'">`
-                : `<div class="md-logo-abbr" style="background:${colors.bg};color:${colors.accent}">${abbr(match.team1.name)}</div>`}
-              <div class="md-team-name ${match.winner === 1 ? 'winner' : ''}">${match.team1.name}</div>
-            </div>
-            <div id="form-t1" class="team-form"><span class="form-loading">...</span></div>
+      <div class="md-teams">
+        <div class="md-team left">
+          <div class="td-clickable" onclick="showTeamDetail('${match.team1.name}','${match.game}',true,'${match.team1.logo || ''}')">
+            ${match.team1.logo
+              ? `<img src="${match.team1.logo}" class="md-logo" onerror="this.style.display='none'">`
+              : `<div class="md-logo-abbr" style="background:${colors.bg};color:${colors.accent}">${abbr(match.team1.name)}</div>`}
+            <div class="md-team-name ${match.winner === 1 ? 'winner' : ''}">${match.team1.name}</div>
           </div>
+          <div id="form-t1" class="team-form"><span class="form-loading">...</span></div>
+        </div>
 
-          <div class="md-score-block">
-            <div class="md-score">
-              ${isUpcoming
-                ? '<span class="md-vs">vs</span>'
-                : `${match.score1 ?? '?'} <span class="md-score-sep">:</span> ${match.score2 ?? '?'}`}
-            </div>
-            <div class="md-date">${formatDateFull(match.date)}</div>
-            ${match.date ? `<div class="md-time">${formatTimeStr(match.date)}</div>` : ''}
-            <div class="md-form-label">Forme récente</div>
+        <div class="md-score-block">
+          <div class="md-score">
+            ${isUpcoming
+              ? '<span class="md-vs">vs</span>'
+              : `${match.score1 ?? '?'} <span class="md-score-sep">:</span> ${match.score2 ?? '?'}`}
           </div>
+          <div class="md-date">${formatDateFull(match.date)}</div>
+          ${match.date ? `<div class="md-time">${formatTimeStr(match.date)}</div>` : ''}
+          <div class="md-form-label">Forme récente</div>
+        </div>
 
-          <div class="md-team right">
-            <div class="td-clickable" onclick="showTeamDetail('${match.team2.name}','${match.game}',true,'${match.team2.logo || ''}')">
-              ${match.team2.logo
-                ? `<img src="${match.team2.logo}" class="md-logo" onerror="this.style.display='none'">`
-                : `<div class="md-logo-abbr" style="background:${colors.bg};color:${colors.accent}">${abbr(match.team2.name)}</div>`}
-              <div class="md-team-name ${match.winner === 2 ? 'winner' : ''}">${match.team2.name}</div>
-            </div>
-            <div id="form-t2" class="team-form"><span class="form-loading">...</span></div>
+        <div class="md-team right">
+          <div class="td-clickable" onclick="showTeamDetail('${match.team2.name}','${match.game}',true,'${match.team2.logo || ''}')">
+            ${match.team2.logo
+              ? `<img src="${match.team2.logo}" class="md-logo" onerror="this.style.display='none'">`
+              : `<div class="md-logo-abbr" style="background:${colors.bg};color:${colors.accent}">${abbr(match.team2.name)}</div>`}
+            <div class="md-team-name ${match.winner === 2 ? 'winner' : ''}">${match.team2.name}</div>
           </div>
+          <div id="form-t2" class="team-form"><span class="form-loading">...</span></div>
         </div>
       </div>
 
