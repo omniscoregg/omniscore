@@ -534,6 +534,13 @@ body {
   padding-bottom: 16px;
   border-bottom: 1px solid var(--border);
 }
+
+/* Fiche match — header en colonne */
+.match-detail-box .modal-header {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
 .modal-title { font-size: 16px; font-weight: 600; color: var(--text); }
 .modal-close {
   background: none;
@@ -3434,14 +3441,6 @@ body {
   overflow-x: hidden;
   box-sizing: border-box;
   position: relative;
-}
-
-.modal-header {
-  position: relative;
-  z-index: 10;
-  background: #12151c;
-  padding-bottom: 12px;
-  margin-bottom: 4px;
 }
 
 /* Logo équipe dans le header */
