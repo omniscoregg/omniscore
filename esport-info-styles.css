@@ -1,0 +1,315 @@
+/* ============================================================
+   esport-info.css — Page Infos Esport
+   À coller à la fin de style.css
+   ============================================================ */
+
+/* ── Overlay pleine page ── */
+.esport-info-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 300;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 16px 32px;
+  overflow-y: auto;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.esport-info-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ── Boîte principale ── */
+.esport-info-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 680px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  animation: infoSlideUp 0.25s ease;
+}
+
+@keyframes infoSlideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Header ── */
+.esport-info-header {
+  padding: 24px 24px 20px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.esport-info-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 14px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.esport-info-close:hover { border-color: var(--accent); color: var(--text); }
+
+.esport-info-back {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text2);
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  margin-bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.esport-info-back:hover { border-color: var(--accent); color: var(--text); }
+
+.esport-info-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.esport-info-subtitle {
+  font-size: 13px;
+  color: var(--text2);
+}
+
+.esport-info-game-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.esport-info-desc {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.7;
+  margin-top: 4px;
+}
+
+/* ── Grille liste des jeux ── */
+.esport-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 20px;
+}
+
+.esport-info-game-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+}
+.esport-info-game-card:hover {
+  border-color: currentColor;
+  transform: translateY(-1px);
+}
+
+.esport-info-game-icon { font-size: 22px; }
+
+.esport-info-game-label {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.esport-info-game-arrow {
+  font-size: 18px;
+  color: var(--text3);
+}
+
+/* ── Sections détail ── */
+.esport-info-section {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.esport-info-section:last-child { border-bottom: none; }
+
+.esport-info-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+}
+
+/* ── Format & Règles ── */
+.esport-info-format-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.esport-info-format-row {
+  display: flex;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  font-size: 13px;
+}
+
+.esport-info-format-label {
+  color: var(--text2);
+  min-width: 150px;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.esport-info-format-value {
+  color: var(--text);
+  flex: 1;
+  line-height: 1.5;
+}
+
+/* ── Ligues ── */
+.esport-info-leagues {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.esport-info-league-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+}
+
+.esport-info-league-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 130px;
+  flex-shrink: 0;
+}
+
+.esport-info-league-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.esport-info-league-region {
+  font-size: 11px;
+  color: var(--text3);
+}
+
+.esport-info-league-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex: 1;
+}
+
+.esport-info-league-tier {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border: 1px solid;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.esport-info-league-desc {
+  font-size: 12px;
+  color: var(--text2);
+  text-align: right;
+  line-height: 1.4;
+}
+
+/* ── Liens utiles ── */
+.esport-info-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.esport-info-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.esport-info-link-btn:hover { opacity: 0.8; transform: translateY(-1px); }
+
+/* ── Bouton ℹ️ sidebar ── */
+.esport-info-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.esport-info-btn:hover { opacity: 1; }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .esport-info-overlay { padding: 16px 8px 80px; }
+
+  .esport-info-grid {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .esport-info-format-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .esport-info-format-label { min-width: unset; }
+
+  .esport-info-league-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .esport-info-league-right { align-items: flex-start; }
+  .esport-info-league-desc { text-align: left; }
+
+  .esport-info-game-title { font-size: 18px; }
+  .esport-info-title { font-size: 17px; }
+}
