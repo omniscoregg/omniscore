@@ -18,6 +18,7 @@ async function showTeamDetail(teamName, game, fromMatch = null, teamLogo = '') {
       <div class="modal-header">
         <div style="display:flex;align-items:center;gap:10px">
           ${fromMatch ? '<button class="back-btn" onclick="closeTeamDetail();showMatchDetail(window._lastOpenedMatch)">← Match</button>' : ''}
+          ${teamLogo ? '<img src="' + teamLogo + '" class="td-logo-header-img">' : ''}
           <div>
             <div class="md-game" style="color:${colors.accent}">${cfg?.label || game}</div>
             <div class="td-team-name" id="td-name">Chargement...</div>
@@ -28,10 +29,6 @@ async function showTeamDetail(teamName, game, fromMatch = null, teamLogo = '') {
           <div id="td-fav-btn"></div>
           <button class="modal-close" onclick="closeTeamDetail()">✕</button>
         </div>
-      </div>
-
-      <div class="td-logo-header">
-        ${teamLogo ? '<img src="' + teamLogo + '" class="td-logo-big">' : ''}
       </div>
       <div id="td-content">
         <div class="lb-loading">Chargement de la fiche équipe...</div>
@@ -189,8 +186,7 @@ if (countryEl && team?.location) {
 
   const wr = (w + l) > 0 ? Math.round((w / (w + l)) * 100) : 0;
   if (w + l > 0 || team) {
-    html += '<div class="form-label">Forme récente</div>'
-      + '<div class="ti-stats">'
+    html += '<div class="ti-stats">'
       + '<span class="ti-stat wr">' + wr + '% WR</span>'
       + '<span class="ti-stat">' + w + 'V ' + l + 'D</span>'
       + '</div>';

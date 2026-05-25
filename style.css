@@ -3429,14 +3429,28 @@ body {
 
 .modal-header {
   position: sticky;
-  top: -1px;
+  top: 0;
   z-index: 10;
   background: #12151c;
   padding-bottom: 12px;
   margin-bottom: 4px;
-  /* Masque le contenu qui passe derrière */
-  box-shadow: 0 8px 0 #12151c;
-  clip-path: inset(0 0 -20px 0);
+}
+
+/* Logo équipe dans le header */
+.td-logo-header-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* Header top pour la fiche match */
+.md-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
 /* Croix — desktop : dans le flux normal */

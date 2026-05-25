@@ -21,50 +21,52 @@ document.body.style.overflow = 'hidden';
   modal.innerHTML = `
     <div class="modal-box wide match-detail-box">
       <div class="modal-header">
-        <div style="display:flex;align-items:center;gap:10px">
-          ${fromFavorites ? '<button class="back-btn" onclick="closeMatchDetail();showFavoritesPage()">← Favoris</button>' : ''}
-          <div>
-            <div class="md-game" style="color:${colors.accent}">${match.gameLabel}</div>
-            <div class="md-tournament">${match.tournament} · ${match.format}</div>
+        <div class="md-header-top">
+          <div style="display:flex;align-items:center;gap:10px">
+            ${fromFavorites ? '<button class="back-btn" onclick="closeMatchDetail();showFavoritesPage()">← Favoris</button>' : ''}
+            <div>
+              <div class="md-game" style="color:${colors.accent}">${match.gameLabel}</div>
+              <div class="md-tournament">${match.tournament} · ${match.format}</div>
+            </div>
           </div>
-        </div>
-        <div class="md-header-actions">
-          <div id="fav-btn-t1" class="fav-btn-wrap"></div>
-          <div id="fav-btn-t2" class="fav-btn-wrap"></div>
-          <button class="modal-close" onclick="closeMatchDetail()">✕</button>
-        </div>
-      </div>
-
-      <div class="md-teams">
-        <div class="md-team left">
-          <div class="td-clickable" onclick="showTeamDetail('${match.team1.name}','${match.game}',true,'${match.team1.logo || ''}')">
-            ${match.team1.logo
-              ? `<img src="${match.team1.logo}" class="md-logo" onerror="this.style.display='none'">`
-              : `<div class="md-logo-abbr" style="background:${colors.bg};color:${colors.accent}">${abbr(match.team1.name)}</div>`}
-            <div class="md-team-name ${match.winner === 1 ? 'winner' : ''}">${match.team1.name}</div>
+          <div class="md-header-actions">
+            <div id="fav-btn-t1" class="fav-btn-wrap"></div>
+            <div id="fav-btn-t2" class="fav-btn-wrap"></div>
+            <button class="modal-close" onclick="closeMatchDetail()">✕</button>
           </div>
-          <div id="form-t1" class="team-form"><span class="form-loading">...</span></div>
         </div>
 
-        <div class="md-score-block">
-          <div class="md-score">
-            ${isUpcoming
-              ? '<span class="md-vs">vs</span>'
-              : `${match.score1 ?? '?'} <span class="md-score-sep">:</span> ${match.score2 ?? '?'}`}
+        <div class="md-teams">
+          <div class="md-team left">
+            <div class="td-clickable" onclick="showTeamDetail('${match.team1.name}','${match.game}',true,'${match.team1.logo || ''}')">
+              ${match.team1.logo
+                ? `<img src="${match.team1.logo}" class="md-logo" onerror="this.style.display='none'">`
+                : `<div class="md-logo-abbr" style="background:${colors.bg};color:${colors.accent}">${abbr(match.team1.name)}</div>`}
+              <div class="md-team-name ${match.winner === 1 ? 'winner' : ''}">${match.team1.name}</div>
+            </div>
+            <div id="form-t1" class="team-form"><span class="form-loading">...</span></div>
           </div>
-          <div class="md-date">${formatDateFull(match.date)}</div>
-          ${match.date ? `<div class="md-time">${formatTimeStr(match.date)}</div>` : ''}
-          <div class="md-form-label">Forme récente</div>
-        </div>
 
-        <div class="md-team right">
-          <div class="td-clickable" onclick="showTeamDetail('${match.team2.name}','${match.game}',true,'${match.team2.logo || ''}')">
-            ${match.team2.logo
-              ? `<img src="${match.team2.logo}" class="md-logo" onerror="this.style.display='none'">`
-              : `<div class="md-logo-abbr" style="background:${colors.bg};color:${colors.accent}">${abbr(match.team2.name)}</div>`}
-            <div class="md-team-name ${match.winner === 2 ? 'winner' : ''}">${match.team2.name}</div>
+          <div class="md-score-block">
+            <div class="md-score">
+              ${isUpcoming
+                ? '<span class="md-vs">vs</span>'
+                : `${match.score1 ?? '?'} <span class="md-score-sep">:</span> ${match.score2 ?? '?'}`}
+            </div>
+            <div class="md-date">${formatDateFull(match.date)}</div>
+            ${match.date ? `<div class="md-time">${formatTimeStr(match.date)}</div>` : ''}
+            <div class="md-form-label">Forme récente</div>
           </div>
-          <div id="form-t2" class="team-form"><span class="form-loading">...</span></div>
+
+          <div class="md-team right">
+            <div class="td-clickable" onclick="showTeamDetail('${match.team2.name}','${match.game}',true,'${match.team2.logo || ''}')">
+              ${match.team2.logo
+                ? `<img src="${match.team2.logo}" class="md-logo" onerror="this.style.display='none'">`
+                : `<div class="md-logo-abbr" style="background:${colors.bg};color:${colors.accent}">${abbr(match.team2.name)}</div>`}
+              <div class="md-team-name ${match.winner === 2 ? 'winner' : ''}">${match.team2.name}</div>
+            </div>
+            <div id="form-t2" class="team-form"><span class="form-loading">...</span></div>
+          </div>
         </div>
       </div>
 
@@ -202,8 +204,7 @@ function renderForm(formData) {
       + logoHtml
       + '</div>';
   }).join('');
-  return '<div class="form-label">Forme récente</div>'
-    + '<div class="form-dots">' + dots + '</div>'
+  return '<div class="form-dots">' + dots + '</div>'
     + '<div class="form-record">' + wins + 'V ' + (formData.length - wins) + 'D</div>'
     + '<div class="form-rows">' + rows + '</div>';
 }
@@ -368,43 +369,51 @@ async function loadPredAction(match, colors, isUpcoming = true) {
   }
 
   // Formulaire de prédiction avec score
-  const format = match.format || 'Bo3';
+  const maxScore = match.format === 'Bo5' ? 3 : match.format === 'Bo1' ? 1 : 2;
   el.innerHTML = '<div class="md-pred-full">'
-    + '<div class="md-pred-winner-label">Qui va gagner ?</div>'
+    +'<div class="md-pred-winner-label">Qui va gagner ?</div>'
     + '<div class="md-pred-winner-btns">'
-    + '<button class="md-pred-btn" id="detail-btn-t1" style="border-color:' + colors.accent + '" onclick="selectDetailWinner(this,\'' + match.team1.name + '\',\'' + match.id + '\',\'' + format + '\',\'' + match.team1.name + '\',\'' + match.team2.name + '\')">' + match.team1.name + '</button>'
-    + '<button class="md-pred-btn" id="detail-btn-t2" style="border-color:' + colors.accent + '" onclick="selectDetailWinner(this,\'' + match.team2.name + '\',\'' + match.id + '\',\'' + format + '\',\'' + match.team1.name + '\',\'' + match.team2.name + '\')">' + match.team2.name + '</button>'
+    + '<button class="md-pred-btn" id="detail-btn-t1" style="border-color:' + colors.accent + '" onclick="selectDetailWinner(this,\'' + match.team1.name + '\',\'' + match.id + '\',\'' + match.format + '\')">' + match.team1.name + '</button>'
+    + '<button class="md-pred-btn" id="detail-btn-t2" style="border-color:' + colors.accent + '" onclick="selectDetailWinner(this,\'' + match.team2.name + '\',\'' + match.id + '\',\'' + match.format + '\')">' + match.team2.name + '</button>'
     + '</div>'
-    + '<div id="detail-score-' + match.id + '"></div>'
+    + '<div class="md-pred-score-row" id="detail-score-' + match.id + '" style="display:none">'
+    + '<span class="pred-score-label">Score exact (optionnel) :</span>'
+    + '<div class="pred-score-inputs">'
+    + '<input type="number" id="detail-s1-' + match.id + '" class="pred-score-input" min="0" max="' + maxScore + '" placeholder="0">'
+    + '<span class="pred-score-sep">-</span>'
+    + '<input type="number" id="detail-s2-' + match.id + '" class="pred-score-input" min="0" max="' + maxScore + '" placeholder="0">'
+    + '</div>'
+    + '</div>'
+    + '<button class="form-submit" id="detail-confirm-' + match.id + '" style="display:none;margin-top:10px" onclick="confirmDetailPred(\'' + match.id + '\',\'' + match.game + '\',\'' + match.team1.name + '\',\'' + match.team2.name + '\',\'' + match.format + '\')">'
+    + 'Confirmer ma prédiction'
+    + '</button>'
     + '</div>';
 }
 
-function selectDetailWinner(btn, winner, matchId, format, team1, team2) {
+function selectDetailWinner(btn, winner, matchId, format) {
   document.querySelectorAll('.md-pred-winner-btns .md-pred-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
   btn.dataset.winner = winner;
 
-  const container = document.getElementById('detail-score-' + matchId);
-  if (!container) return;
-
-  const validScores = window.getValidScores ? getValidScores(format, winner) : (format === 'Bo5' ? [[3,0],[3,1],[3,2]] : format === 'Bo1' ? [[1,0]] : [[2,0],[2,1]]);
-  const isTeam1Winner = winner === team1;
-
-  const btns = validScores.map(([w, l]) => {
-    const s1 = isTeam1Winner ? w : l;
-    const s2 = isTeam1Winner ? l : w;
-    return `<button class="score-choice-btn" onclick="confirmDetailPred('${matchId}','${window._lastOpenedMatch?.game || ''}','${team1}','${team2}','${winner}',${s1},${s2})">${s1} - ${s2}</button>`;
-  }).join('');
-
-  container.innerHTML = `
-    <div class="score-choice-panel" style="margin-top:12px">
-      <span class="pred-score-label">Score exact <span style="color:var(--text3);font-size:10px">(optionnel)</span></span>
-      <div class="score-choice-btns">${btns}</div>
-      <button class="score-skip-btn" onclick="confirmDetailPred('${matchId}','${window._lastOpenedMatch?.game || ''}','${team1}','${team2}','${winner}',null,null)">Sans score →</button>
-    </div>`;
+  const scoreRow   = document.getElementById('detail-score-' + matchId);
+  const confirmBtn = document.getElementById('detail-confirm-' + matchId);
+  if (scoreRow)   scoreRow.style.display   = 'flex';
+  if (confirmBtn) confirmBtn.style.display = 'block';
 }
 
-async function confirmDetailPred(matchId, game, team1, team2, winner, s1, s2) {
+async function confirmDetailPred(matchId, game, team1, team2, format) {
+  const selectedBtn = document.querySelector('.md-pred-winner-btns .md-pred-btn.selected');
+  if (!selectedBtn) return;
+  const winner = selectedBtn.dataset.winner || selectedBtn.textContent.trim();
+
+  const s1Input = document.getElementById('detail-s1-' + matchId);
+  const s2Input = document.getElementById('detail-s2-' + matchId);
+  const v1 = s1Input?.value;
+  const v2 = s2Input?.value;
+  // Les deux scores doivent être remplis pour compter
+  const s1 = (v1 !== '' && v2 !== '') ? parseInt(v1) : null;
+  const s2 = (v1 !== '' && v2 !== '') ? parseInt(v2) : null;
+
   const user = window.FirebaseService?.getCurrentUser();
   if (!user) { closeMatchDetail(); showAuthModal('login'); return; }
 
