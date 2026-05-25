@@ -211,6 +211,7 @@ function renderGameFilters() {
             <span class="game-toggle-label">${cfg.label}</span>
           </div>
           <button class="game-fav-btn" id="gfav-${key}" onclick="toggleGameFav('${key}')" title="Suivre ce jeu">☆</button>
+          ${window.ESPORT_INFO?.[key] ? `<button class="game-info-btn" onclick="event.stopPropagation();showEsportInfoPage('${key}')" title="Infos esport">📚</button>` : ''}
         </div>
       `).join('')}
     </div>
@@ -681,6 +682,7 @@ function renderDrawerGames() {
             + '<span class="drawer-game-dot" style="background:' + accent + '"></span>'
             + '<span class="drawer-game-label">' + cfg.label + '</span>'
             + (state.liveMatches?.some(m => m.game === key) ? '<span style="color:#f87171;font-size:10px">LIVE</span>' : '')
+            + (window.ESPORT_INFO?.[key] ? '<button class="drawer-info-btn" onclick="event.stopPropagation();closeGameDrawer();showEsportInfoPage(&quot;' + key + '&quot;)" title="Infos esport">📚</button>' : '')
             + '</div>';
         }).join('')
       ).join('');

@@ -451,8 +451,7 @@ var ESPORT_INFO = {
 // ----------------------------------------------------------
 //  Affichage de la page
 // ----------------------------------------------------------
-function showEsportInfoPage(gameKey) {
-  // Créer ou réutiliser l'overlay
+function showEsportInfoPage(gameKey, tab) {
   let overlay = document.getElementById('esport-info-overlay');
   if (!overlay) {
     overlay = document.createElement('div');
@@ -463,15 +462,19 @@ function showEsportInfoPage(gameKey) {
 
   const lang = window.i18n ? window.i18n.currentLang() : 'fr';
 
-  // Si pas de jeu spécifique → page liste de tous les jeux
   if (!gameKey || !ESPORT_INFO[gameKey]) {
     overlay.innerHTML = renderEsportInfoList(lang);
     overlay.classList.add('open');
     return;
   }
 
-  overlay.innerHTML = renderEsportInfoDetail(gameKey, lang);
+  overlay.innerHTML = renderEsportInfoDetail(gameKey, lang, tab || 'info');
   overlay.classList.add('open');
+
+  // Charger les champions si onglet champions actif
+  if (tab === 'champions' && GAMES_WITH_CHAMPIONS.includes(gameKey)) {
+    setTimeout(() => loadChampions(gameKey), 50);
+  }
 }
 
 function closeEsportInfoPage() {
@@ -518,19 +521,28 @@ function renderEsportInfoList(lang) {
 }
 
 // ----------------------------------------------------------
-//  Page détail — un jeu
+//  Page détail — un jeu (avec onglets si champions disponibles)
 // ----------------------------------------------------------
-function renderEsportInfoDetail(key, lang) {
+
+// Jeux avec champions/agents
+var GAMES_WITH_CHAMPIONS = ['lol', 'valorant', 'dota2', 'r6'];
+
+function renderEsportInfoDetail(key, lang, activeTab) {
   const info = ESPORT_INFO[key];
   if (!info) return '';
+
+  activeTab = activeTab || 'info';
+  const hasChampions = GAMES_WITH_CHAMPIONS.includes(key);
 
   const accent = info.accent;
   const desc = info.description[lang] || info.description.fr;
   const formatItems = (info.format[lang] || info.format.fr);
-  const backLabel = { fr: 'Retour', en: 'Back', es: 'Volver' };
+  const backLabel   = { fr: 'Retour', en: 'Back', es: 'Volver' };
   const formatLabel = { fr: 'Format & Règles', en: 'Format & Rules', es: 'Formato & Reglas' };
   const leaguesLabel = { fr: 'Circuits & Ligues', en: 'Circuits & Leagues', es: 'Circuitos & Ligas' };
-  const linksLabel = { fr: 'Liens utiles', en: 'Useful links', es: 'Enlaces útiles' };
+  const linksLabel  = { fr: 'Liens utiles', en: 'Useful links', es: 'Enlaces útiles' };
+  const tabInfoLabel = { fr: 'Infos Esport', en: 'Esport Info', es: 'Info Esport' };
+  const tabChampLabel = { fr: 'Champions & Agents', en: 'Champions & Agents', es: 'Campeones & Agentes' };
   const tierLabels = {
     0: { fr: 'Mondial', en: 'Worldwide', es: 'Mundial', color: '#fbbf24' },
     1: { fr: 'Tier 1', en: 'Tier 1', es: 'Tier 1', color: info.accent },
@@ -560,6 +572,54 @@ function renderEsportInfoDetail(key, lang) {
     </a>
   `).join('');
 
+  // Onglets (seulement si le jeu a des champions)
+  const tabsHtml = hasChampions ? `
+    <div class="esport-info-tabs">
+      <button class="esport-info-tab ${activeTab === 'info' ? 'active' : ''}"
+        style="${activeTab === 'info' ? `color:${accent};border-bottom-color:${accent}` : ''}"
+        onclick="showEsportInfoPage('${key}', 'info')">
+        📋 ${tabInfoLabel[lang] || tabInfoLabel.fr}
+      </button>
+      <button class="esport-info-tab ${activeTab === 'champions' ? 'active' : ''}"
+        style="${activeTab === 'champions' ? `color:${accent};border-bottom-color:${accent}` : ''}"
+        onclick="showEsportInfoPage('${key}', 'champions')">
+        ⚔️ ${tabChampLabel[lang] || tabChampLabel.fr}
+      </button>
+    </div>
+  ` : '';
+
+  // Contenu onglet champions
+  const champContent = activeTab === 'champions' && hasChampions ? `
+    <div class="esport-info-section" id="champions-container">
+      <div class="esport-info-champ-loading">
+        <div class="lb-loading">Chargement des champions...</div>
+      </div>
+    </div>
+  ` : '';
+
+  // Contenu onglet infos
+  const infoContent = activeTab !== 'champions' ? `
+    <div class="esport-info-section">
+      <div class="esport-info-section-title" style="color:${accent}">⚙️ ${formatLabel[lang] || formatLabel.fr}</div>
+      <div class="esport-info-format-list">
+        ${formatItems.map(item => `
+          <div class="esport-info-format-row">
+            <span class="esport-info-format-label">${item.label}</span>
+            <span class="esport-info-format-value">${item.value}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="esport-info-section">
+      <div class="esport-info-section-title" style="color:${accent}">🏆 ${leaguesLabel[lang] || leaguesLabel.fr}</div>
+      <div class="esport-info-leagues">${leagueRows}</div>
+    </div>
+    <div class="esport-info-section">
+      <div class="esport-info-section-title" style="color:${accent}">🔗 ${linksLabel[lang] || linksLabel.fr}</div>
+      <div class="esport-info-links">${linkBtns}</div>
+    </div>
+  ` : '';
+
   return `
     <div class="esport-info-box">
       <div class="esport-info-header" style="border-bottom-color:${accent}30">
@@ -571,88 +631,33 @@ function renderEsportInfoDetail(key, lang) {
         </div>
         <p class="esport-info-desc">${desc}</p>
       </div>
-
-      <div class="esport-info-section">
-        <div class="esport-info-section-title" style="color:${accent}">⚙️ ${formatLabel[lang] || formatLabel.fr}</div>
-        <div class="esport-info-format-list">
-          ${formatItems.map(item => `
-            <div class="esport-info-format-row">
-              <span class="esport-info-format-label">${item.label}</span>
-              <span class="esport-info-format-value">${item.value}</span>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-
-      <div class="esport-info-section">
-        <div class="esport-info-section-title" style="color:${accent}">🏆 ${leaguesLabel[lang] || leaguesLabel.fr}</div>
-        <div class="esport-info-leagues">
-          ${leagueRows}
-        </div>
-      </div>
-
-      <div class="esport-info-section">
-        <div class="esport-info-section-title" style="color:${accent}">🔗 ${linksLabel[lang] || linksLabel.fr}</div>
-        <div class="esport-info-links">
-          ${linkBtns}
-        </div>
-      </div>
+      ${tabsHtml}
+      ${infoContent}
+      ${champContent}
     </div>
   `;
 }
 
 // ----------------------------------------------------------
-//  Bouton dans la sidebar — ajouté à chaque jeu
-
+//  Chargement champions — sera enrichi dans champions.js
 // ----------------------------------------------------------
-//  Boutons ℹ️ dans la sidebar
-// ----------------------------------------------------------
-function addEsportInfoButtons() {
-  Object.keys(ESPORT_INFO).forEach(key => {
-    // Chercher la ligne du jeu dans la sidebar
-    const toggle = document.getElementById('gt-' + key);
-    if (!toggle) return;
-    const row = toggle.closest('.game-toggle-row');
-    if (!row || row.querySelector('.esport-info-btn')) return;
-
-    const btn = document.createElement('button');
-    btn.className = 'esport-info-btn';
-    btn.title = 'Infos esport';
-    btn.innerHTML = 'ℹ️';
-    btn.onclick = (e) => {
-      e.stopPropagation();
-      showEsportInfoPage(key);
-    };
-    row.appendChild(btn);
-  });
+function loadChampions(gameKey) {
+  const container = document.getElementById('champions-container');
+  if (!container) return;
+  // Déléguer à champions.js si disponible
+  if (window.loadChampionsForGame) {
+    window.loadChampionsForGame(gameKey, container);
+  } else {
+    container.innerHTML = '<div class="lb-empty">Champions à venir...</div>';
+  }
 }
 
 // ----------------------------------------------------------
-//  Bouton dans la navbar — classe dédiée pour éviter display:none mobile
-// ----------------------------------------------------------
-function addEsportInfoNavButton() {
-  const navbar = document.querySelector('.navbar');
-  if (!navbar || document.getElementById('esport-info-nav-btn')) return;
-
-  const btn = document.createElement('button');
-  btn.id = 'esport-info-nav-btn';
-  btn.className = 'esport-info-nav-btn';   // classe dédiée, pas fav-nav-btn
-  btn.innerHTML = '📚 Infos';
-  btn.title = 'Infos Esport';
-  btn.onclick = () => showEsportInfoPage(null);
-
-  // Insérer avant auth-bar
-  const authBar = document.getElementById('auth-bar');
-  if (authBar) navbar.insertBefore(btn, authBar);
-  else navbar.appendChild(btn);
-}
-
-// ----------------------------------------------------------
-//  Init
+//  Init — plus de bouton navbar, les boutons sont dans sidebar/drawer
 // ----------------------------------------------------------
 function initEsportInfo() {
-  addEsportInfoNavButton();
-  setTimeout(addEsportInfoButtons, 800);
+  // Les boutons 📚 sont injectés directement par renderGameFilters() et renderDrawerGames()
+  // via window.ESPORT_INFO dans app.js — rien à faire ici
 }
 
 // Exposer globalement
