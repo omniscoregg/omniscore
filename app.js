@@ -35,7 +35,21 @@ async function init() {
   renderMatches();
   renderUpcoming();
   i18n.applyTranslations();
-  setTimeout(() => { if (window.initPredictions) initPredictions(); if (window.loadGameFavButtons) loadGameFavButtons(); }, 600);
+  setTimeout(() => {
+    if (window.initPredictions) initPredictions();
+    if (window.loadGameFavButtons) loadGameFavButtons();
+    if (window.initHomeNavigation) initHomeNavigation();
+    if (window.showHomePage) {
+      const today = new Date().toISOString().slice(0, 10);
+      const lastSeen = localStorage.getItem('omniscore_home_seen');
+      if (lastSeen !== today) {
+        localStorage.setItem('omniscore_home_seen', today);
+        showHomePage();
+      }
+    }
+    if (window.initCarousel) initCarousel();
+    if (window.checkAdminAccess) checkAdminAccess();
+  }, 600);
 }
 
 async function loadAllData() {
@@ -83,7 +97,16 @@ function renderMainTabs() {
   `;
 
   const main = document.querySelector('.main-content');
-  if (main) main.insertBefore(tabs, main.firstChild);
+  if (main) {
+    main.insertBefore(tabs, main.firstChild);
+    // Ajouter le carrousel si pas encore présent
+    if (!document.getElementById('blog-carousel')) {
+      const carousel = document.createElement('div');
+      carousel.id = 'blog-carousel';
+      carousel.style.display = 'none';
+      tabs.after(carousel);
+    }
+  }
 }
 
 function setMainTab(tab) {
