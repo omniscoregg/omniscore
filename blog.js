@@ -2,7 +2,7 @@
 //  blog.js — Système de blog + page admin
 // ============================================================
 
-const ADMIN_UID = 'HMuJBa53KceM7zQZ0ylpVPjV3Nh1';
+window.ADMIN_UID = window.ADMIN_UID || 'HMuJBa53KceM7zQZ0ylpVPjV3Nh1';
 
 // ----------------------------------------------------------
 //  Firebase helpers
@@ -163,7 +163,7 @@ async function showBlogPost(id) {
 // ----------------------------------------------------------
 async function showBlogAdmin(editId = null) {
   const user = window.FirebaseService?.getCurrentUser();
-  if (!user || user.uid !== ADMIN_UID) {
+  if (!user || user.uid !== window.ADMIN_UID) {
     alert('Accès non autorisé.');
     return;
   }
