@@ -2663,10 +2663,7 @@ body {
 #home-page {
   min-height: calc(100vh - 52px);
   background: var(--bg);
-  overflow-x: hidden;
   overflow-y: auto;
-  max-width: 100vw;
-  box-sizing: border-box;
 }
 
 /* ── Hero ── */
@@ -2824,8 +2821,6 @@ body {
   gap: 24px;
   padding: 28px 32px 48px;
   max-width: 1100px;
-  width: 100%;
-  box-sizing: border-box;
   margin: 0 auto;
 }
 
@@ -2838,9 +2833,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  min-width: 0;
-  overflow: hidden;
-  box-sizing: border-box;
 }
 
 .home-section-full {
@@ -2884,9 +2876,8 @@ body {
 /* ── Live cards ── */
 .home-live-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 10px;
-  overflow: hidden;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
 }
 
 .home-live-card {
@@ -3273,38 +3264,13 @@ body {
 
   .home-grid {
     grid-template-columns: 1fr;
-    padding: 12px 12px 80px;
-    gap: 12px;
-    width: 100%;
-    box-sizing: border-box;
+    padding: 16px 16px 80px;
+    gap: 16px;
   }
   .home-section-full { grid-column: 1; }
-  .home-section {
-    overflow: hidden;
-    min-width: 0;
-    width: 100%;
-    box-sizing: border-box;
-    padding: 14px;
-  }
 
-  .home-live-list {
-    grid-template-columns: repeat(2, 1fr);
-    overflow: hidden;
-  }
-  .home-competitions {
-    grid-template-columns: 1fr;
-    overflow: hidden;
-  }
-  .home-upcoming-list,
-  .home-leaderboard {
-    overflow: hidden;
-  }
-  .home-upcoming-card,
-  .home-lb-row,
-  .home-comp-chip {
-    min-width: 0;
-    box-sizing: border-box;
-  }
+  .home-live-list { grid-template-columns: 1fr; }
+  .home-competitions { grid-template-columns: 1fr; }
 }
 
 /* ============================================================
@@ -3445,5 +3411,136 @@ body {
     right: 16px;
     max-width: none;
     min-width: 0;
+  }
+}
+
+/* ============================================================
+   Corrections modal + score mobile
+   ============================================================ */
+
+/* ── 1. Modal : overflow-x hidden + croix fixée en haut à droite ── */
+.modal-overlay {
+  overflow-x: hidden;
+}
+
+.modal-box {
+  overflow-x: hidden;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #12151c;
+  padding-bottom: 12px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 20;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  padding: 0;
+  flex-shrink: 0;
+}
+.modal-close:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+/* ── 2. Boutons de score valides ── */
+.score-choice-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  margin-top: 8px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.score-choice-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.score-choice-btn {
+  background: var(--surface);
+  border: 1.5px solid var(--border2);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.score-choice-btn:hover,
+.score-choice-btn:active {
+  border-color: var(--accent);
+  background: rgba(167,139,250,0.12);
+  color: var(--accent);
+}
+
+.score-skip-btn {
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 4px 8px;
+  text-decoration: underline;
+  transition: color 0.15s;
+}
+.score-skip-btn:hover { color: var(--text2); }
+
+/* ── 3. Mobile spécifique ── */
+@media (max-width: 768px) {
+  .modal-box {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100% !important;
+  }
+
+  .score-choice-btn {
+    padding: 10px 16px;
+    font-size: 15px;
+    flex: 1;
+    min-width: 70px;
+    text-align: center;
+  }
+
+  .score-choice-panel {
+    padding: 12px;
+  }
+
+  .onetap-score-panel {
+    left: 8px;
+    right: 8px;
+    width: auto;
   }
 }
