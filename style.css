@@ -3429,12 +3429,14 @@ body {
 
 .modal-header {
   position: sticky;
-  top: 0;
+  top: -1px;
   z-index: 10;
   background: #12151c;
   padding-bottom: 12px;
   margin-bottom: 4px;
-  box-shadow: 0 4px 12px #12151c;
+  /* Masque le contenu qui passe derrière */
+  box-shadow: 0 8px 0 #12151c;
+  clip-path: inset(0 0 -20px 0);
 }
 
 /* Croix — desktop : dans le flux normal */
