@@ -2075,19 +2075,9 @@ body {
     background: none !important;
   }
 
-  /* Bouton hamburger jeux */
+  /* Bouton hamburger jeux — masqué sur mobile car déjà dans la bottom bar */
   .mobile-games-btn {
-    display: flex !important;
-    align-items: center;
-    gap: 4px;
-    background: none;
-    border: 1px solid var(--border2);
-    color: var(--text2);
-    font-size: 12px;
-    padding: 4px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-family: inherit;
+    display: none !important;
   }
 
   /* Drawer jeux */
