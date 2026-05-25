@@ -273,6 +273,25 @@
 }
 .esport-info-link-btn:hover { opacity: 0.8; transform: translateY(-1px); }
 
+/* ── Bouton navbar ── */
+.esport-info-nav-btn {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.esport-info-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+
 /* ── Bouton ℹ️ sidebar ── */
 .esport-info-btn {
   background: none;
@@ -291,6 +310,8 @@
 /* ── Mobile ── */
 @media (max-width: 768px) {
   .esport-info-overlay { padding: 16px 8px 80px; }
+  /* Le bouton reste visible sur mobile dans la navbar */
+  .esport-info-nav-btn { font-size: 11px; padding: 4px 8px; }
 
   .esport-info-grid {
     grid-template-columns: 1fr;

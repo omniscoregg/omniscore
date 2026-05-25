@@ -603,55 +603,55 @@ function renderEsportInfoDetail(key, lang) {
 
 // ----------------------------------------------------------
 //  Bouton dans la sidebar — ajouté à chaque jeu
+
+// ----------------------------------------------------------
+//  Boutons ℹ️ dans la sidebar
 // ----------------------------------------------------------
 function addEsportInfoButtons() {
-  // Ajouter un bouton "ℹ️" à côté de chaque jeu dans la sidebar
   Object.keys(ESPORT_INFO).forEach(key => {
-    const row = document.querySelector(`.game-toggle-row #gt-${key}`)?.closest('.game-toggle-row');
-    if (row && !row.querySelector('.esport-info-btn')) {
-      const btn = document.createElement('button');
-      btn.className = 'esport-info-btn';
-      btn.title = 'Infos esport';
-      btn.innerHTML = 'ℹ️';
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        showEsportInfoPage(key);
-      };
-      row.appendChild(btn);
-    }
+    // Chercher la ligne du jeu dans la sidebar
+    const toggle = document.getElementById('gt-' + key);
+    if (!toggle) return;
+    const row = toggle.closest('.game-toggle-row');
+    if (!row || row.querySelector('.esport-info-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'esport-info-btn';
+    btn.title = 'Infos esport';
+    btn.innerHTML = 'ℹ️';
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      showEsportInfoPage(key);
+    };
+    row.appendChild(btn);
   });
 }
 
 // ----------------------------------------------------------
-//  Bouton global dans la navbar
+//  Bouton dans la navbar — classe dédiée pour éviter display:none mobile
 // ----------------------------------------------------------
 function addEsportInfoNavButton() {
   const navbar = document.querySelector('.navbar');
-  const favBtn = document.getElementById('fav-nav-btn');
   if (!navbar || document.getElementById('esport-info-nav-btn')) return;
 
   const btn = document.createElement('button');
   btn.id = 'esport-info-nav-btn';
-  btn.className = 'fav-nav-btn';
+  btn.className = 'esport-info-nav-btn';   // classe dédiée, pas fav-nav-btn
   btn.innerHTML = '📚 Infos';
   btn.title = 'Infos Esport';
   btn.onclick = () => showEsportInfoPage(null);
 
-  if (favBtn) {
-    navbar.insertBefore(btn, favBtn);
-  } else {
-    const authBar = document.getElementById('auth-bar');
-    if (authBar) navbar.insertBefore(btn, authBar);
-    else navbar.appendChild(btn);
-  }
+  // Insérer avant auth-bar
+  const authBar = document.getElementById('auth-bar');
+  if (authBar) navbar.insertBefore(btn, authBar);
+  else navbar.appendChild(btn);
 }
 
 // ----------------------------------------------------------
-//  Init — appelé depuis app.js init()
+//  Init
 // ----------------------------------------------------------
 function initEsportInfo() {
   addEsportInfoNavButton();
-  // Ajouter les boutons ℹ️ après le rendu des filtres
   setTimeout(addEsportInfoButtons, 800);
 }
 
