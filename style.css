@@ -3414,14 +3414,12 @@ body {
   }
 }
 
+
 /* ============================================================
-   Corrections modal + score mobile
+   Corrections modal + score
    ============================================================ */
 
-/* ── 1. Modal : overflow-x hidden + croix fixée en haut à droite ── */
-.modal-overlay {
-  overflow-x: hidden;
-}
+.modal-overlay { overflow-x: hidden; }
 
 .modal-box {
   overflow-x: hidden;
@@ -3437,32 +3435,21 @@ body {
   padding-bottom: 12px;
 }
 
+/* Croix — desktop : dans le flux normal */
 .modal-close {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 20;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  color: var(--text2);
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 16px;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-  padding: 0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: color 0.15s;
   flex-shrink: 0;
 }
-.modal-close:hover {
-  background: var(--border);
-  color: var(--text);
-}
+.modal-close:hover { color: var(--text); }
 
-/* ── 2. Boutons de score valides ── */
+/* Boutons de score valides */
 .score-choice-panel {
   display: flex;
   flex-direction: column;
@@ -3476,7 +3463,6 @@ body {
   box-sizing: border-box;
   width: 100%;
 }
-
 .score-choice-btns {
   display: flex;
   gap: 8px;
@@ -3484,7 +3470,6 @@ body {
   justify-content: center;
   width: 100%;
 }
-
 .score-choice-btn {
   background: var(--surface);
   border: 1.5px solid var(--border2);
@@ -3504,7 +3489,6 @@ body {
   background: rgba(167,139,250,0.12);
   color: var(--accent);
 }
-
 .score-skip-btn {
   background: none;
   border: none;
@@ -3518,12 +3502,31 @@ body {
 }
 .score-skip-btn:hover { color: var(--text2); }
 
-/* ── 3. Mobile spécifique ── */
+/* Mobile */
 @media (max-width: 768px) {
   .modal-box {
     overflow-x: hidden;
     width: 100%;
     max-width: 100% !important;
+  }
+
+  /* Croix mobile : cercle en haut à droite */
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 20;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--text2);
+    padding: 0;
   }
 
   .score-choice-btn {
@@ -3533,14 +3536,6 @@ body {
     min-width: 70px;
     text-align: center;
   }
-
-  .score-choice-panel {
-    padding: 12px;
-  }
-
-  .onetap-score-panel {
-    left: 8px;
-    right: 8px;
-    width: auto;
-  }
+  .score-choice-panel { padding: 12px; }
+  .onetap-score-panel { left: 8px; right: 8px; width: auto; }
 }
