@@ -665,3 +665,8 @@ if (document.readyState === 'loading') {
 } else {
   setTimeout(initEsportInfo, 1500);
 }
+
+} else {
+  setTimeout(initEsportInfo, 1500);
+}
+// v2
