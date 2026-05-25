@@ -525,12 +525,7 @@ function handleOnetap(btn) {
   const t2     = btn.dataset.t2;
   const winner = btn.dataset.winner;
   const format = btn.dataset.format || 'Bo3';
-
-  // Calculer le score max selon le format
-  const maxScore = format === 'Bo5' ? 3 : format === 'Bo1' ? 1 : 2;
-  btn.dataset.maxscore = maxScore;
-
-  if (window.selectPredTeam) selectPredTeam(btn, id, game, t1, t2, winner, maxScore);
+  if (window.selectPredTeam) selectPredTeam(btn, id, game, t1, t2, winner, format);
 }
 
 function openMatchDetail(key) {
