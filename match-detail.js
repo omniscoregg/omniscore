@@ -87,6 +87,22 @@ document.body.style.overflow = 'hidden';
         </span>
         ${match.source === 'demo' ? '<span class="demo-badge">démo</span>' : ''}
       </div>
+
+      ${match.streams && match.streams.length > 0 ? `
+      <div class="md-streams">
+        <div class="md-streams-title">📺 Regarder en direct</div>
+        <div class="md-streams-list">
+          ${match.streams.map(s => {
+            const langFlags = { fr: '🇫🇷', en: '🇬🇧', es: '🇪🇸', de: '🇩🇪', pt: '🇧🇷', ru: '🇷🇺', ko: '🇰🇷', zh: '🇨🇳', ja: '🇯🇵', tr: '🇹🇷' };
+            const flag = langFlags[s.lang?.toLowerCase()] || '🌐';
+            const platform = s.url?.includes('twitch') ? 'Twitch' : s.url?.includes('youtube') ? 'YouTube' : s.url?.includes('afreeca') ? 'AfreecaTV' : 'Stream';
+            return `<a href="${s.url}" target="_blank" rel="noopener" class="md-stream-btn">
+              <span class="md-stream-flag">${flag}</span>
+              <span class="md-stream-platform">${platform}</span>
+            </a>`;
+          }).join('')}
+        </div>
+      </div>` : ''}
     </div>
   `;
 

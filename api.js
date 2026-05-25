@@ -21,6 +21,13 @@ const GAME_CONFIG = {
   r6:          { source: 'pandascore', slug: 'r6siege', label: 'Rainbow Six Siege',  genre: 'fps'     },
   cod:         { source: 'pandascore', slug: 'codmw',   label: 'Call of Duty',       genre: 'fps'     },
   rl:          { source: 'pandascore', slug: 'rl',      label: 'Rocket League',      genre: 'sport'   },
+  pubg:        { source: 'pandascore', slug: 'pubg',    label: 'PUBG',               genre: 'br'      },
+  sf6:         { source: 'liquipedia', slug: 'fighters',     label: 'Street Fighter 6', genre: 'fighting', lp_game: 'Street_Fighter_6'          },
+  tekken8:     { source: 'liquipedia', slug: 'fighters',     label: 'Tekken 8',         genre: 'fighting', lp_game: 'Tekken_8'                  },
+  smash:       { source: 'liquipedia', slug: 'smashbros',    label: 'Smash Bros.',      genre: 'fighting', lp_game: ''                          },
+  pubgmobile:  { source: 'liquipedia', slug: 'pubgmobile',   label: 'PUBG Mobile',      genre: 'br',       lp_game: ''                          },
+  apexlegends: { source: 'liquipedia', slug: 'apexlegends',  label: 'Apex Legends',     genre: 'br',       lp_game: ''                          },
+  hearthstone: { source: 'liquipedia', slug: 'hearthstone',  label: 'Hearthstone',      genre: 'card',     lp_game: ''                          },
 };
 
 // ----------------------------------------------------------
@@ -72,6 +79,11 @@ function normalizePandaScore(m, gameKey) {
     format:     m.number_of_games ? `Bo${m.number_of_games}` : '—',
     status:     m.status === 'finished' ? 'finished' : m.status === 'running' ? 'running' : 'upcoming',
     source:     'pandascore',
+    streams:    (m.streams_list || []).filter(s => s.raw_url || s.embed_url).map(s => ({
+      name:     s.language || 'Stream',
+      url:      s.raw_url || s.embed_url,
+      lang:     s.language || '',
+    })),
   };
 }
 

@@ -3572,3 +3572,50 @@ body {
   .score-choice-panel { padding: 12px; }
   .onetap-score-panel { left: 8px; right: 8px; width: auto; }
 }
+
+/* ── Streams ── */
+.md-streams {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.md-streams-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 10px;
+}
+
+.md-streams-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.md-stream-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.md-stream-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(167,139,250,0.08);
+}
+
+.md-stream-flag { font-size: 15px; }
+.md-stream-platform { font-size: 12px; }
