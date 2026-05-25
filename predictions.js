@@ -273,9 +273,30 @@ function showFormError(msg) {
 async function handleLogout() { await logout(); }
 
 // ----------------------------------------------------------
+//  Scores valides selon le format
+// ----------------------------------------------------------
+function getValidScores(format) {
+  const scores = {
+    'Bo1': [[1, 0]],
+    'Bo3': [[2, 0], [2, 1]],
+    'Bo5': [[3, 0], [3, 1], [3, 2]],
+    'Bo7': [[4, 0], [4, 1], [4, 2], [4, 3]],
+  };
+  return scores[format] || scores['Bo3'];
+}
+window.getValidScores = getValidScores;
+
+async function confirmPredWithScore(matchId, game, team1, team2, winner, s1, s2) {
+  document.getElementById('score-row-' + matchId)?.remove();
+  document.querySelectorAll('.onetap-score-panel, .score-choice-panel').forEach(e => e.remove());
+  await predict(matchId, game, team1, team2, winner, s1, s2);
+}
+window.confirmPredWithScore = confirmPredWithScore;
+
+// ----------------------------------------------------------
 //  Bouton prédiction sur les cartes
 // ----------------------------------------------------------
-async function renderPredictionBtn(matchId, game, team1, team2, status) {
+async function renderPredictionBtn(matchId, game, team1, team2, status, format = 'Bo3') {
   if (status !== 'upcoming') return '';
   if (!currentUser) {
     return `<div class="pred-cta" onclick="showAuthModal('login')">🎯 Connectez-vous pour prédire</div>`;
@@ -289,64 +310,56 @@ async function renderPredictionBtn(matchId, game, team1, team2, status) {
     <div class="pred-buttons">
       <span class="pred-label">🎯 Qui va gagner ?</span>
       <div class="pred-teams-row">
-        <button class="pred-btn" onclick="selectPredTeam(this,'${matchId}','${game}','${team1}','${team2}','${team1}')">${team1}</button>
-        <button class="pred-btn" onclick="selectPredTeam(this,'${matchId}','${game}','${team1}','${team2}','${team2}')">${team2}</button>
+        <button class="pred-btn" onclick="selectPredTeam(this,'${matchId}','${game}','${team1}','${team2}','${team1}','${format}')">${team1}</button>
+        <button class="pred-btn" onclick="selectPredTeam(this,'${matchId}','${game}','${team1}','${team2}','${team2}','${format}')">${team2}</button>
       </div>
-      <div class="pred-score-row" id="score-row-${matchId}" style="display:none">
-        <span class="pred-score-label">Score prédit (optionnel) :</span>
-        <div class="pred-score-inputs">
-          <input type="number" id="score1-${matchId}" class="pred-score-input" min="0" max="3" placeholder="0">
-          <span class="pred-score-sep">-</span>
-          <input type="number" id="score2-${matchId}" class="pred-score-input" min="0" max="3" placeholder="0">
-        </div>
-        <button class="pred-confirm-btn" id="confirm-${matchId}">Confirmer</button>
-      </div>
+      <div id="score-row-${matchId}"></div>
     </div>`;
 }
 
-function selectPredTeam(btn, matchId, game, team1, team2, winner, maxScore = 2) {
+function selectPredTeam(btn, matchId, game, team1, team2, winner, format = 'Bo3') {
   const row = btn.closest('.pred-teams-row');
   if (row) row.querySelectorAll('.pred-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
 
-  let scoreRow = document.getElementById('score-row-' + matchId);
+  document.querySelectorAll('.onetap-score-panel, .score-choice-panel').forEach(e => e.remove());
 
-  if (!scoreRow) {
-    document.querySelectorAll('.onetap-score-panel').forEach(e => e.remove());
+  const validScores = getValidScores(format);
+  const isTeam1Winner = winner === team1;
+
+  const scoreContainer = document.getElementById('score-row-' + matchId);
+
+  const btns = validScores.map(([w, l]) => {
+    const s1 = isTeam1Winner ? w : l;
+    const s2 = isTeam1Winner ? l : w;
+    return `<button class="score-choice-btn" onclick="event.stopPropagation();confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',${s1},${s2})">${s1} - ${s2}</button>`;
+  }).join('');
+
+  const panelHTML = `
+    <div class="score-choice-panel">
+      <span class="pred-score-label">Score prédit <span style="color:var(--text3);font-size:10px">(optionnel)</span></span>
+      <div class="score-choice-btns">${btns}</div>
+      <button class="score-skip-btn" onclick="event.stopPropagation();confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',null,null)">Sans score</button>
+    </div>`;
+
+  if (scoreContainer) {
+    scoreContainer.innerHTML = panelHTML;
+    scoreContainer.addEventListener('click', e => e.stopPropagation());
+  } else {
+    // Panel flottant pour les cartes onetap
     const panel = document.createElement('div');
-    panel.className = 'onetap-score-panel';
+    panel.className = 'onetap-score-panel score-choice-panel';
     panel.id = 'score-row-' + matchId;
     panel.innerHTML = `
-      <span class="pred-score-label">Score prédit (optionnel) :</span>
-      <div class="pred-score-inputs">
-        <input type="number" id="score1-${matchId}" class="pred-score-input" min="0" max="${maxScore}" placeholder="0" onclick="event.stopPropagation()" oninput="event.stopPropagation()">
-<span class="pred-score-sep">-</span>
-<input type="number" id="score2-${matchId}" class="pred-score-input" min="0" max="${maxScore}" placeholder="0" onclick="event.stopPropagation()" oninput="event.stopPropagation()">
-      </div>
-      <button class="pred-confirm-btn" id="confirm-${matchId}" onclick="event.stopPropagation()">Confirmer</button>
-      <button class="pred-cancel-btn" onclick="event.stopPropagation();this.closest('.onetap-score-panel').remove()">✕</button>
+      <span class="pred-score-label">Score prédit <span style="color:var(--text3);font-size:10px">(optionnel)</span></span>
+      <div class="score-choice-btns">${btns}</div>
+      <button class="score-skip-btn" onclick="event.stopPropagation();confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',null,null)">Sans score</button>
+      <button class="pred-cancel-btn" onclick="event.stopPropagation();document.getElementById('score-row-${matchId}')?.remove()">✕</button>
     `;
     panel.addEventListener('click', e => e.stopPropagation());
     panel.addEventListener('mousedown', e => e.stopPropagation());
-    btn.closest('.match-card').appendChild(panel);
-    scoreRow = panel;
-  } else {
-    scoreRow.style.display = 'flex';
-  }
-
-  const confirmBtn = document.getElementById('confirm-' + matchId);
-  if (confirmBtn) {
-    confirmBtn.onclick = async (e) => {
-  e.stopPropagation();
-  const input1 = document.getElementById('score1-' + matchId);
-  const input2 = document.getElementById('score2-' + matchId);
-  const v1 = input1?.value?.trim();
-  const v2 = input2?.value?.trim();
-  const s1 = (v1 !== '' && v2 !== '' && !isNaN(parseInt(v1))) ? parseInt(v1) : null;
-  const s2 = (v1 !== '' && v2 !== '' && !isNaN(parseInt(v2))) ? parseInt(v2) : null;
-  document.getElementById('score-row-' + matchId)?.remove();
-  await predict(matchId, game, team1, team2, winner, s1, s2);
-   };
+    const card = btn.closest('.match-card');
+    if (card) card.appendChild(panel);
   }
 }
 
@@ -362,8 +375,8 @@ async function predict(matchId, game, team1, team2, winner, score1 = null, score
   } catch (err) { console.error('Erreur prédiction:', err); }
 }
 
-function selectPredTeamGlobal(btn, matchId, game, team1, team2, winner, maxScore = 2) {
-  selectPredTeam(btn, matchId, game, team1, team2, winner, maxScore);
+function selectPredTeamGlobal(btn, matchId, game, team1, team2, winner, format = 'Bo3') {
+  selectPredTeam(btn, matchId, game, team1, team2, winner, format);
 }
 
 // ----------------------------------------------------------
