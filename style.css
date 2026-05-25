@@ -3433,6 +3433,8 @@ body {
   z-index: 10;
   background: #12151c;
   padding-bottom: 12px;
+  margin-bottom: 4px;
+  box-shadow: 0 4px 12px #12151c;
 }
 
 /* Croix — desktop : dans le flux normal */
