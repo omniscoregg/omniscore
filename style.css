@@ -531,7 +531,8 @@ body {
   z-index: 10;
   padding-top: 24px;
   margin-top: -24px;
-  padding-bottom: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
 }
 .modal-title { font-size: 16px; font-weight: 600; color: var(--text); }
 .modal-close {
@@ -3457,7 +3458,6 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
 }
 
 /* Croix — desktop : dans le flux normal */
