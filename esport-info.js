@@ -3,7 +3,7 @@
 //  Pattern : même overlay que leagues.js / profile.js
 // ============================================================
 
-const ESPORT_INFO = {
+var ESPORT_INFO = {
   lol: {
     label: 'League of Legends',
     icon: '⚔️',
@@ -659,3 +659,4 @@ function initEsportInfo() {
 window.showEsportInfoPage  = showEsportInfoPage;
 window.closeEsportInfoPage = closeEsportInfoPage;
 window.initEsportInfo      = initEsportInfo;
+console.log('[esport-info] chargé ✓');
