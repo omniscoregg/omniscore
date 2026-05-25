@@ -397,3 +397,6 @@ function initHomeNavigation() {
 window.showHomePage  = showHomePage;
 window.hideHomePage  = hideHomePage;
 window.initHomeNavigation = initHomeNavigation;
+
+// Attacher le listener dès que le DOM est prêt
+document.addEventListener('DOMContentLoaded', initHomeNavigation);
