@@ -398,5 +398,11 @@ window.showHomePage  = showHomePage;
 window.hideHomePage  = hideHomePage;
 window.initHomeNavigation = initHomeNavigation;
 
-// Attacher le listener dès que le DOM est prêt
-document.addEventListener('DOMContentLoaded', initHomeNavigation);
+// Attacher le listener immédiatement
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initHomeNavigation);
+} else {
+  initHomeNavigation();
+}
+
+console.log('[home] chargé ✓');
