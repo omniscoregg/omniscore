@@ -10,7 +10,7 @@
 
   <!-- ── Navbar ── -->
   <nav class="navbar">
-    <div class="navbar-logo">⚡ OMNISCORE</div>
+    <div class="navbar-logo" onclick="if(document.getElementById('home-page')){hideHomePage()}else{showHomePage()}" style="cursor:pointer">⚡ OMNISCORE</div>
     <button class="mobile-games-btn" onclick="toggleGameDrawer()" id="hamburger-btn">☰ Jeux</button>
     <div class="navbar-spacer"></div>
     <!-- source-badge supprimé -->
@@ -58,7 +58,6 @@
   <script src="profile.js"></script>
   <script src="leagues.js"></script>
   <script src="landing.js"></script>
-  <script src="home.js"></script>
   <script src="app.js"></script>
   <!-- Drawer jeux mobile -->
   <div class="drawer-overlay" id="drawer-overlay" onclick="closeGameDrawer()"></div>
