@@ -659,10 +659,4 @@ function initEsportInfo() {
 window.showEsportInfoPage  = showEsportInfoPage;
 window.closeEsportInfoPage = closeEsportInfoPage;
 window.initEsportInfo      = initEsportInfo;
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => setTimeout(initEsportInfo, 1500));
-} else {
-  setTimeout(initEsportInfo, 1500);
 }
-// v2

@@ -48,6 +48,7 @@ async function init() {
     }
     if (window.initCarousel) initCarousel();
     if (window.checkAdminAccess) checkAdminAccess();
+if (window.initEsportInfo) initEsportInfo();
   }, 600);
 }
 
