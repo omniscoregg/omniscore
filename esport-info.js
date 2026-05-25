@@ -659,4 +659,3 @@ function initEsportInfo() {
 window.showEsportInfoPage  = showEsportInfoPage;
 window.closeEsportInfoPage = closeEsportInfoPage;
 window.initEsportInfo      = initEsportInfo;
-}
