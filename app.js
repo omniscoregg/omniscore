@@ -38,7 +38,6 @@ async function init() {
   setTimeout(() => {
     if (window.initPredictions) initPredictions();
     if (window.loadGameFavButtons) loadGameFavButtons();
-    if (window.initHomeNavigation) initHomeNavigation();
     if (window.showHomePage) {
       const today = new Date().toISOString().slice(0, 10);
       const lastSeen = localStorage.getItem('omniscore_home_seen');

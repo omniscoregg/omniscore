@@ -381,17 +381,17 @@ function startSeasonCountdown() {
 // ----------------------------------------------------------
 function initHomeNavigation() {
   const logo = document.querySelector('.navbar-logo');
-  if (logo) {
-    logo.style.cursor = 'pointer';
-    logo.addEventListener('click', () => {
-      const homePage = document.getElementById('home-page');
-      if (homePage) {
-        hideHomePage();
-      } else {
-        showHomePage();
-      }
-    });
-  }
+  if (!logo || logo.dataset.homeInit) return;
+  logo.dataset.homeInit = '1';
+  logo.style.cursor = 'pointer';
+  logo.addEventListener('click', () => {
+    const homePage = document.getElementById('home-page');
+    if (homePage) {
+      hideHomePage();
+    } else {
+      showHomePage();
+    }
+  });
 }
 
 window.showHomePage  = showHomePage;
