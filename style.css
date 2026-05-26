@@ -4214,3 +4214,315 @@ body {
   .esport-info-game-title { font-size: 18px; }
   .esport-info-title { font-size: 17px; }
 }
+
+/* ── Toolbar (search + filtres) ── */
+/* ============================================================
+   champions.css — Fiches Champions & Agents
+   À coller à la fin de style.css
+   ============================================================ */
+
+/* ── Toolbar (search + filtres) ── */
+.champ-toolbar {
+  padding: 16px 20px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.champ-search-wrap { width: 100%; }
+
+.champ-search {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 13px;
+  padding: 8px 12px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.champ-search:focus { border-color: var(--accent); }
+
+.champ-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.champ-filter-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text2);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.champ-filter-btn:hover { color: var(--text); border-color: var(--border2); }
+.champ-filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ── Grille ── */
+.champ-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 8px;
+  padding: 12px 20px 20px;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+/* ── Carte champion ── */
+.champ-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+  display: flex;
+  flex-direction: column;
+}
+.champ-card:hover {
+  border-color: var(--border2);
+  transform: translateY(-2px);
+}
+
+.champ-img-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.champ-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.champ-img-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 800;
+  background: var(--surface);
+}
+.champ-img-fallback.large { font-size: 40px; }
+
+.champ-attr {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-size: 12px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 4px;
+  padding: 1px 3px;
+}
+
+.champ-info {
+  padding: 6px 8px;
+  flex: 1;
+}
+
+.champ-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.champ-title {
+  font-size: 10px;
+  color: var(--text3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.champ-role {
+  font-size: 10px;
+  font-weight: 600;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Loading ── */
+.champ-loading {
+  padding: 40px 0;
+  text-align: center;
+}
+
+/* ── Modal détail ── */
+.champ-detail-box {
+  max-width: 460px;
+}
+
+.champ-detail-img-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--surface2);
+}
+
+.champ-detail-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.champ-detail-name {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.champ-detail-title {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 2px;
+  font-style: italic;
+}
+
+.champ-detail-role {
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.champ-detail-attr {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+
+.champ-detail-blurb {
+  padding: 16px 24px 20px;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.7;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Stats R6 ── */
+.champ-detail-stats {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.champ-detail-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  border-right: 1px solid var(--border);
+}
+.champ-detail-stat:last-child { border-right: none; }
+
+.champ-stat-label {
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.champ-stat-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .champ-grid {
+    grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+    gap: 6px;
+    padding: 10px 14px 16px;
+    max-height: 400px;
+  }
+
+  .champ-toolbar { padding: 12px 14px 6px; }
+  .champ-filter-btn { font-size: 10px; padding: 3px 10px; }
+}
+
+/* ── Compétences ── */
+.champ-abilities-loading { min-height: 40px; }
+
+.champ-abilities-section {
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.champ-abilities-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.champ-ability-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.champ-ability-row:last-child { border-bottom: none; }
+
+.champ-ability-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  width: 44px;
+}
+
+.champ-ability-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--surface2);
+}
+
+.champ-ability-slot {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.champ-ability-info { flex: 1; }
+
+.champ-ability-name {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.champ-ability-desc {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.5;
+}
