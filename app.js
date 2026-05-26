@@ -720,11 +720,8 @@ window.matchStore  = matchStore;
 window._appState  = state;
 
 function goHome() {
-  if (window.showHomePage) {
-    window.showHomePage();
-  } else {
-    location.reload();
-  }
+  localStorage.removeItem('omniscore_home_seen');
+  if (window.showHomePage) window.showHomePage();
 }
 window.goHome = goHome;
 
