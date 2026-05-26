@@ -685,7 +685,24 @@ function renderDrawerGames() {
             + (window.ESPORT_INFO?.[key] ? '<button class="drawer-info-btn" onclick="event.stopPropagation();closeGameDrawer();showEsportInfoPage(&quot;' + key + '&quot;)" title="Infos esport">📚</button>' : '')
             + '</div>';
         }).join('')
-      ).join('');
+      ).join('')
+    + renderDrawerLangSwitcher();
+}
+
+function renderDrawerLangSwitcher() {
+  if (!window.i18n) return '';
+  const langs = { fr: 'fr', en: 'gb', es: 'es' };
+  const names  = { fr: 'Français', en: 'English', es: 'Español' };
+  const current = window.i18n.currentLang();
+  const buttons = Object.entries(langs).map(([code, flag]) =>
+    '<button class="drawer-lang-btn ' + (code === current ? 'active' : '') + '" onclick="window.i18n.setLang(\'' + code + '\');renderDrawerGames()" title="' + names[code] + '">'
+    + '<img src="https://flagcdn.com/24x18/' + flag + '.png" alt="' + names[code] + '" width="24" height="18" style="border-radius:2px;display:block">'
+    + '</button>'
+  ).join('');
+  return '<div class="drawer-lang-switcher">'
+    + '<div class="drawer-lang-label">Langue</div>'
+    + '<div class="drawer-lang-btns">' + buttons + '</div>'
+    + '</div>';
 }
 
 window.toggleGameDrawer = toggleGameDrawer;
