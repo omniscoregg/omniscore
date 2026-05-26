@@ -5,15 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OmniscoreGG — Résultats Esport</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- ── Open Graph ── -->
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://omniscore.pages.dev">
+  <meta property="og:title"       content="Omniscore — Résultats & Prédictions Esport">
+  <meta property="og:description" content="Suivez vos matchs en direct, prédisez les résultats et grimpez dans le classement sur 10 jeux esport professionnels.">
+  <meta property="og:image"       content="https://omniscore.pages.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name"   content="OmniscoreGG">
+  <meta property="og:locale"      content="fr_FR">
+
+  <!-- ── Twitter Card ── -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Omniscore — Résultats & Prédictions Esport">
+  <meta name="twitter:description" content="Suivez vos matchs en direct, prédisez les résultats et grimpez dans le classement sur 10 jeux esport.">
+  <meta name="twitter:image"       content="https://omniscore.pages.dev/og-image.png">
+
+  <!-- ── Favicon ── -->
+  <link rel="icon" type="image/png" href="omniscore_logo-png.png">
 </head>
 <body>
 
   <!-- ── Navbar ── -->
   <nav class="navbar">
-    <div class="navbar-logo" style="cursor:pointer">⚡ OMNISCORE</div>
+    <div class="navbar-logo" style="cursor:pointer" onclick="if(window.showHomePage)showHomePage();else location.reload()">
+      <img src="omniscore_logo-png.png" alt="Omniscore" class="navbar-logo-img">
+    </div>
     <button class="mobile-games-btn" onclick="toggleGameDrawer()" id="hamburger-btn">☰ Jeux</button>
     <div class="navbar-spacer"></div>
-    <!-- source-badge supprimé -->
     <button id="fav-nav-btn" class="fav-nav-btn" onclick="showFavoritesPage()" title="Mes favoris" style="display:none">⭐ Favoris</button>
     <div id="auth-bar" class="auth-bar"></div>
     <div id="lang-switcher" class="lang-switcher"></div>
@@ -21,20 +42,13 @@
 
   <!-- ── Layout principal ── -->
   <div class="layout">
-
-    <!-- Sidebar gauche : filtres par jeu -->
     <aside class="sidebar-left">
       <div id="games-title" class="sidebar-title">Jeux</div>
       <div id="game-filters"></div>
     </aside>
-
-    <!-- Contenu central : matchs -->
     <main class="main-content">
       <div id="matches-list"></div>
     </main>
-
-    <!-- Sidebar droite supprimée -->
-
   </div>
 
   <!-- Firebase SDK via CDN -->
@@ -59,6 +73,7 @@
   <script src="esport-info.js"></script>
   <script src="champions.js"></script>
   <script src="app.js"></script>
+
   <!-- Drawer jeux mobile -->
   <div class="drawer-overlay" id="drawer-overlay" onclick="closeGameDrawer()"></div>
   <div class="mobile-games-drawer" id="games-drawer">
@@ -68,24 +83,19 @@
   <!-- Bottom navigation mobile -->
   <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
     <button class="mobile-nav-btn" onclick="toggleGameDrawer()" id="mnav-games">
-      <span class="nav-icon">☰</span>
-      <span>Jeux</span>
+      <span class="nav-icon">☰</span><span>Jeux</span>
     </button>
     <button class="mobile-nav-btn" onclick="showFavoritesPage && showFavoritesPage()">
-      <span class="nav-icon">⭐</span>
-      <span>Favoris</span>
+      <span class="nav-icon">⭐</span><span>Favoris</span>
     </button>
     <button class="mobile-nav-btn active" onclick="mobileGoHome(this)">
-      <span class="nav-icon">🏠</span>
-      <span>Accueil</span>
+      <span class="nav-icon">🏠</span><span>Accueil</span>
     </button>
     <button class="mobile-nav-btn" onclick="showLeaguesPage && showLeaguesPage()">
-      <span class="nav-icon">⚔️</span>
-      <span>Ligues</span>
+      <span class="nav-icon">⚔️</span><span>Ligues</span>
     </button>
     <button class="mobile-nav-btn" onclick="showLeaderboard && showLeaderboard()">
-      <span class="nav-icon">🏆</span>
-      <span>Classement</span>
+      <span class="nav-icon">🏆</span><span>Classement</span>
     </button>
   </nav>
 
