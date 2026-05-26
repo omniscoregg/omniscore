@@ -39,13 +39,13 @@ async function init() {
     if (window.initPredictions) initPredictions();
     if (window.loadGameFavButtons) loadGameFavButtons();
     if (window.showHomePage) {
-      const today = new Date().toISOString().slice(0, 10);
-      const lastSeen = localStorage.getItem('omniscore_home_seen');
-      if (lastSeen !== today) {
-        localStorage.setItem('omniscore_home_seen', today);
-        showHomePage();
-      }
-    }
+  const today = new Date().toISOString().slice(0, 10);
+  const lastSeen = localStorage.getItem('omniscore_home_seen');
+  if (lastSeen !== today) {
+    localStorage.setItem('omniscore_home_seen', today);
+    showHomePage();
+  }
+}
     if (window.initCarousel) initCarousel();
     if (window.checkAdminAccess) checkAdminAccess();
 if (window.initEsportInfo) initEsportInfo();
@@ -720,7 +720,6 @@ window.matchStore  = matchStore;
 window._appState  = state;
 
 function goHome() {
-  localStorage.removeItem('omniscore_home_seen');
   if (window.showHomePage) window.showHomePage();
 }
 window.goHome = goHome;
