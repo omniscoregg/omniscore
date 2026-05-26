@@ -82,7 +82,7 @@ async function fetchLoLChampionDetail(champId, version) {
     spells: c.spells.map((s, i) => ({
       key:   ['Q','W','E','R'][i],
       name:  s.name,
-      desc:  s.description.replace(/<[^>]+>/g, '').slice(0, 200) + '...',
+      desc:  s.description.replace(/<[^>]+>/g, ''),
       image: `https://ddragon.leagueoflegends.com/cdn/${version}/img/spell/${s.image.full}`,
     })),
   };
