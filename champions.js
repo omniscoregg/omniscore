@@ -1,41 +1,24 @@
 // ============================================================
 //  champions.js — Fiches champions & agents
-//  Jeux : LoL (Data Dragon) | Valorant (valorant-api.com)
-//         Dota 2 (OpenDota) | R6 Siege (statique r6operators)
+//  LoL (Data Dragon) | Valorant (valorant-api.com)
+//  Dota 2 (OpenDota) | R6 (statique + r6operators CDN)
 // ============================================================
 
-// ----------------------------------------------------------
-//  Config par jeu
-// ----------------------------------------------------------
 var CHAMP_CONFIG = {
-  lol: {
-    label: 'Champions',
-    accent: '#7c88ff',
-    roles: { Assassin:'Assassin', Fighter:'Combattant', Mage:'Mage', Marksman:'Tireur', Support:'Support', Tank:'Tank' },
-  },
-  valorant: {
-    label: 'Agents',
-    accent: '#4ade80',
-    roles: { Duelist:'Duelliste', Initiator:'Initiateur', Controller:'Contrôleur', Sentinel:'Sentinelle' },
-  },
-  dota2: {
-    label: 'Héros',
-    accent: '#7c88ff',
-    roles: {},
-  },
-  r6: {
-    label: 'Opérateurs',
-    accent: '#4ade80',
-    roles: { Attacker:'Attaquant', Defender:'Défenseur' },
-  },
+  lol:      { label: 'Champions', accent: '#7c88ff' },
+  valorant: { label: 'Agents',    accent: '#4ade80' },
+  dota2:    { label: 'Héros',     accent: '#b45af2' },
+  r6:       { label: 'Opérateurs',accent: '#f97316' },
 };
 
+// CDN r6operators pour les icônes
+var R6_ICON_CDN = 'https://r6operators.marcopixel.eu/icons/png/';
+
 // ----------------------------------------------------------
-//  Entrée principale — appelée par esport-info.js
+//  Entrée principale
 // ----------------------------------------------------------
 async function loadChampionsForGame(gameKey, container) {
-  container.innerHTML = '<div class="champ-loading"><div class="lb-loading">Chargement...</div></div>';
-
+  container.innerHTML = '<div style="padding:40px;text-align:center"><div class="lb-loading">Chargement...</div></div>';
   try {
     const data = await fetchChampions(gameKey);
     if (!data || data.length === 0) {
@@ -44,7 +27,7 @@ async function loadChampionsForGame(gameKey, container) {
     }
     renderChampionGrid(gameKey, data, container);
   } catch(e) {
-    console.error('[Champions]', e);
+    console.error('[Champions]', gameKey, e);
     container.innerHTML = '<div class="lb-empty">Erreur de chargement.</div>';
   }
 }
@@ -63,10 +46,9 @@ async function fetchChampions(gameKey) {
 }
 
 // ----------------------------------------------------------
-//  League of Legends — Riot Data Dragon
+//  League of Legends — Data Dragon
 // ----------------------------------------------------------
 async function fetchLoLChampions() {
-  // Récupérer la version actuelle
   const verRes  = await fetch('https://ddragon.leagueoflegends.com/api/versions.json');
   const versions = await verRes.json();
   const version  = versions[0];
@@ -75,13 +57,35 @@ async function fetchLoLChampions() {
   const json = await res.json();
 
   return Object.values(json.data).map(c => ({
-    id:     c.id,
-    name:   c.name,
-    title:  c.title,
-    roles:  c.tags || [],
-    image:  `https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${c.id}.png`,
-    blurb:  c.blurb,
+    id:      c.id,
+    name:    c.name,
+    title:   c.title,
+    roles:   c.tags || [],
+    image:   `https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${c.id}.png`,
+    blurb:   c.blurb,
+    version: version,
   })).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+// Charger les sorts d'un champion LoL
+async function fetchLoLChampionDetail(champId, version) {
+  const res  = await fetch(`https://ddragon.leagueoflegends.com/cdn/${version}/data/fr_FR/champion/${champId}.json`);
+  const json = await res.json();
+  const c    = json.data[champId];
+  if (!c) return null;
+  return {
+    passive: {
+      name:  c.passive.name,
+      desc:  c.passive.description.replace(/<[^>]+>/g, ''),
+      image: `https://ddragon.leagueoflegends.com/cdn/${version}/img/passive/${c.passive.image.full}`,
+    },
+    spells: c.spells.map((s, i) => ({
+      key:   ['Q','W','E','R'][i],
+      name:  s.name,
+      desc:  s.description.replace(/<[^>]+>/g, '').slice(0, 200) + '...',
+      image: `https://ddragon.leagueoflegends.com/cdn/${version}/img/spell/${s.image.full}`,
+    })),
+  };
 }
 
 // ----------------------------------------------------------
@@ -92,17 +96,25 @@ async function fetchValorantAgents() {
   const json = await res.json();
 
   return json.data.map(a => ({
-    id:     a.uuid,
-    name:   a.displayName,
-    title:  a.developerName || '',
-    roles:  [a.role?.displayName || ''],
-    image:  a.displayIcon,
-    blurb:  a.description,
+    id:         a.uuid,
+    name:       a.displayName,
+    title:      a.developerName || '',
+    roles:      [a.role?.displayName || ''],
+    roleIcon:   a.role?.displayIcon || null,
+    image:      a.displayIcon,
+    fullImage:  a.fullPortrait || a.displayIcon,
+    blurb:      a.description,
+    abilities:  (a.abilities || []).map(ab => ({
+      slot:   ab.slot,
+      name:   ab.displayName,
+      desc:   ab.description,
+      image:  ab.displayIcon,
+    })),
   })).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 // ----------------------------------------------------------
-//  Dota 2 — OpenDota API
+//  Dota 2 — OpenDota
 // ----------------------------------------------------------
 async function fetchDota2Heroes() {
   const [heroesRes, statsRes] = await Promise.all([
@@ -112,179 +124,166 @@ async function fetchDota2Heroes() {
   const heroes = await heroesRes.json();
   const stats  = await statsRes.json();
 
-  // Map stats par id pour les images
   const statsMap = {};
   stats.forEach(h => { statsMap[h.id] = h; });
 
+  const attrLabels = { str: '💪 Force', agi: '⚡ Agilité', int: '🧠 Intelligence', all: '✨ Universel' };
+
   return heroes.map(h => {
-    const stat = statsMap[h.id] || {};
+    const stat    = statsMap[h.id] || {};
     const imgPath = stat.img ? 'https://cdn.cloudflare.steamstatic.com' + stat.img : null;
     return {
       id:    h.id,
       name:  h.localized_name,
-      title: '',
+      title: attrLabels[h.primary_attr] || '',
       roles: h.roles || [],
       image: imgPath,
       blurb: (h.roles || []).join(' · '),
-      attr:  h.primary_attr, // str / agi / int / all
+      attr:  h.primary_attr,
+      stats: stat ? {
+        hp:     stat.base_health + stat.base_str * 22,
+        armor:  stat.base_armor,
+        speed:  stat.move_speed,
+        attack: `${stat.base_attack_min}-${stat.base_attack_max}`,
+      } : null,
     };
   }).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 // ----------------------------------------------------------
-//  Rainbow Six Siege — données statiques (r6operators)
+//  R6 Siege — données statiques + icônes r6operators CDN
 // ----------------------------------------------------------
 function getR6Operators() {
-  return [
-    // Attaquants
-    { id:'sledge',    name:'Sledge',    roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/5PduhX7K5jPZqwA3ikBnQH/18e1bb9efa5af2c2df6e748fb22a4f6a/R6_OPERATOR_R_sledge.png',    blurb:'Bélier de brèche — crée des ouvertures dans les murs mous.',     side:'Attaque',   org:'SAS',         speed:2, armor:2 },
-    { id:'thatcher',  name:'Thatcher',  roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/3a25C3HqQD1V3VNMaW3WoW/a2c1f6a1b2e5e9b2b2b2b2b2b2b2b2b2/R6_OPERATOR_R_thatcher.png', blurb:'Neutralise les gadgets électroniques ennemis.',                  side:'Attaque',   org:'SAS',         speed:2, armor:2 },
-    { id:'ash',       name:'Ash',       roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/3wZmzAiCGfnNHiPVlbNWQW/4c5e8a1b2b2b2b2b2b2b2b2b2b2b2b2b/R6_OPERATOR_R_ash.png',      blurb:'Lance-grenades M120 CREM pour détruire barricades et gadgets.',  side:'Attaque',   org:'FBI SWAT',    speed:3, armor:1 },
-    { id:'thermite',  name:'Thermite',  roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/thermite/img.png',  blurb:'Charge Exothermic-C — détruit les murs renforcés.',             side:'Attaque',   org:'FBI SWAT',    speed:2, armor:2 },
-    { id:'twitch',    name:'Twitch',    roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/twitch/img.png',    blurb:'Drone Shock — détruit les gadgets défenseurs à distance.',      side:'Attaque',   org:'GIGN',        speed:2, armor:2 },
-    { id:'montagne',  name:'Montagne',  roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/montagne/img.png',  blurb:'Bouclier Le Rocher extensible — protection maximale.',           side:'Attaque',   org:'GIGN',        speed:1, armor:3 },
-    { id:'glaz',      name:'Glaz',      roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/glaz/img.png',      blurb:'Sniper à lunette thermique — voit à travers la fumée.',         side:'Attaque',   org:'SPETSNAZ',    speed:3, armor:1 },
-    { id:'fuze',      name:'Fuze',      roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/fuze/img.png',      blurb:'Cluster charge — perfore les surfaces pour lancer des grenades.',side:'Attaque',   org:'SPETSNAZ',    speed:1, armor:3 },
-    { id:'blitz',     name:'Blitz',     roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/blitz/img.png',     blurb:'Bouclier Flash-Shield — aveugle les défenseurs.',               side:'Attaque',   org:'GSG 9',       speed:2, armor:2 },
-    { id:'iq',        name:'IQ',        roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/iq/img.png',        blurb:'Électronique Scanner — détecte les gadgets électroniques.',     side:'Attaque',   org:'GSG 9',       speed:3, armor:1 },
-    { id:'buck',      name:'Buck',      roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/buck/img.png',      blurb:'Skeleton Key — sous-canon multi-coups pour détruire les murs.', side:'Attaque',   org:'JTF2',        speed:2, armor:2 },
-    { id:'blackbeard',name:'Blackbeard',roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/blackbeard/img.png',blurb:'Rifle Shield — bouclier fixé sur l\'arme pour se couvrir.',     side:'Attaque',   org:'NAVY SEAL',   speed:2, armor:2 },
-    { id:'hibana',    name:'Hibana',    roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/hibana/img.png',    blurb:'X-KAIROS — projectiles explosifs qui détruisent les renforts.',  side:'Attaque',   org:'SAT',         speed:3, armor:1 },
-    { id:'jackal',    name:'Jackal',    roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/jackal/img.png',    blurb:'Eyenox Model III — scanne et traque les empreintes ennemies.',  side:'Attaque',   org:'GEO',         speed:2, armor:2 },
-    { id:'ying',      name:'Ying',      roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/ying/img.png',      blurb:'Candela — flashs multiples qui aveuglent les défenseurs.',      side:'Attaque',   org:'SDU',         speed:2, armor:2 },
-    { id:'lion',      name:'Lion',      roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/lion/img.png',      blurb:'EE-ONE-D — révèle tous les ennemis qui bougent.',              side:'Attaque',   org:'GIGN',        speed:2, armor:2 },
-    { id:'finka',     name:'Finka',     roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/finka/img.png',     blurb:'Adrénaline — boost toute l\'équipe attaquante.',               side:'Attaque',   org:'CBRN',        speed:2, armor:2 },
-    { id:'maverick',  name:'Maverick',  roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/maverick/img.png',  blurb:'Torche Breaching — brûle silencieusement les murs renforcés.',  side:'Attaque',   org:'NIGHTHAVEN', speed:3, armor:1 },
-    { id:'nomad',     name:'Nomad',     roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/nomad/img.png',     blurb:'Airjab — mines de proximity qui repoussent les défenseurs.',   side:'Attaque',   org:'GIGR',        speed:2, armor:2 },
-    { id:'gridlock',  name:'Gridlock',  roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/gridlock/img.png',  blurb:'Trax Stingers — couvre le sol de pièges anti-rush.',           side:'Attaque',   org:'SASR',        speed:1, armor:3 },
-    { id:'amaru',     name:'Amaru',     roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/amaru/img.png',     blurb:'Garra Hook — grappin pour entrer par les fenêtres rapidement.', side:'Attaque',   org:'APCA',        speed:2, armor:2 },
-    { id:'kali',      name:'Kali',      roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/kali/img.png',      blurb:'LV Lance-Nade — perce les sols et plafonds pour éliminer.',    side:'Attaque',   org:'NIGHTHAVEN', speed:3, armor:1 },
-    { id:'iana',      name:'Iana',      roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/iana/img.png',      blurb:'Gemini Replicator — hologramme clone pour leurrer l\'ennemi.', side:'Attaque',   org:'REU',         speed:2, armor:2 },
-    { id:'ace',       name:'Ace',       roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/ace/img.png',       blurb:'S.E.L.M.A. — appareil qui détruit les renforts en rafale.',    side:'Attaque',   org:'NIGHTHAVEN', speed:2, armor:2 },
-    { id:'zero',      name:'Zero',      roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/zero/img.png',      blurb:'Argus Camera — caméra qui hackle les gadgets défenseurs.',     side:'Attaque',   org:'ECHELON',     speed:3, armor:1 },
-    { id:'flores',    name:'Flores',    roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/flores/img.png',    blurb:'RCE-Ratero Drone — drone explosif télécommandé.',              side:'Attaque',   org:'AFEAU',       speed:2, armor:2 },
-    { id:'osa',       name:'Osa',       roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/osa/img.png',       blurb:'Talon-8 Shield — bouclier transparent deployable.',            side:'Attaque',   org:'NIGHTHAVEN', speed:1, armor:3 },
-    { id:'sens',      name:'Sens',      roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/sens/img.png',      blurb:'R.O.U Projector — rideau de fumée mobile.',                   side:'Attaque',   org:'CBRN',        speed:3, armor:1 },
-    { id:'grim',      name:'Grim',      roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/grim/img.png',      blurb:'Kawan Hive Launcher — révèle les ennemis par micro-drones.',   side:'Attaque',   org:'NIGHTHAVEN', speed:3, armor:1 },
-    { id:'ram',       name:'Ram',       roles:['Attacker'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/ram/img.png',       blurb:'BU-GI Auto-Breacher — détruit murs et gadgets automatiquement.',side:'Attaque',   org:'707th SMB',   speed:1, armor:3 },
-    // Défenseurs
-    { id:'smoke',     name:'Smoke',     roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/smoke/img.png',     blurb:'Grenades à déclenchement à distance — contrôle de zone.',     side:'Défense',   org:'SAS',         speed:2, armor:2 },
-    { id:'mute',      name:'Mute',      roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/mute/img.png',      blurb:'Signal Jammer — bloque drones et gadgets à déclenchement.',   side:'Défense',   org:'SAS',         speed:1, armor:3 },
-    { id:'castle',    name:'Castle',    roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/castle/img.png',    blurb:'Armor Pack — barricades en kevlar résistantes.',              side:'Défense',   org:'FBI SWAT',    speed:2, armor:2 },
-    { id:'pulse',     name:'Pulse',     roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/pulse/img.png',     blurb:'Heartbeat Sensor — détecte les ennemis à travers les murs.',  side:'Défense',   org:'FBI SWAT',    speed:3, armor:1 },
-    { id:'doc',       name:'Doc',       roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/doc/img.png',       blurb:'Stim Pistol — soigne ou booste lui-même et ses alliés.',      side:'Défense',   org:'GIGN',        speed:1, armor:3 },
-    { id:'rook',      name:'Rook',      roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/rook/img.png',      blurb:'Armor Pack — dépose des armures pour toute l\'équipe.',       side:'Défense',   org:'GIGN',        speed:1, armor:3 },
-    { id:'kapkan',    name:'Kapkan',    roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/kapkan/img.png',    blurb:'EDD Mk II — mines dans les fenêtres et portes.',              side:'Défense',   org:'SPETSNAZ',    speed:2, armor:2 },
-    { id:'tachanka',  name:'Tachanka',  roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/tachanka/img.png',  blurb:'Shumikha Launcher — lance des grenades incendiaires.',        side:'Défense',   org:'SPETSNAZ',    speed:1, armor:3 },
-    { id:'jager',     name:'Jäger',     roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/jager/img.png',     blurb:'ADS — intercepte automatiquement les grenades ennemies.',     side:'Défense',   org:'GSG 9',       speed:3, armor:1 },
-    { id:'bandit',    name:'Bandit',    roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/bandit/img.png',    blurb:'Shock Wire — électrifie les barbelés et les renforts.',       side:'Défense',   org:'GSG 9',       speed:3, armor:1 },
-    { id:'frost',     name:'Frost',     roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/frost/img.png',     blurb:'Welcome Mat — piège à ours qui neutralise instantanément.',   side:'Défense',   org:'JTF2',        speed:2, armor:2 },
-    { id:'echo',      name:'Echo',      roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/echo/img.png',      blurb:'Yokai — drone volant invisible qui émet des ultrasons.',       side:'Défense',   org:'SAT',         speed:1, armor:3 },
-    { id:'caveira',   name:'Caveira',   roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/caveira/img.png',   blurb:'Silent Step + Interrogation — traque et interroge les ennemis.',side:'Défense',  org:'BOPE',        speed:3, armor:1 },
-    { id:'valkyrie',  name:'Valkyrie',  roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/valkyrie/img.png',  blurb:'Black Eye — mini-caméras deployables pour la surveillance.',   side:'Défense',   org:'NAVY SEAL',   speed:2, armor:2 },
-    { id:'hibana_d',  name:'Lesion',    roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/lesion/img.png',    blurb:'Gu Mines — aiguilles empoisonnées invisibles.',               side:'Défense',   org:'SDU',         speed:2, armor:2 },
-    { id:'ela',       name:'Ela',       roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/ela/img.png',       blurb:'Grzmot Mine — mines concussion qui désorienter les attaquants.',side:'Défense',  org:'GROM',        speed:3, armor:1 },
-    { id:'vigil',     name:'Vigil',     roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/vigil/img.png',     blurb:'ERC-7 — disparaît temporairement des drones ennemis.',        side:'Défense',   org:'707th SMB',   speed:3, armor:1 },
-    { id:'maestro',   name:'Maestro',   roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/maestro/img.png',   blurb:'Evil Eye — tourelle laser résistante et rotative.',           side:'Défense',   org:'GIS',         speed:1, armor:3 },
-    { id:'alibi',     name:'Alibi',     roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/alibi/img.png',     blurb:'Prisma — hologrammes qui leurre et marque les attaquants.',   side:'Défense',   org:'GIS',         speed:3, armor:1 },
-    { id:'mozzie',    name:'Mozzie',    roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/mozzie/img.png',    blurb:'Pest — capture les drones attaquants pour les retourner.',    side:'Défense',   org:'SASR',        speed:2, armor:2 },
-    { id:'warden',    name:'Warden',    roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/warden/img.png',    blurb:'Glance Smart Glasses — voit à travers la fumée et les flashs.',side:'Défense',  org:'SECRET SERVICE',speed:1, armor:3 },
-    { id:'goyo',      name:'Goyo',      roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/goyo/img.png',      blurb:'Volcan Shield — bouclier piégé qui explose et brûle.',        side:'Défense',   org:'FUERZAS ESP.',speed:1, armor:3 },
-    { id:'wamai',     name:'Wamai',     roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/wamai/img.png',     blurb:'Mag-NET — intercepte et redirige les grenades ennemies.',     side:'Défense',   org:'NIGHTHAVEN', speed:2, armor:2 },
-    { id:'oryx',      name:'Oryx',      roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/oryx/img.png',      blurb:'Remah Dash — charge à travers les barricades mou.',           side:'Défense',   org:'GIGR',        speed:3, armor:1 },
-    { id:'melusi',    name:'Melusi',    roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/melusi/img.png',    blurb:'Banshee Sonic Defense — ralentit les attaquants qui s\'approchent.',side:'Défense',org:'INKABA',    speed:2, armor:2 },
-    { id:'aruni',     name:'Aruni',     roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/aruni/img.png',     blurb:'Surya Gate — barrière laser qui détruit les gadgets.',        side:'Défense',   org:'NIGHTHAVEN', speed:2, armor:2 },
-    { id:'thunderbird',name:'Thunderbird',roles:['Defender'],image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/thunderbird/img.png',blurb:'Kóna Station — distributeur de soins pour les alliés.',     side:'Défense',   org:'CJIRU',       speed:2, armor:2 },
-    { id:'thorn',     name:'Thorn',     roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/thorn/img.png',     blurb:'Razorbloom — mine à déclenchement temporisé.',               side:'Défense',   org:'ERG',         speed:2, armor:2 },
-    { id:'azami',     name:'Azami',     roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/azami/img.png',     blurb:'Kiba Barrier — crée des boucliers dans les brèches.',        side:'Défense',   org:'SAT',         speed:2, armor:2 },
-    { id:'solis',     name:'Solis',     roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/solis/img.png',     blurb:'SPEC-IO Electro-Sensor — détecte les gadgets électroniques.',  side:'Défense',   org:'AFEAU',       speed:2, armor:2 },
-    { id:'fenrir',    name:'Fenrir',    roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/fenrir/img.png',     blurb:'F-NATT Dread Mine — mine qui sème la peur.',                 side:'Défense',   org:'FMK',         speed:2, armor:2 },
-    { id:'tubarao',   name:'Tubarão',   roles:['Defender'], image:'https://staticctf.ubisoft.com/J3yJr34U2pZ2Ieem48Dwy9uqj5PNUDk7/tubarao/img.png',   blurb:'Zoto Canister — congèle les gadgets attaquants.',            side:'Défense',   org:'DAE',         speed:2, armor:2 },
+  var ops = [
+    // ── ATTAQUANTS ──
+    { id:'sledge',     name:'Sledge',     side:'Attaque', org:'SAS',          speed:2, armor:2, gadget:'Bélier de brèche',           gadgetDesc:'Crée des ouvertures dans les murs mous sans alerter les défenseurs.' },
+    { id:'thatcher',   name:'Thatcher',   side:'Attaque', org:'SAS',          speed:2, armor:2, gadget:'Grenade EMP',                gadgetDesc:'Neutralise les gadgets électroniques à travers les murs.' },
+    { id:'ash',        name:'Ash',        side:'Attaque', org:'FBI SWAT',      speed:3, armor:1, gadget:'Lance-grenades M120 CREM',   gadgetDesc:'Détruit les barricades, barbelés et gadgets à distance.' },
+    { id:'thermite',   name:'Thermite',   side:'Attaque', org:'FBI SWAT',      speed:2, armor:2, gadget:'Charge Exothermic-C',        gadgetDesc:'La seule charge capable de détruire les murs renforcés.' },
+    { id:'twitch',     name:'Twitch',     side:'Attaque', org:'GIGN',          speed:2, armor:2, gadget:'Drone Shock',                gadgetDesc:'Drone télécommandé qui détruit les gadgets défenseurs.' },
+    { id:'montagne',   name:'Montagne',   side:'Attaque', org:'GIGN',          speed:1, armor:3, gadget:'Bouclier Le Rocher',          gadgetDesc:'Bouclier extensible qui couvre entièrement l\'opérateur.' },
+    { id:'glaz',       name:'Glaz',       side:'Attaque', org:'SPETSNAZ',      speed:3, armor:1, gadget:'Lunette thermique',           gadgetDesc:'Permet de voir et tirer à travers la fumée.' },
+    { id:'fuze',       name:'Fuze',       side:'Attaque', org:'SPETSNAZ',      speed:1, armor:3, gadget:'Cluster Charge',              gadgetDesc:'Perfore les surfaces douces pour lancer des grenades.' },
+    { id:'blitz',      name:'Blitz',      side:'Attaque', org:'GSG 9',         speed:2, armor:2, gadget:'Flash-Shield',                gadgetDesc:'Bouclier avec flash intégré qui aveugle les défenseurs.' },
+    { id:'iq',         name:'IQ',         side:'Attaque', org:'GSG 9',         speed:3, armor:1, gadget:'Électronique Scanner',         gadgetDesc:'Détecte et localise tous les gadgets électroniques.' },
+    { id:'buck',       name:'Buck',       side:'Attaque', org:'JTF2',          speed:2, armor:2, gadget:'Skeleton Key',                gadgetDesc:'Sous-canon multi-coups fixé sur le fusil pour détruire les murs.' },
+    { id:'blackbeard', name:'Blackbeard', side:'Attaque', org:'NAVY SEAL',     speed:2, armor:2, gadget:'Rifle Shield',                gadgetDesc:'Bouclier fixé sur la lunette pour se couvrir la tête.' },
+    { id:'hibana',     name:'Hibana',     side:'Attaque', org:'SAT',           speed:3, armor:1, gadget:'X-KAIROS',                   gadgetDesc:'Projectiles explosifs qui détruisent les murs renforcés à distance.' },
+    { id:'jackal',     name:'Jackal',     side:'Attaque', org:'GEO',           speed:2, armor:2, gadget:'Eyenox Model III',            gadgetDesc:'Scanne et traque les empreintes de pas des défenseurs.' },
+    { id:'ying',       name:'Ying',       side:'Attaque', org:'SDU',           speed:2, armor:2, gadget:'Candela',                    gadgetDesc:'Disque roulant qui émet des flashs multiples simultanés.' },
+    { id:'lion',       name:'Lion',       side:'Attaque', org:'GIGN',          speed:2, armor:2, gadget:'EE-ONE-D',                   gadgetDesc:'Révèle tous les ennemis qui bougent sur toute la carte.' },
+    { id:'finka',      name:'Finka',      side:'Attaque', org:'CBRN',          speed:2, armor:2, gadget:'Poussée d\'adrénaline',       gadgetDesc:'Boost instantané de toute l\'équipe attaquante.' },
+    { id:'maverick',   name:'Maverick',   side:'Attaque', org:'NIGHTHAVEN',    speed:3, armor:1, gadget:'Torche Breaching',            gadgetDesc:'Brûle silencieusement les murs renforcés de façon précise.' },
+    { id:'nomad',      name:'Nomad',      side:'Attaque', org:'GIGR',          speed:2, armor:2, gadget:'Airjab',                     gadgetDesc:'Mines de proximité qui repoussent les défenseurs.' },
+    { id:'gridlock',   name:'Gridlock',   side:'Attaque', org:'SASR',          speed:1, armor:3, gadget:'Trax Stingers',              gadgetDesc:'Couvre le sol de pièges qui blessent et ralentissent.' },
+    { id:'amaru',      name:'Amaru',      side:'Attaque', org:'APCA',          speed:2, armor:2, gadget:'Garra Hook',                 gadgetDesc:'Grappin pour entrer instantanément par les fenêtres.' },
+    { id:'kali',       name:'Kali',       side:'Attaque', org:'NIGHTHAVEN',    speed:3, armor:1, gadget:'LV Lance-Nade',               gadgetDesc:'Perce les sols et plafonds pour éliminer les défenseurs.' },
+    { id:'iana',       name:'Iana',       side:'Attaque', org:'REU',           speed:2, armor:2, gadget:'Gemini Replicator',           gadgetDesc:'Hologramme clone contrôlable à distance pour le repérage.' },
+    { id:'ace',        name:'Ace',        side:'Attaque', org:'NIGHTHAVEN',    speed:2, armor:2, gadget:'S.E.L.M.A.',                  gadgetDesc:'Appareil qui détruit les renforts en rafale progressive.' },
+    { id:'zero',       name:'Zero',       side:'Attaque', org:'ECHELON',       speed:3, armor:1, gadget:'Argus Camera',               gadgetDesc:'Caméra pénétrante qui hackle les gadgets défenseurs.' },
+    { id:'flores',     name:'Flores',     side:'Attaque', org:'AFEAU',         speed:2, armor:2, gadget:'RCE-Ratero Drone',            gadgetDesc:'Drone télécommandé qui explose sur commande.' },
+    { id:'osa',        name:'Osa',        side:'Attaque', org:'NIGHTHAVEN',    speed:1, armor:3, gadget:'Talon-8 Shield',              gadgetDesc:'Bouclier transparent deployable pour sécuriser une zone.' },
+    { id:'sens',       name:'Sens',       side:'Attaque', org:'CBRN',          speed:3, armor:1, gadget:'R.O.U Projector',             gadgetDesc:'Déploie un rideau de fumée mobile sur le sol.' },
+    { id:'grim',       name:'Grim',       side:'Attaque', org:'NIGHTHAVEN',    speed:3, armor:1, gadget:'Kawan Hive Launcher',         gadgetDesc:'Micro-drones qui révèlent les ennemis dans une zone.' },
+    { id:'ram',        name:'Ram',        side:'Attaque', org:'707th SMB',     speed:1, armor:3, gadget:'BU-GI Auto-Breacher',         gadgetDesc:'Détruit automatiquement murs et gadgets dans son passage.' },
+    // ── DÉFENSEURS ──
+    { id:'smoke',      name:'Smoke',      side:'Défense', org:'SAS',           speed:2, armor:2, gadget:'Grenade à déclenchement',     gadgetDesc:'Grenades à gaz activables à distance pour contrôler les zones.' },
+    { id:'mute',       name:'Mute',       side:'Défense', org:'SAS',           speed:1, armor:3, gadget:'Signal Jammer',               gadgetDesc:'Brouille les drones et gadgets à déclenchement dans sa zone.' },
+    { id:'castle',     name:'Castle',     side:'Défense', org:'FBI SWAT',      speed:2, armor:2, gadget:'Armor Pack',                  gadgetDesc:'Barricades en kevlar résistantes aux balles et explosions.' },
+    { id:'pulse',      name:'Pulse',      side:'Défense', org:'FBI SWAT',      speed:3, armor:1, gadget:'Heartbeat Sensor',            gadgetDesc:'Détecte les battements de coeur des attaquants à travers les murs.' },
+    { id:'doc',        name:'Doc',        side:'Défense', org:'GIGN',          speed:1, armor:3, gadget:'Stim Pistol',                 gadgetDesc:'Pistolet de soin qui soigne ou booste lui-même et ses alliés.' },
+    { id:'rook',       name:'Rook',       side:'Défense', org:'GIGN',          speed:1, armor:3, gadget:'Armor Pack',                  gadgetDesc:'Dépose un sac d\'armures renforcées pour toute l\'équipe.' },
+    { id:'kapkan',     name:'Kapkan',     side:'Défense', org:'SPETSNAZ',      speed:2, armor:2, gadget:'EDD Mk II',                   gadgetDesc:'Mines piégées dans les encadrements de fenêtres et portes.' },
+    { id:'tachanka',   name:'Tachanka',   side:'Défense', org:'SPETSNAZ',      speed:1, armor:3, gadget:'Shumikha Launcher',           gadgetDesc:'Lance des grenades incendiaires pour contrôler les zones.' },
+    { id:'jager',      name:'Jäger',      side:'Défense', org:'GSG 9',         speed:3, armor:1, gadget:'ADS',                        gadgetDesc:'Intercepte et détruit automatiquement les grenades ennemies.' },
+    { id:'bandit',     name:'Bandit',     side:'Défense', org:'GSG 9',         speed:3, armor:1, gadget:'Shock Wire',                  gadgetDesc:'Électrifie les barbelés et les murs renforcés pour détruire les charges.' },
+    { id:'frost',      name:'Frost',      side:'Défense', org:'JTF2',          speed:2, armor:2, gadget:'Welcome Mat',                 gadgetDesc:'Piège à ours qui neutralise instantanément les ennemis.' },
+    { id:'echo',       name:'Echo',       side:'Défense', org:'SAT',           speed:1, armor:3, gadget:'Yokai',                      gadgetDesc:'Drone volant invisible qui émet des ultrasons désorienter.' },
+    { id:'caveira',    name:'Caveira',    side:'Défense', org:'BOPE',          speed:3, armor:1, gadget:'Silent Step + Interrogation', gadgetDesc:'Se déplace silencieusement et révèle la position de toute l\'équipe ennemie.' },
+    { id:'valkyrie',   name:'Valkyrie',   side:'Défense', org:'NAVY SEAL',     speed:2, armor:2, gadget:'Black Eye',                   gadgetDesc:'Mini-caméras deployables pour surveiller plusieurs zones.' },
+    { id:'lesion',     name:'Lesion',     side:'Défense', org:'SDU',           speed:2, armor:2, gadget:'Gu Mines',                   gadgetDesc:'Aiguilles empoisonnées invisibles qui ralentissent et blessent.' },
+    { id:'ela',        name:'Ela',        side:'Défense', org:'GROM',          speed:3, armor:1, gadget:'Grzmot Mine',                 gadgetDesc:'Mines concussion qui désorientent les attaquants.' },
+    { id:'vigil',      name:'Vigil',      side:'Défense', org:'707th SMB',     speed:3, armor:1, gadget:'ERC-7',                      gadgetDesc:'Disparaît temporairement des caméras et drones ennemis.' },
+    { id:'maestro',    name:'Maestro',    side:'Défense', org:'GIS',           speed:1, armor:3, gadget:'Evil Eye',                   gadgetDesc:'Tourelle laser résistante aux balles, contrôlée à distance.' },
+    { id:'alibi',      name:'Alibi',      side:'Défense', org:'GIS',           speed:3, armor:1, gadget:'Prisma',                     gadgetDesc:'Hologrammes parfaits qui leurre et marque les attaquants.' },
+    { id:'mozzie',     name:'Mozzie',     side:'Défense', org:'SASR',          speed:2, armor:2, gadget:'Pest',                       gadgetDesc:'Capture les drones attaquants pour les retourner contre eux.' },
+    { id:'warden',     name:'Warden',     side:'Défense', org:'SECRET SERVICE', speed:1, armor:3, gadget:'Glance Smart Glasses',      gadgetDesc:'Voit à travers la fumée et n\'est pas aveuglé par les flashs.' },
+    { id:'goyo',       name:'Goyo',       side:'Défense', org:'FUERZAS ESPECIALES', speed:1, armor:3, gadget:'Volcan Shield',        gadgetDesc:'Bouclier piégé qui explose et crée une zone incendiaire.' },
+    { id:'wamai',      name:'Wamai',      side:'Défense', org:'NIGHTHAVEN',    speed:2, armor:2, gadget:'Mag-NET',                    gadgetDesc:'Intercepte et redirige les grenades et gadgets ennemis.' },
+    { id:'oryx',       name:'Oryx',       side:'Défense', org:'GIGR',          speed:3, armor:1, gadget:'Remah Dash',                 gadgetDesc:'Charge à travers les barricades et peut escalader les brèches.' },
+    { id:'melusi',     name:'Melusi',     side:'Défense', org:'INKABA',        speed:2, armor:2, gadget:'Banshee',                    gadgetDesc:'Capteurs soniques qui ralentissent les attaquants qui s\'approchent.' },
+    { id:'aruni',      name:'Aruni',      side:'Défense', org:'NIGHTHAVEN',    speed:2, armor:2, gadget:'Surya Gate',                 gadgetDesc:'Barrière laser qui détruit gadgets et ralentit les ennemis.' },
+    { id:'thunderbird',name:'Thunderbird',side:'Défense', org:'CJIRU',         speed:2, armor:2, gadget:'Kóna Station',               gadgetDesc:'Distributeur automatique de soins pour les alliés proches.' },
+    { id:'thorn',      name:'Thorn',      side:'Défense', org:'ERG',           speed:2, armor:2, gadget:'Razorbloom',                 gadgetDesc:'Mine à déclenchement temporisé après activation.' },
+    { id:'azami',      name:'Azami',      side:'Défense', org:'SAT',           speed:2, armor:2, gadget:'Kiba Barrier',               gadgetDesc:'Crée des boucliers circulaires dans les brèches des murs.' },
+    { id:'solis',      name:'Solis',      side:'Défense', org:'AFEAU',         speed:2, armor:2, gadget:'SPEC-IO Electro-Sensor',      gadgetDesc:'Détecte et localise les gadgets électroniques attaquants.' },
+    { id:'fenrir',     name:'Fenrir',     side:'Défense', org:'FMK',           speed:2, armor:2, gadget:'F-NATT Dread Mine',          gadgetDesc:'Mines activables à distance qui sèment la peur et ralentissent.' },
+    { id:'tubarao',    name:'Tubarão',    side:'Défense', org:'DAE',           speed:2, armor:2, gadget:'Zoto Canister',              gadgetDesc:'Congèle les gadgets attaquants dans une zone.' },
   ];
+
+  // Ajouter l'image depuis le CDN r6operators
+  return ops.map(op => ({
+    ...op,
+    roles: [op.side],
+    image: R6_ICON_CDN + op.id + '.png',
+    blurb: op.gadgetDesc,
+    abilities: [{
+      slot: 'GADGET',
+      name: op.gadget,
+      desc: op.gadgetDesc,
+      image: null,
+    }],
+  }));
 }
 
 // ----------------------------------------------------------
 //  Rendu de la grille
 // ----------------------------------------------------------
 function renderChampionGrid(gameKey, champions, container) {
-  const cfg    = CHAMP_CONFIG[gameKey] || {};
-  const accent = cfg.accent || '#a78bfa';
-  const lang   = window.i18n ? window.i18n.currentLang() : 'fr';
+  var cfg    = CHAMP_CONFIG[gameKey] || {};
+  var accent = cfg.accent || '#a78bfa';
+  var lang   = window.i18n ? window.i18n.currentLang() : 'fr';
 
-  // Construire les filtres de rôles uniques
-  const allRoles = [...new Set(champions.flatMap(c => c.roles || []))].filter(Boolean).sort();
-
-  const filterLabels = {
-    fr: { all: 'Tous', search: 'Rechercher...' },
-    en: { all: 'All',  search: 'Search...' },
-    es: { all: 'Todos',search: 'Buscar...' },
-  };
-  const fl = filterLabels[lang] || filterLabels.fr;
-
-  // Pour R6 : filtres par side plutôt que role
-  const isR6 = gameKey === 'r6';
-  const filterValues = isR6
+  var isR6   = gameKey === 'r6';
+  var filterValues = isR6
     ? ['Attaque', 'Défense']
-    : allRoles;
+    : [...new Set(champions.flatMap(c => c.roles || []))].filter(Boolean).sort();
 
-  const filtersHtml = filterValues.length > 1 ? `
+  var fl = { fr:{ all:'Tous', search:'Rechercher...' }, en:{ all:'All', search:'Search...' }, es:{ all:'Todos', search:'Buscar...' } }[lang] || { all:'Tous', search:'Rechercher...' };
+
+  var filtersHtml = filterValues.length > 1 ? `
     <div class="champ-filters">
-      <button class="champ-filter-btn active" data-filter="all" onclick="filterChampions(this, 'all')" style="border-color:${accent}40">
-        ${fl.all}
-      </button>
-      ${filterValues.map(r => `
-        <button class="champ-filter-btn" data-filter="${r}" onclick="filterChampions(this, '${r}')" style="">
-          ${r}
-        </button>
-      `).join('')}
-    </div>
-  ` : '';
+      <button class="champ-filter-btn active" data-filter="all" onclick="filterChampions(this,'all')" style="background:${accent};border-color:${accent};color:#fff">${fl.all}</button>
+      ${filterValues.map(r => `<button class="champ-filter-btn" data-filter="${r}" onclick="filterChampions(this,'${r}')">${r}</button>`).join('')}
+    </div>` : '';
 
-  const searchHtml = `
-    <div class="champ-search-wrap">
-      <input type="text" class="champ-search" placeholder="${fl.search}" oninput="filterChampionSearch(this.value)">
-    </div>
-  `;
-
-  const cardsHtml = champions.map(c => renderChampCard(c, gameKey, accent)).join('');
+  var cardsHtml = champions.map(c => renderChampCard(c, gameKey, accent)).join('');
 
   container.innerHTML = `
     <div class="champ-toolbar">
-      ${searchHtml}
+      <input type="text" class="champ-search" placeholder="${fl.search}" oninput="filterChampionSearch(this.value)">
       ${filtersHtml}
     </div>
-    <div class="champ-grid" id="champ-grid">
-      ${cardsHtml}
-    </div>
+    <div class="champ-grid" id="champ-grid">${cardsHtml}</div>
   `;
 
-  // Stocker les données pour le filtrage
   window._champData = champions;
   window._champGame = gameKey;
 }
 
 function renderChampCard(c, gameKey, accent) {
-  const isR6     = gameKey === 'r6';
-  const roleStr  = isR6 ? (c.side || '') : (c.roles || []).join(', ');
-  const sideColor = c.side === 'Attaque' ? '#4ade80' : c.side === 'Défense' ? '#f87171' : accent;
-
-  // Attribut Dota 2
-  const attrIcons = { str: '💪', agi: '⚡', int: '🧠', all: '✨' };
-  const attrHtml  = c.attr ? `<span class="champ-attr">${attrIcons[c.attr] || ''}</span>` : '';
-
-  // Filtre data attribute
-  const filterVal = isR6 ? (c.side || '') : (c.roles || []).join(' ');
-
-  const imgHtml = c.image
-    ? `<img src="${c.image}" class="champ-img" alt="${c.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-    : '';
-  const fallbackHtml = `<div class="champ-img-fallback" style="${c.image ? 'display:none' : ''};color:${accent}">${c.name[0]}</div>`;
+  var isR6      = gameKey === 'r6';
+  var roleStr   = isR6 ? c.side : (c.roles || []).join(', ');
+  var sideColor = c.side === 'Attaque' ? '#4ade80' : c.side === 'Défense' ? '#f87171' : accent;
+  var filterVal = isR6 ? (c.side || '') : (c.roles || []).join(' ');
+  var attrIcons = { str:'💪', agi:'⚡', int:'🧠', all:'✨' };
+  var attrHtml  = c.attr ? `<span class="champ-attr">${attrIcons[c.attr] || ''}</span>` : '';
 
   return `
-    <div class="champ-card" data-filter="${filterVal}" data-name="${c.name.toLowerCase()}" onclick="showChampDetail('${c.id}', '${window._champGame || gameKey}')">
+    <div class="champ-card" data-filter="${filterVal}" data-name="${c.name.toLowerCase()}" onclick="showChampDetail('${String(c.id).replace(/'/g,"\\'")}','${gameKey}')">
       <div class="champ-img-wrap">
-        ${imgHtml}
-        ${fallbackHtml}
+        ${c.image ? `<img src="${c.image}" class="champ-img" alt="${c.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+        <div class="champ-img-fallback" style="${c.image?'display:none':'display:flex'};color:${accent}">${c.name[0]}</div>
         ${attrHtml}
       </div>
       <div class="champ-info">
@@ -292,115 +291,164 @@ function renderChampCard(c, gameKey, accent) {
         ${c.title ? `<div class="champ-title">${c.title}</div>` : ''}
         <div class="champ-role" style="color:${isR6 ? sideColor : accent}">${roleStr}</div>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
 // ----------------------------------------------------------
 //  Filtrage
 // ----------------------------------------------------------
 function filterChampions(btn, filterVal) {
-  // Mettre à jour les boutons actifs
-  document.querySelectorAll('.champ-filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.champ-filter-btn').forEach(b => {
+    b.classList.remove('active');
+    b.style.background = '';
+    b.style.color = '';
+    b.style.borderColor = '';
+  });
+  var accent = CHAMP_CONFIG[window._champGame]?.accent || '#a78bfa';
   btn.classList.add('active');
+  btn.style.background   = accent;
+  btn.style.color        = '#fff';
+  btn.style.borderColor  = accent;
 
-  const grid = document.getElementById('champ-grid');
-  if (!grid) return;
-
-  const searchVal = document.querySelector('.champ-search')?.value?.toLowerCase() || '';
-
-  grid.querySelectorAll('.champ-card').forEach(card => {
-    const matchFilter = filterVal === 'all' || card.dataset.filter?.includes(filterVal);
-    const matchSearch = !searchVal || card.dataset.name?.includes(searchVal);
+  var searchVal = document.querySelector('.champ-search')?.value?.toLowerCase() || '';
+  document.querySelectorAll('#champ-grid .champ-card').forEach(card => {
+    var matchFilter = filterVal === 'all' || (card.dataset.filter || '').includes(filterVal);
+    var matchSearch = !searchVal || (card.dataset.name || '').includes(searchVal);
     card.style.display = matchFilter && matchSearch ? '' : 'none';
   });
 }
 
 function filterChampionSearch(val) {
-  const grid = document.getElementById('champ-grid');
-  if (!grid) return;
-
-  const searchVal   = val.toLowerCase();
-  const activeFilter = document.querySelector('.champ-filter-btn.active')?.dataset.filter || 'all';
-
-  grid.querySelectorAll('.champ-card').forEach(card => {
-    const matchFilter = activeFilter === 'all' || card.dataset.filter?.includes(activeFilter);
-    const matchSearch = !searchVal || card.dataset.name?.includes(searchVal);
+  var searchVal    = val.toLowerCase();
+  var activeFilter = document.querySelector('.champ-filter-btn.active')?.dataset.filter || 'all';
+  document.querySelectorAll('#champ-grid .champ-card').forEach(card => {
+    var matchFilter = activeFilter === 'all' || (card.dataset.filter || '').includes(activeFilter);
+    var matchSearch = !searchVal || (card.dataset.name || '').includes(searchVal);
     card.style.display = matchFilter && matchSearch ? '' : 'none';
   });
 }
 
 // ----------------------------------------------------------
-//  Modal détail champion
+//  Modal détail champion avec compétences
 // ----------------------------------------------------------
-function showChampDetail(champId, gameKey) {
-  const data = window._champData?.find(c => String(c.id) === String(champId));
+async function showChampDetail(champId, gameKey) {
+  var data   = window._champData?.find(c => String(c.id) === String(champId));
   if (!data) return;
 
-  const cfg    = CHAMP_CONFIG[gameKey] || {};
-  const accent = cfg.accent || '#a78bfa';
-  const isR6   = gameKey === 'r6';
+  var cfg    = CHAMP_CONFIG[gameKey] || {};
+  var accent = cfg.accent || '#a78bfa';
+  var isR6   = gameKey === 'r6';
 
   document.getElementById('champ-detail-modal')?.remove();
 
-  const modal = document.createElement('div');
+  var modal = document.createElement('div');
   modal.id        = 'champ-detail-modal';
   modal.className = 'modal-overlay';
 
-  const roleStr    = isR6 ? data.side : (data.roles || []).join(' · ');
-  const sideColor  = data.side === 'Attaque' ? '#4ade80' : data.side === 'Défense' ? '#f87171' : accent;
-  const attrIcons  = { str: '💪 Force', agi: '⚡ Agilité', int: '🧠 Intelligence', all: '✨ Universel' };
-  const attrLabel  = data.attr ? attrIcons[data.attr] || '' : '';
+  var roleStr   = isR6 ? data.side : (data.roles || []).join(' · ');
+  var sideColor = data.side === 'Attaque' ? '#4ade80' : data.side === 'Défense' ? '#f87171' : accent;
+  var attrIcons = { str:'💪 Force', agi:'⚡ Agilité', int:'🧠 Intelligence', all:'✨ Universel' };
 
-  // Infos R6 spécifiques
-  const r6Extras = isR6 ? `
+  // Stats R6
+  var r6StatsHtml = isR6 ? `
     <div class="champ-detail-stats">
-      <div class="champ-detail-stat">
-        <span class="champ-stat-label">Organisation</span>
-        <span class="champ-stat-value">${data.org || '—'}</span>
-      </div>
-      <div class="champ-detail-stat">
-        <span class="champ-stat-label">Vitesse</span>
-        <span class="champ-stat-value">${'⚡'.repeat(data.speed || 0)}${'○'.repeat(3 - (data.speed || 0))}</span>
-      </div>
-      <div class="champ-detail-stat">
-        <span class="champ-stat-label">Armure</span>
-        <span class="champ-stat-value">${'🛡️'.repeat(data.armor || 0)}${'○'.repeat(3 - (data.armor || 0))}</span>
-      </div>
-    </div>
-  ` : '';
+      <div class="champ-detail-stat"><span class="champ-stat-label">Organisation</span><span class="champ-stat-value" style="font-size:11px">${data.org || '—'}</span></div>
+      <div class="champ-detail-stat"><span class="champ-stat-label">Vitesse</span><span class="champ-stat-value">${'⚡'.repeat(data.speed||0)}${'·'.repeat(3-(data.speed||0))}</span></div>
+      <div class="champ-detail-stat"><span class="champ-stat-label">Armure</span><span class="champ-stat-value">${'🛡️'.repeat(data.armor||0)}${'·'.repeat(3-(data.armor||0))}</span></div>
+    </div>` : '';
+
+  // Stats Dota
+  var dotaStatsHtml = gameKey === 'dota2' && data.stats ? `
+    <div class="champ-detail-stats">
+      <div class="champ-detail-stat"><span class="champ-stat-label">HP</span><span class="champ-stat-value">${data.stats.hp}</span></div>
+      <div class="champ-detail-stat"><span class="champ-stat-label">Armure</span><span class="champ-stat-value">${data.stats.armor}</span></div>
+      <div class="champ-detail-stat"><span class="champ-stat-label">Vitesse</span><span class="champ-stat-value">${data.stats.speed}</span></div>
+      <div class="champ-detail-stat"><span class="champ-stat-label">Attaque</span><span class="champ-stat-value">${data.stats.attack}</span></div>
+    </div>` : '';
 
   modal.innerHTML = `
     <div class="modal-box champ-detail-box">
       <div class="modal-header">
-        <div style="display:flex;align-items:center;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px">
           <div class="champ-detail-img-wrap">
-            ${data.image
-              ? `<img src="${data.image}" class="champ-detail-img" onerror="this.style.display='none'">`
-              : `<div class="champ-img-fallback large" style="color:${accent}">${data.name[0]}</div>`}
+            ${data.image ? `<img src="${data.image}" class="champ-detail-img" onerror="this.style.display='none'">` : ''}
+            <div class="champ-img-fallback large" style="${data.image?'display:none':'display:flex'};color:${accent}">${data.name[0]}</div>
           </div>
           <div>
             <div class="champ-detail-name" style="color:${accent}">${data.name}</div>
             ${data.title ? `<div class="champ-detail-title">${data.title}</div>` : ''}
             <div class="champ-detail-role" style="color:${isR6 ? sideColor : accent}">${roleStr}</div>
-            ${attrLabel ? `<div class="champ-detail-attr">${attrLabel}</div>` : ''}
+            ${data.attr ? `<div class="champ-detail-attr">${attrIcons[data.attr]||''}</div>` : ''}
           </div>
         </div>
         <button class="modal-close" onclick="document.getElementById('champ-detail-modal').remove()">✕</button>
       </div>
-      ${r6Extras}
+      ${r6StatsHtml}
+      ${dotaStatsHtml}
       ${data.blurb ? `<div class="champ-detail-blurb">${data.blurb}</div>` : ''}
+      <div id="champ-abilities-section" class="champ-abilities-loading">
+        ${data.abilities ? '' : '<div class="lb-loading" style="padding:16px;text-align:center">Chargement des compétences...</div>'}
+      </div>
     </div>
   `;
 
   document.body.appendChild(modal);
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  // Charger les compétences
+  await loadAbilities(data, gameKey, accent);
+}
+
+async function loadAbilities(data, gameKey, accent) {
+  var section = document.getElementById('champ-abilities-section');
+  if (!section) return;
+
+  var abilities = data.abilities || null;
+
+  // LoL : charger depuis champion/{id}.json
+  if (gameKey === 'lol' && !abilities) {
+    try {
+      var detail = await fetchLoLChampionDetail(data.id, data.version);
+      if (detail) {
+        abilities = [
+          { slot:'P', name: detail.passive.name, desc: detail.passive.desc, image: detail.passive.image },
+          ...detail.spells.map(s => ({ slot: s.key, name: s.name, desc: s.desc, image: s.image })),
+        ];
+      }
+    } catch(e) { console.warn('[LoL abilities]', e); }
+  }
+
+  if (!abilities || abilities.length === 0) {
+    section.innerHTML = '';
+    return;
+  }
+
+  var abilitiesHtml = abilities.map(ab => `
+    <div class="champ-ability-row">
+      <div class="champ-ability-left">
+        ${ab.image ? `<img src="${ab.image}" class="champ-ability-icon" onerror="this.style.display='none'">` : ''}
+        <span class="champ-ability-slot" style="color:${accent}">${ab.slot || ''}</span>
+      </div>
+      <div class="champ-ability-info">
+        <div class="champ-ability-name" style="color:${accent}">${ab.name || ''}</div>
+        ${ab.desc ? `<div class="champ-ability-desc">${ab.desc}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  var titleMap = { lol:'Compétences', valorant:'Capacités', dota2:'Rôles', r6:'Gadget' };
+  section.innerHTML = `
+    <div class="champ-abilities-section">
+      <div class="champ-abilities-title" style="color:${accent}">⚔️ ${titleMap[gameKey] || 'Compétences'}</div>
+      ${abilitiesHtml}
+    </div>
+  `;
 }
 
 // Exposer globalement
-window.loadChampionsForGame  = loadChampionsForGame;
-window.filterChampions       = filterChampions;
-window.filterChampionSearch  = filterChampionSearch;
-window.showChampDetail       = showChampDetail;
+window.loadChampionsForGame = loadChampionsForGame;
+window.filterChampions      = filterChampions;
+window.filterChampionSearch = filterChampionSearch;
+window.showChampDetail      = showChampDetail;
 
 console.log('[champions] chargé ✓');
