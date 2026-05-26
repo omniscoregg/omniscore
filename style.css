@@ -4527,34 +4527,26 @@ body {
   line-height: 1.5;
 }
 
-/* ── Onglets Infos Esport — style cohérent avec le reste du site ── */
-.esport-info-tabs {
-  display: flex;
-  gap: 6px;
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-}
-
-.esport-info-tab {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text3);
-  font-size: 13px;
-  padding: 8px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-family: inherit;
-  font-weight: 500;
-  transition: all 0.15s;
+/* ── Séparateurs de date ── */
+.date-separator {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
+  margin: 20px 0 10px;
+  color: var(--text3);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
-.esport-info-tab:hover { border-color: var(--border2); color: var(--text2); }
-.esport-info-tab.active {
-  background: var(--surface2);
-  border-color: var(--accent);
-  color: var(--accent);
-  font-weight: 600;
+.date-separator::before,
+.date-separator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.date-separator span {
+  white-space: nowrap;
+  padding: 0 4px;
 }
