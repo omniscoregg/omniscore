@@ -719,4 +719,13 @@ window.closeGameDrawer  = closeGameDrawer;
 window.matchStore  = matchStore;
 window._appState  = state;
 
+function goHome() {
+  if (window.showHomePage) {
+    window.showHomePage();
+  } else {
+    location.reload();
+  }
+}
+window.goHome = goHome;
+
 document.addEventListener('DOMContentLoaded', init);
