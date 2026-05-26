@@ -4,7 +4,7 @@
 
 const TRANSLATIONS = {
   fr: {
-    flag: '🇫🇷', name: 'Français',
+    flag: 'fr', name: 'Français',
     tagline: 'Résultats esport · 17 jeux couverts',
     games: 'Jeux',
     upcoming: 'À venir',
@@ -31,7 +31,7 @@ const TRANSLATIONS = {
     bo: 'Bo',
   },
   en: {
-    flag: '🇬🇧', name: 'English',
+    flag: 'gb', name: 'English',
     tagline: 'Esport results · 17 games covered',
     games: 'Games',
     upcoming: 'Upcoming',
@@ -58,7 +58,7 @@ const TRANSLATIONS = {
     bo: 'Bo',
   },
   es: {
-    flag: '🇪🇸', name: 'Español',
+    flag: 'es', name: 'Español',
     tagline: 'Resultados esport · 17 juegos cubiertos',
     games: 'Juegos',
     upcoming: 'Próximos',
@@ -141,10 +141,14 @@ function renderLangSwitcher() {
   if (!el) return;
   const buttons = [];
   for (const code in TRANSLATIONS) {
-    const tr = TRANSLATIONS[code];
+    const tr     = TRANSLATIONS[code];
     const active = code === currentLang ? 'active' : '';
-    const flag = tr.flag;
-    buttons.push('<button class="lang-btn ' + active + '" onclick="setLang(\'' + code + '\')">' + flag + '</button>');
+    const imgUrl = `https://flagcdn.com/24x18/${tr.flag}.png`;
+    buttons.push(
+      `<button class="lang-btn ${active}" onclick="setLang('${code}')" title="${tr.name}">`
+      + `<img src="${imgUrl}" alt="${tr.name}" class="lang-flag" width="24" height="18">`
+      + `</button>`
+    );
   }
   el.innerHTML = buttons.join('');
 }
