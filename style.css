@@ -57,13 +57,14 @@ body {
 .navbar-logo-img {
   height: 80px;
   width: auto;
-  max-width: 200px;
+  max-width: 220px;
   display: block;
   object-fit: contain;
+  mix-blend-mode: screen;
 }
 
 @media (max-width: 768px) {
-  .navbar-logo-img { height: 50px; max-width: 150px; }
+  .navbar-logo-img { height: 50px; max-width: 160px; mix-blend-mode: screen; }
 }
 
 .navbar-tagline {
