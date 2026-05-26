@@ -30,7 +30,7 @@
 
   <!-- ── Navbar ── -->
   <nav class="navbar">
-    <div class="navbar-logo" style="cursor:pointer" onclick="if(window.showHomePage)showHomePage();else location.reload()">
+    <div class="navbar-logo" style="cursor:pointer" onclick="window.showHomePage ? showHomePage() : location.reload()">
       <img src="omniscore_logo-png.png" alt="Omniscore" class="navbar-logo-img">
     </div>
     <button class="mobile-games-btn" onclick="toggleGameDrawer()" id="hamburger-btn">☰ Jeux</button>
