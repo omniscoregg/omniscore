@@ -55,7 +55,7 @@ body {
 }
 
 .navbar-logo-img {
-  height: 48px;
+  height: 80px;
   width: auto;
   max-width: 200px;
   display: block;
@@ -63,7 +63,7 @@ body {
 }
 
 @media (max-width: 768px) {
-  .navbar-logo-img { height: 32px; max-width: 150px; }
+  .navbar-logo-img { height: 50px; max-width: 150px; }
 }
 
 .navbar-tagline {
