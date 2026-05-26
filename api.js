@@ -21,13 +21,6 @@ const GAME_CONFIG = {
   r6:          { source: 'pandascore', slug: 'r6siege', label: 'Rainbow Six Siege',  genre: 'fps'     },
   cod:         { source: 'pandascore', slug: 'codmw',   label: 'Call of Duty',       genre: 'fps'     },
   rl:          { source: 'pandascore', slug: 'rl',      label: 'Rocket League',      genre: 'sport'   },
-  pubg:        { source: 'pandascore', slug: 'pubg',    label: 'PUBG',               genre: 'br'      },
-  sf6:         { source: 'liquipedia', slug: 'fighters',     label: 'Street Fighter 6', genre: 'fighting', lp_game: 'Street_Fighter_6'          },
-  tekken8:     { source: 'liquipedia', slug: 'fighters',     label: 'Tekken 8',         genre: 'fighting', lp_game: 'Tekken_8'                  },
-  smash:       { source: 'liquipedia', slug: 'smashbros',    label: 'Smash Bros.',      genre: 'fighting', lp_game: ''                          },
-  pubgmobile:  { source: 'liquipedia', slug: 'pubgmobile',   label: 'PUBG Mobile',      genre: 'br',       lp_game: ''                          },
-  apexlegends: { source: 'liquipedia', slug: 'apexlegends',  label: 'Apex Legends',     genre: 'br',       lp_game: ''                          },
-  hearthstone: { source: 'liquipedia', slug: 'hearthstone',  label: 'Hearthstone',      genre: 'card',     lp_game: ''                          },
 };
 
 // ----------------------------------------------------------
@@ -180,21 +173,12 @@ function getMockMatches(gameKey, count, status) {
     r6:          [['G2','Spacestation'],['Team Liquid','DZ'],['Rogue','Chiefs'],['NaVi','BDS'],['TSM','EG']],
     cod:         [['OpTic','Atlanta FaZe'],['LAT','NY Subliners'],['Boston','Miami'],['Vegas','Toronto'],['Rokkr','Surge']],
     rl:          [['Gentle Mates','Vitality'],['G2','NRG'],['FaZe','BDS'],['Spacestation','Complexity'],['OpTic','Version1']],
-    eafc:        [['Tekkz','Gorilla'],['Obrun','Nicolas99FC'],['Msdossary','Agge'],['Stokes','Henny'],['Ryan','Shellzz']],
-    pubg:        [['DBD','Twisted Minds'],['NAVI','GNL'],['GEX','Quad'],['Danawa','DreamFire'],['Havan','4Rivals']],
-    sf6:         [['Xiaohai','Punk'],['MenaRD','Blaz'],['Tokido','Fuudo'],['Nephew','EndingWalker'],['Bonchan','NL']],
-    tekken8:     [['Knee','JDCR'],['Arslan Ash','Awais'],['Main Man','Malgu'],['Nobi','Ulsan'],['KYOHEI','Mulgold']],
-    smash:       [['MkLeo','Tweek'],['Quik','Light'],['Sparg0','Glutonny'],['Yonni','Tea'],['Maister','Sisqui']],
-    pubgmobile:  [['Bigetron','BOX'],['Nova','SuperSkrull'],['Stalwart','D9'],['Fnatic','Mortal'],['Tencent','Loops']],
-    apexlegends: [['TSM','NRG'],['Sentinels','Optic'],['FaZe','Alliance'],['Dignitas','100T'],['XSET','Luminosity']],
-    hearthstone: [['Viper','Nalguidan'],['Fr0zen','Shaxy'],['Kolento','Neirea'],['Thijs','Sintolol'],['Casie','Jarla']],
   };
   const tours = {
     lol: ['LCK Spring','LEC Spring','LCS Spring'], cs2: ['ESL Pro League','PGL Major','BLAST'],
     valorant: ['VCT Americas','VCT EMEA','Champions'], dota2: ['The International','ESL One'],
     mlbb: ['MPL ID','MPL PH','M-Series'], kog: ['KPL Spring','Honor League'],
-    cod: ['CDL Major','CDL Champs','CDL Kickoff'], sf6: ['Capcom Pro Tour','EWC 2025'],
-    tekken8: ['EWC 2025','Tekken World Tour'], smash: ['EVO 2025','Summit'],
+    cod: ['CDL Major','CDL Champs','CDL Kickoff'],
     default: ['World Championship','Major','Regional'],
   };
   const teamList = teams[gameKey] || [['Team A','Team B'],['Team C','Team D']];
