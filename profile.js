@@ -125,6 +125,9 @@ async function loadProfileContent(user) {
       </div>
       ` : ''}
 
+      <!-- Section saison -->
+      <div id="season-section-wrap"></div>
+
       <!-- Historique prédictions -->
       <div class="profile-section">
         <div class="profile-section-title">📋 Dernières prédictions</div>
@@ -137,6 +140,17 @@ async function loadProfileContent(user) {
 
     // Rendre le daily streak après que le HTML est injecté
     renderDailyStreak(dayStreak, nextBonus);
+
+    // Rendre la section saison
+    if (window.renderSeasonSection) {
+      const lang = window.i18n ? window.i18n.currentLang() : 'fr';
+      const seasonWrap = document.getElementById('season-section-wrap');
+      if (seasonWrap) {
+        renderSeasonSection(user.uid, rank || 9999, lang).then(html => {
+          seasonWrap.innerHTML = html;
+        });
+      }
+    }
 
   } catch(e) {
     console.error('[Profile]', e);

@@ -395,6 +395,7 @@ async function showLeaderboard() {
       </div>
       <div class="leaderboard-tabs">
         <button class="lb-tab active" onclick="loadLeaderboard('global', this)">Global</button>
+        <button class="lb-tab" onclick="loadLeaderboard('season', this)">🏅 Saison</button>
         ${Object.entries(EsportAPI.GAME_CONFIG)
           .filter(([, c]) => c.source === 'pandascore')
           .map(([k, c]) => `<button class="lb-tab" onclick="loadLeaderboard('${k}', this)">${c.label}</button>`)
@@ -413,6 +414,11 @@ async function loadLeaderboard(type, btn) {
   const el = document.getElementById('leaderboard-content');
   el.innerHTML = '<div class="lb-loading">Chargement...</div>';
   try {
+    // Classement saisonnier
+    if (type === 'season' && window.renderSeasonLeaderboard) {
+      await window.renderSeasonLeaderboard(el, window.i18n ? window.i18n.currentLang() : 'fr');
+      return;
+    }
     const data = type === 'global' ? await getLeaderboard() : await getLeaderboardByGame(type);
     if (data.length === 0) { el.innerHTML = '<div class="lb-empty">Aucune prédiction pour l\'instant.</div>'; return; }
     el.innerHTML = `

@@ -1,0 +1,116 @@
+/* ============================================================
+   seasons.css — Styles système de saisons
+   À coller à la fin de style.css
+   ============================================================ */
+
+/* ── Section saison dans le profil ── */
+.season-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 8px;
+  background: var(--surface2);
+}
+
+.season-current {
+  margin-top: 12px;
+}
+
+.season-stats-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.season-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.season-stat-value {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.season-stat-label {
+  font-size: 11px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.season-progress-wrap {
+  margin-top: 8px;
+}
+
+/* ── Historique des saisons ── */
+.season-history {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.season-history-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.season-badges-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.season-no-badge {
+  font-size: 12px;
+  color: var(--text3);
+  font-style: italic;
+}
+
+/* ── Badge de saison ── */
+.season-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.15s;
+}
+.season-badge:hover { border-color: var(--border2); }
+
+.season-badge-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.season-badge-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.season-badge-label {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.season-badge-season {
+  font-size: 10px;
+  color: var(--text3);
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .season-stats-row { gap: 10px; }
+  .season-stat-value { font-size: 18px; }
+}
