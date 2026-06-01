@@ -37,8 +37,13 @@ function hideHomePage() {
 // ----------------------------------------------------------
 function buildHomeHTML() {
   const now = new Date();
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const daysLeft = Math.ceil((endOfMonth - now) / 86400000);
+  const _season = window.getCurrentSeason ? window.getCurrentSeason() : null;
+  const _seasonName = _season ? (_season.name ? (_season.name.fr || 'Saison en cours') : 'Saison en cours') : 'Saison en cours';
+  const _seasonIcon = _season ? (_season.icon || '⏳') : '⏳';
+  const _endOfSeason = _season
+    ? new Date(_season.year, _season.endMonth - 1, _season.endDay, 23, 59, 59)
+    : new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const daysLeft = Math.ceil((_endOfSeason - now) / 86400000);
 
   return `
     <!-- HERO -->
@@ -59,8 +64,8 @@ function buildHomeHTML() {
     <!-- SAISON -->
     <div class="home-section home-season-bar">
       <div class="home-season-info">
-        <span class="home-season-label">⏳ Saison en cours</span>
-        <span class="home-season-name">Saison Mai ${now.getFullYear()}</span>
+        <span class="home-season-label">${_seasonIcon} Saison en cours</span>
+        <span class="home-season-name">${_seasonName} ${now.getFullYear()}</span>
       </div>
       <div class="home-season-countdown" id="home-countdown">
         <div class="home-countdown-block"><span id="cd-days">--</span><small>jours</small></div>
@@ -351,7 +356,10 @@ function startSeasonCountdown() {
 
   function update() {
     const now = new Date();
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0);
+    const _s = window.getCurrentSeason ? window.getCurrentSeason() : null;
+    const end = _s
+      ? new Date(_s.year, _s.endMonth - 1, _s.endDay, 23, 59, 59)
+      : new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0);
     const diff = end - now;
     if (diff <= 0) return;
 

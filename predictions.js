@@ -197,13 +197,21 @@ function renderAuthBar() {
     el.innerHTML = `
       <div class="auth-user">
         <span class="auth-username" onclick="showProfilePage()" style="cursor:pointer">👤 ${currentProfile.username}</span>
-        <span class="auth-points">⭐ ${currentProfile.points} pts</span>
+        <span class="auth-points" id="auth-season-pts">⭐ ${currentProfile.points} pts</span>
         ${currentProfile.streak > 0 ? `<span class="auth-streak" title="Série de ${currentProfile.streak}">🔥 ${currentProfile.streak}</span>` : ''}
         <button class="auth-btn small" onclick="showLeaderboard()">🏆</button>
         <button class="auth-btn small" onclick="showLeaguesPage ? showLeaguesPage() : null">⚔️</button>
         <button class="auth-btn small" onclick="showProfilePage()">⚙️</button>
         <button class="auth-btn small logout" onclick="handleLogout()">↩</button>
       </div>`;
+
+    // Charger les points saisonniers
+    if (window.getSeasonPoints) {
+      window.getSeasonPoints(currentUser.uid).then(seasonPts => {
+        const el = document.getElementById('auth-season-pts');
+        if (el) el.textContent = '⭐ ' + seasonPts + ' pts saison';
+      });
+    }
   } else {
     el.innerHTML = `
       <button class="auth-btn" onclick="showAuthModal('login')">Connexion</button>
