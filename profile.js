@@ -63,16 +63,16 @@ async function loadProfileContent(user) {
     el.innerHTML = `
       <!-- Header profil -->
       <div class="profile-header">
-        <div class="profile-avatar" style="border: 2px solid ${window.getRank ? window.getRank(profile.points, rank || 9999).color : '#a78bfa'}">${profile.username?.[0]?.toUpperCase() || '?'}</div>
+        <div class="profile-avatar" style="border: 2px solid ${window.getSeasonRank ? window.getSeasonRank(profile.points, rank || 9999).color : (window.getRank ? window.getRank(profile.points, rank || 9999).color : '#a78bfa')}">${profile.username?.[0]?.toUpperCase() || '?'}</div>
         <div class="profile-info">
           <div class="profile-username">${profile.username}</div>
           <div class="profile-email">${profile.email}</div>
           <div class="profile-since">Membre depuis ${formatDate(profile.createdAt)}</div>
-          ${window.renderRankBadge ? window.renderRankBadge(profile.points, rank || 9999, 'normal') : ''}
+          ${window.renderSeasonRankBadge ? window.renderSeasonRankBadge(profile.points, rank || 9999, 'normal') : (window.renderRankBadge ? window.renderRankBadge(profile.points, rank || 9999, 'normal') : '')}
         </div>
         <div class="profile-rank">${rankLabel}</div>
       </div>
-      ${window.renderRankProgress ? window.renderRankProgress(profile.points, rank || 9999) : ''}
+      ${window.renderSeasonSection ? '' : (window.renderRankProgress ? window.renderRankProgress(profile.points, rank || 9999) : '')}
 
       <div class="daily-streak-wrap" id="daily-streak-section"></div>
 
@@ -92,11 +92,15 @@ async function loadProfileContent(user) {
         </div>
       </div>
 
-      <!-- Ligne 2 : Points centré -->
+      <!-- Ligne 2 : Points saison + carrière -->
       <div class="profile-points-row">
         <div class="profile-stat">
           <div class="profile-stat-value" style="color:#a78bfa;font-size:28px">⭐ ${profile.points}</div>
-          <div class="profile-stat-label">Points</div>
+          <div class="profile-stat-label">Points saison</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value" style="color:#fbbf24;font-size:22px">🏅 ${profile.totalPoints || profile.points}</div>
+          <div class="profile-stat-label">Points carrière</div>
         </div>
       </div>
 
