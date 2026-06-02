@@ -1,5 +1,5 @@
 // ============================================================
-//  firebase.js — Initialisation Firebase (version compat)
+//  firebase.js — Initialisation Firebase + App Check reCAPTCHA v3
 // ============================================================
 
 const firebaseConfig = {
@@ -13,4 +13,12 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+
+// ── App Check reCAPTCHA v3 ──
+firebase.appCheck().activate(
+  new firebase.appCheck.ReCaptchaV3Provider('6Le4IAktAAAAAdw5qymbxT-eDAH1BhJ8mW2KsdTa'),
+  true // auto-refresh token
+);
+
 console.log('[Firebase] Initialisé ✓');
+console.log('[App Check] Activé ✓');
