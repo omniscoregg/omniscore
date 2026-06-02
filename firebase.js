@@ -20,3 +20,12 @@ appCheck.activate('6Le4IAktAAAAAdw5qymbxT-eDAH1BhJ8mW2KsdTa', true);
 
 console.log('[Firebase] Initialisé ✓');
 console.log('[App Check] Activé ✓');
+
+// ── App Check reCAPTCHA v3 ──
+try {
+  const appCheck = firebase.appCheck();
+  appCheck.activate('6Le4IAktAAAAAdw5qymbxT-eDAH1BhJ8mW2KsdTa', true);
+  console.log('[App Check] Activé ✓');
+} catch(e) {
+  console.warn('[App Check] Non disponible:', e.message);
+}
