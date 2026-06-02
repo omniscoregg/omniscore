@@ -16,8 +16,7 @@ firebase.initializeApp(firebaseConfig);
 
 // ── App Check reCAPTCHA v3 ──
 const appCheck = firebase.appCheck();
-appCheck.activate('6Le4IAktAAAAAdw5qymbxT-eDAH1BhJ8mW2KsdTa', true); // auto-refresh token
-);
+appCheck.activate('6Le4IAktAAAAAdw5qymbxT-eDAH1BhJ8mW2KsdTa', true);
 
 console.log('[Firebase] Initialisé ✓');
 console.log('[App Check] Activé ✓');
