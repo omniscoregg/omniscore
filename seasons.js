@@ -172,7 +172,10 @@ async function getSeasonPoints(uid) {
       .collection('users').doc(uid)
       .collection('seasons').doc(season.seasonKey)
       .get();
-    return snap.exists ? (snap.data().points || 0) : 0;
+    if (snap.exists) return snap.data().points || 0;
+// Fallback : lire directement users.points si la sous-collection n'existe pas
+const userSnap = await firebase.firestore().collection('users').doc(uid).get();
+return userSnap.data()?.points || 0;
   } catch(e) { return 0; }
 }
 
