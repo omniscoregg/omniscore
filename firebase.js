@@ -1,5 +1,5 @@
 // ============================================================
-//  firebase.js — Initialisation Firebase + App Check reCAPTCHA v3
+//  firebase.js — Initialisation Firebase
 // ============================================================
 
 const firebaseConfig = {
@@ -14,18 +14,13 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-// ── App Check reCAPTCHA v3 ──
-const appCheck = firebase.appCheck();
-appCheck.activate('6Le4IAktAAAAAdw5qymbxT-eDAH1BhJ8mW2KsdTa', true);
+// ── App Check temporairement désactivé (erreur reCAPTCHA) ──
+// try {
+//   const appCheck = firebase.appCheck();
+//   appCheck.activate('6Le4IAktAAAAAdw5qymbxT-eDAH1BhJ8mW2KsdTa', true);
+//   console.log('[App Check] Activé ✓');
+// } catch(e) {
+//   console.warn('[App Check] Non disponible:', e.message);
+// }
 
 console.log('[Firebase] Initialisé ✓');
-console.log('[App Check] Activé ✓');
-
-// ── App Check reCAPTCHA v3 ──
-try {
-  const appCheck = firebase.appCheck();
-  appCheck.activate('6Le4IAktAAAAAdw5qymbxT-eDAH1BhJ8mW2KsdTa', true);
-  console.log('[App Check] Activé ✓');
-} catch(e) {
-  console.warn('[App Check] Non disponible:', e.message);
-}
