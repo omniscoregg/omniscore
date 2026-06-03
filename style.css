@@ -4772,3 +4772,23 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* ── Logo équipe dans favoris profil ── */
+.profile-fav-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.profile-fav-arrow {
+  font-size: 16px;
+  color: var(--text3);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.profile-fav-card.team:hover .profile-fav-arrow {
+  color: var(--text2);
+}
