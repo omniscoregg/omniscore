@@ -116,16 +116,40 @@ async function loadProfileContent(user) {
       ${favTeams.length > 0 || favGames.length > 0 ? `
       <div class="profile-section">
         <div class="profile-section-title">⭐ Mes Favoris</div>
-        <div class="profile-favs">
-          ${favGames.map(g => {
-            const cfg = EsportAPI.GAME_CONFIG[g];
-            return cfg ? `<span class="profile-fav-tag game">${cfg.label}</span>` : '';
-          }).join('')}
-          ${favTeams.map(f => {
-            const cfg = EsportAPI.GAME_CONFIG[f.game];
-            return `<span class="profile-fav-tag team" title="${cfg?.label || f.game}">${f.teamName} <span style="opacity:0.6;font-size:10px">${cfg?.label || f.game}</span></span>`;
-          }).join('')}
-        </div>
+        ${favGames.length > 0 ? `
+        <div class="profile-favs-category">
+          <div class="profile-favs-label">🎮 Jeux</div>
+          <div class="profile-favs-grid">
+            ${favGames.map(g => {
+              const cfg = EsportAPI.GAME_CONFIG[g];
+              if (!cfg) return '';
+              const colors = window.GENRE_COLORS?.[cfg.genre] || {};
+              const accent = colors.accent || '#a78bfa';
+              return `<div class="profile-fav-card game" style="border-color:${accent}30">
+                <span class="profile-fav-dot" style="background:${accent}"></span>
+                <span class="profile-fav-name">${cfg.label}</span>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>` : ''}
+        ${favTeams.length > 0 ? `
+        <div class="profile-favs-category">
+          <div class="profile-favs-label">🏆 Équipes</div>
+          <div class="profile-favs-grid">
+            ${favTeams.map(f => {
+              const cfg = EsportAPI.GAME_CONFIG[f.game];
+              const colors = window.GENRE_COLORS?.[cfg?.genre] || {};
+              const accent = colors.accent || '#a78bfa';
+              return `<div class="profile-fav-card team" style="border-color:${accent}30">
+                <span class="profile-fav-dot" style="background:${accent}"></span>
+                <div class="profile-fav-info">
+                  <span class="profile-fav-name">${f.teamName}</span>
+                  <span class="profile-fav-game">${cfg?.label || f.game}</span>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>` : ''}
       </div>
       ` : ''}
 
