@@ -60,6 +60,24 @@ async function loadTeamDetail(teamName, game, token, cfg, colors, teamLogo = '')
     const nameEl = document.getElementById('td-name');
     if (nameEl) nameEl.textContent = teamData?.name || teamName;
 
+    // Mettre à jour le logo depuis l'API si pas déjà fourni
+    const logoEl = document.querySelector('#team-detail-modal .td-logo-header-img');
+    const apiLogo = teamData?.image_url || teamData?.logo || null;
+    if (!logoEl && apiLogo) {
+      const headerDiv = document.querySelector('#team-detail-modal .modal-header > div');
+      if (headerDiv) {
+        const img = document.createElement('img');
+        img.src = apiLogo;
+        img.className = 'td-logo-header-img';
+        img.onerror = () => img.remove();
+        // Insérer après les boutons retour
+        const firstDiv = headerDiv.querySelector('div');
+        headerDiv.insertBefore(img, firstDiv);
+      }
+    } else if (logoEl && !logoEl.src && apiLogo) {
+      logoEl.src = apiLogo;
+    }
+
     // Bouton favori
     const favEl  = document.getElementById('td-fav-btn');
     const user   = window.FirebaseService?.getCurrentUser();
