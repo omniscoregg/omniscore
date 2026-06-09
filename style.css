@@ -5145,3 +5145,8 @@ body {
   top: 2px;
   right: 2px;
 }
+
+/* Cloche visible desktop seulement */
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+}

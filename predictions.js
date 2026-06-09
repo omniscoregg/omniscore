@@ -208,7 +208,7 @@ function renderAuthBar() {
         ${currentProfile.streak > 0 ? `<span class="auth-streak" title="Série de ${currentProfile.streak}">🔥 ${currentProfile.streak}</span>` : ''}
         <button class="auth-btn small" onclick="showLeaderboard()">🏆</button>
 <button class="auth-btn small" onclick="showLeaguesPage ? showLeaguesPage() : null">⚔️</button>
-<button class="auth-btn small notif-btn" onclick="showNotificationsPage()" title="Notifications" style="position:relative">🔔<span class="notif-badge" style="display:none">0</span></button>
+<button class="auth-btn small notif-btn desktop-only" onclick="showNotificationsPage()" title="Notifications" style="position:relative">🔔<span class="notif-badge" style="display:none">0</span></button>
   🔔<span class="notif-badge" style="display:none">0</span>
 </button>
 <button class="auth-btn small logout" onclick="handleLogout()">↩</button>
