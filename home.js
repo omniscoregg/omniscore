@@ -19,6 +19,7 @@ function showHomePage() {
   document.body.insertBefore(page, document.querySelector('.drawer-overlay'));
 
   // Remplir les sections dynamiques
+  renderHomeUserAvatar();
   renderHomeLeaderboard();
   renderHomeLive();
   renderHomeUpcoming();
@@ -57,6 +58,7 @@ function buildHomeHTML() {
           <div class="home-stat-pill" id="home-stat-live">🔴 — matchs live</div>
           <div class="home-stat-pill" id="home-stat-upcoming">🕐 — matchs à venir</div>
         </div>
+        <div id="home-user-avatar" class="home-user-avatar"></div>
         <button class="home-cta-btn" onclick="hideHomePage()">Voir tous les matchs →</button>
       </div>
     </div>
@@ -142,6 +144,34 @@ function _getHomeRank(pts) {
   if (pts < 1750) return { icon: '🔮', label: 'Maître' };
   return { icon: '👑', label: 'Champion' };
 }
+async function renderHomeUserAvatar() {
+  const el = document.getElementById('home-user-avatar');
+  if (!el) return;
+  const user    = window.FirebaseService?.getCurrentUser();
+  if (!user) { el.style.display = 'none'; return; }
+  try {
+    const profile = await window.FirebaseService.getUserProfile(user.uid);
+    if (!profile) return;
+    const pts     = profile.points || 0;
+    const rank    = window.getSeasonRank ? window.getSeasonRank(pts) : { color: '#a78bfa', name: 'Bronze', icon: '🥉' };
+    const initials = (profile.username || '?')[0].toUpperCase();
+    const gravatarUrl = typeof md5 === 'function'
+      ? 'https://www.gravatar.com/avatar/' + md5((profile.email||'').trim().toLowerCase()) + '?s=80&d=404'
+      : null;
+
+    el.innerHTML = `
+      <div class="home-avatar-frame rank-frame-${rank.name.toLowerCase().replace('î','i').replace('â','a')}" style="--rank-color:${rank.color}">
+        ${gravatarUrl ? `<img src="${gravatarUrl}" class="home-avatar-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+        <div class="home-avatar-initials" style="${gravatarUrl ? 'display:none' : 'display:flex'};background:${rank.color}20;color:${rank.color}">${initials}</div>
+      </div>
+      <div class="home-avatar-info">
+        <span class="home-avatar-name">${profile.username}</span>
+        <span class="home-avatar-rank" style="color:${rank.color}">${rank.icon} ${rank.name} · ⭐ ${pts} pts</span>
+      </div>
+    `;
+  } catch(e) { el.style.display = 'none'; }
+}
+
 async function renderHomeLeaderboard() {
   const el = document.getElementById('home-leaderboard');
   if (!el) return;

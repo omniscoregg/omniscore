@@ -1,18 +1,19 @@
 // ----------------------------------------------------------
 //  Avatar — Gravatar + fallback initiales colorées
 // ----------------------------------------------------------
-async function getAvatarHtml(email, username, color, size) {
-  size = size || 64;
-  // Hash MD5 simplifié pour Gravatar (on utilise une lib CDN)
-  const initials = (username || '?')[0].toUpperCase();
+async function getAvatarHtml(email, username, color, size, points) {
+  size   = size || 64;
+  points = points || 0;
+  const initials   = (username || '?')[0].toUpperCase();
   const gravatarUrl = 'https://www.gravatar.com/avatar/' + md5(email.trim().toLowerCase()) + '?s=' + size + '&d=404';
-
-  // On tente Gravatar, fallback SVG initiales
-  return `<div class="profile-avatar-wrap" style="width:${size}px;height:${size}px">
-    <img src="${gravatarUrl}" class="profile-avatar-img"
+  const rankObj    = window.getSeasonRank ? window.getSeasonRank(points) : { name: 'Bronze', color: '#cd7f32' };
+  const rankName   = rankObj.name;
+  const frameClass = 'rank-frame-' + rankName.toLowerCase().replace(/[îâê]/g, c => ({'î':'i','â':'a','ê':'e'}[c]||c));
+  return `<div class="home-avatar-frame ${frameClass}" style="width:${size}px;height:${size}px;--rank-color:${color}">
+    <img src="${gravatarUrl}" class="home-avatar-img"
       onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-      style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;display:block">
-    <div class="profile-avatar-initials" style="display:none;width:${size}px;height:${size}px;background:${color}20;color:${color};border:2px solid ${color};border-radius:50%;font-size:${Math.round(size*0.4)}px;font-weight:800;align-items:center;justify-content:center">
+      style="display:block">
+    <div class="home-avatar-initials" style="display:none;background:${color}20;color:${color};font-size:${Math.round(size*0.4)}px;font-weight:800">
       ${initials}
     </div>
   </div>`;
@@ -247,7 +248,7 @@ async function loadProfileContent(user) {
     const avatarColor = window.getSeasonRank ? window.getSeasonRank(profile.points).color : '#a78bfa';
     const avatarContainer = document.getElementById('profile-avatar-container');
     if (avatarContainer) {
-      getAvatarHtml(profile.email || '', profile.username || '?', avatarColor, 64).then(html => {
+      getAvatarHtml(profile.email || '', profile.username || '?', avatarColor, 64, profile.points || 0).then(html => {
         avatarContainer.innerHTML = html;
       });
     }
