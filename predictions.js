@@ -194,9 +194,16 @@ function renderAuthBar() {
   const el = document.getElementById('auth-bar');
   if (!el) return;
   if (currentUser && currentProfile) {
+    const rankObj    = window.getSeasonRank ? window.getSeasonRank(currentProfile.points || 0) : { name: 'Bronze', color: '#cd7f32' };
+    const frameClass = 'rank-frame-' + rankObj.name.toLowerCase().replace(/[îâêàùé]/g, c => ({'î':'i','â':'a','ê':'e','à':'a','ù':'u','é':'e'}[c]||c));
+    const initials   = (currentProfile.username || '?')[0].toUpperCase();
+
     el.innerHTML = `
       <div class="auth-user">
-        <span class="auth-username" onclick="showProfilePage()" style="cursor:pointer">👤 ${currentProfile.username}</span>
+        <div class="auth-avatar lb-avatar-frame ${frameClass}" id="auth-avatar-wrap" onclick="showProfilePage()" style="cursor:pointer;--rank-color:${rankObj.color};width:30px;height:30px">
+          <div class="lb-avatar-initials" style="display:flex;color:${rankObj.color};font-size:12px">${initials}</div>
+        </div>
+        <span class="auth-username" onclick="showProfilePage()" style="cursor:pointer">${currentProfile.username}</span>
         <span class="auth-points" id="auth-season-pts">⭐ ${currentProfile.points} pts</span>
         ${currentProfile.streak > 0 ? `<span class="auth-streak" title="Série de ${currentProfile.streak}">🔥 ${currentProfile.streak}</span>` : ''}
         <button class="auth-btn small" onclick="showLeaderboard()">🏆</button>
@@ -205,12 +212,24 @@ function renderAuthBar() {
         <button class="auth-btn small logout" onclick="handleLogout()">↩</button>
       </div>`;
 
-    // Charger les points saisonniers
+    // Charger les points saisonniers + Gravatar
     if (window.getSeasonPoints) {
       window.getSeasonPoints(currentUser.uid).then(seasonPts => {
-        const el = document.getElementById('auth-season-pts');
-        if (el) el.textContent = '⭐ ' + seasonPts + ' pts saison';
+        const pts = document.getElementById('auth-season-pts');
+        if (pts) pts.textContent = '⭐ ' + seasonPts + ' pts saison';
       });
+    }
+    // Charger l'avatar Gravatar
+    if (typeof md5 === 'function' && currentProfile.email) {
+      const avatarWrap = document.getElementById('auth-avatar-wrap');
+      if (avatarWrap) {
+        const gravatarUrl = 'https://www.gravatar.com/avatar/' + md5(currentProfile.email.trim().toLowerCase()) + '?s=30&d=404';
+        const img = new Image();
+        img.onload = () => {
+          avatarWrap.innerHTML = `<img src="${gravatarUrl}" class="lb-avatar-img" style="display:block">`;
+        };
+        img.src = gravatarUrl;
+      }
     }
   } else {
     el.innerHTML = `

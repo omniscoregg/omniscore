@@ -4982,3 +4982,21 @@ body {
 .lb-avatar-frame.rank-frame-maitre  { background: linear-gradient(135deg, #a855f7, #7c3aed); box-shadow: 0 0 12px #a855f760; }
 .lb-avatar-frame.rank-frame-champion { background: linear-gradient(135deg, #f97316, #dc2626); box-shadow: 0 0 12px #f9731660; }
 .lb-avatar-frame.rank-frame-omni    { background: linear-gradient(135deg, #ffffff, #a78bfa, #38bdf8); box-shadow: 0 0 14px #ffffff60; }
+
+/* ── Avatar navbar ── */
+.auth-avatar {
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.auth-avatar:hover { transform: scale(1.05); }
+
+/* ── Espacement bouton page d'accueil ── */
+.home-cta-btn {
+  margin-top: 20px !important;
+}
+
+.home-user-avatar {
+  margin-top: 20px !important;
+  margin-bottom: 4px !important;
+}

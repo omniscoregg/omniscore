@@ -159,12 +159,13 @@ async function renderHomeUserAvatar() {
       ? 'https://www.gravatar.com/avatar/' + md5((profile.email||'').trim().toLowerCase()) + '?s=80&d=404'
       : null;
 
+    const frameClass = 'rank-frame-' + rank.name.toLowerCase().replace(/[îâêàùé]/g, c => ({'î':'i','â':'a','ê':'e','à':'a','ù':'u','é':'e'}[c]||c));
     el.innerHTML = `
-      <div class="home-avatar-frame rank-frame-${rank.name.toLowerCase().replace('î','i').replace('â','a')}" style="--rank-color:${rank.color}">
-        ${gravatarUrl ? `<img src="${gravatarUrl}" class="home-avatar-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
-        <div class="home-avatar-initials" style="${gravatarUrl ? 'display:none' : 'display:flex'};background:${rank.color}20;color:${rank.color}">${initials}</div>
+      <div class="lb-avatar-frame ${frameClass}" id="home-avatar-img-wrap" style="--rank-color:${rank.color};width:56px;height:56px;cursor:pointer" onclick="showProfilePage && showProfilePage()">
+        ${gravatarUrl ? `<img src="${gravatarUrl}" class="lb-avatar-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+        <div class="lb-avatar-initials" style="${gravatarUrl ? 'display:none' : 'display:flex'};color:${rank.color};font-size:22px;font-weight:800;background:${rank.color}20">${initials}</div>
       </div>
-      <div class="home-avatar-info">
+      <div class="home-avatar-info" style="cursor:pointer" onclick="showProfilePage && showProfilePage()">
         <span class="home-avatar-name">${profile.username}</span>
         <span class="home-avatar-rank" style="color:${rank.color}">${rank.icon} ${rank.name} · ⭐ ${pts} pts</span>
       </div>
