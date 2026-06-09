@@ -4942,3 +4942,43 @@ body {
   position: relative;
   flex-shrink: 0;
 }
+
+/* ── Avatars dans le classement ── */
+.lb-avatar-frame {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+.lb-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.lb-avatar-initials {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  background: var(--surface2);
+}
+
+/* Appliquer les mêmes cadres de rang aux avatars lb */
+.lb-avatar-frame.rank-frame-bronze  { background: linear-gradient(135deg, #cd7f32, #a0522d); box-shadow: 0 0 6px #cd7f3240; }
+.lb-avatar-frame.rank-frame-argent  { background: linear-gradient(135deg, #c0c0c0, #909090); box-shadow: 0 0 6px #c0c0c040; }
+.lb-avatar-frame.rank-frame-or      { background: linear-gradient(135deg, #ffd700, #ffa500); box-shadow: 0 0 8px #ffd70050; }
+.lb-avatar-frame.rank-frame-platine { background: linear-gradient(135deg, #00d4ff, #0099cc); box-shadow: 0 0 8px #00d4ff50; }
+.lb-avatar-frame.rank-frame-diamant { background: linear-gradient(135deg, #b9f2ff, #38bdf8); box-shadow: 0 0 10px #b9f2ff60; }
+.lb-avatar-frame.rank-frame-ma-tre,
+.lb-avatar-frame.rank-frame-maitre  { background: linear-gradient(135deg, #a855f7, #7c3aed); box-shadow: 0 0 12px #a855f760; }
+.lb-avatar-frame.rank-frame-champion { background: linear-gradient(135deg, #f97316, #dc2626); box-shadow: 0 0 12px #f9731660; }
+.lb-avatar-frame.rank-frame-omni    { background: linear-gradient(135deg, #ffffff, #a78bfa, #38bdf8); box-shadow: 0 0 14px #ffffff60; }

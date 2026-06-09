@@ -429,15 +429,36 @@ async function loadLeaderboard(type, btn) {
     }
     const data = type === 'global' ? await getLeaderboard() : await getLeaderboardByGame(type);
     if (data.length === 0) { el.innerHTML = '<div class="lb-empty">Aucune prédiction pour l\'instant.</div>'; return; }
+    // Générer les avatars Gravatar pour chaque joueur
+    const avatarMap = {};
+    if (typeof md5 === 'function') {
+      data.forEach(u => {
+        if (u.email) avatarMap[u.id] = 'https://www.gravatar.com/avatar/' + md5(u.email.trim().toLowerCase()) + '?s=36&d=404';
+      });
+    }
+
     el.innerHTML = `
       <table class="lb-table">
-        <thead><tr><th>#</th><th>Pseudo</th><th>Rang</th><th>Points</th><th>🔥</th></tr></thead>
+        <thead><tr><th>#</th><th>Joueur</th><th>Rang</th><th>Points</th><th>🔥</th></tr></thead>
         <tbody>${data.map(u => {
-          const rankBadge = window.renderRankBadge ? window.renderRankBadge(u.points, u.rank, 'small') : '';
+          const rankObj   = window.getSeasonRank ? window.getSeasonRank(u.points) : { name: 'Bronze', color: '#cd7f32', icon: '🥉' };
+          const rankBadge = window.renderSeasonRankBadge ? window.renderSeasonRankBadge(u.points, u.rank, 'small') : '';
+          const frameClass = 'rank-frame-' + rankObj.name.toLowerCase().replace(/[îâêàùé]/g, c => ({'î':'i','â':'a','ê':'e','à':'a','ù':'u','é':'e'}[c]||c));
+          const initials  = (u.username || '?')[0].toUpperCase();
+          const avatarUrl = avatarMap[u.id];
+          const avatarHtml = `<div class="lb-avatar-frame ${frameClass}" style="--rank-color:${rankObj.color}">
+            ${avatarUrl ? `<img src="${avatarUrl}" class="lb-avatar-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+            <div class="lb-avatar-initials" style="${avatarUrl ? 'display:none' : 'display:flex'};color:${rankObj.color}">${initials}</div>
+          </div>`;
           return `
           <tr class="${u.id === currentUser?.uid ? 'lb-me' : ''}">
             <td class="lb-rank">${u.rank === 1 ? '🥇' : u.rank === 2 ? '🥈' : u.rank === 3 ? '🥉' : u.rank}</td>
-            <td class="lb-name">${u.username || '—'}</td>
+            <td class="lb-name">
+              <div style="display:flex;align-items:center;gap:8px">
+                ${avatarHtml}
+                <span>${u.username || '—'}</span>
+              </div>
+            </td>
             <td>${rankBadge}</td>
             <td class="lb-pts">⭐ ${u.points}</td>
             <td class="lb-streak">${u.streak > 0 ? '🔥 ' + u.streak : '—'}</td>
