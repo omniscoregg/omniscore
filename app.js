@@ -724,4 +724,38 @@ function goHome() {
 }
 window.goHome = goHome;
 
+// ----------------------------------------------------------
+//  Menu profil mobile
+// ----------------------------------------------------------
+function toggleMobileProfileMenu(btn) {
+  const menu = document.getElementById('mobile-profile-menu');
+  if (!menu) return;
+  const isOpen = menu.style.display !== 'none';
+  if (isOpen) {
+    menu.style.display = 'none';
+  } else {
+    menu.style.display = 'flex';
+    // Fermer si on clique ailleurs
+    setTimeout(() => {
+      document.addEventListener('click', closeMobileProfileMenuOutside, { once: true });
+    }, 50);
+  }
+}
+
+function closeMobileProfileMenu() {
+  const menu = document.getElementById('mobile-profile-menu');
+  if (menu) menu.style.display = 'none';
+}
+
+function closeMobileProfileMenuOutside(e) {
+  const menu = document.getElementById('mobile-profile-menu');
+  const btn  = document.getElementById('mnav-profile');
+  if (menu && !menu.contains(e.target) && !btn?.contains(e.target)) {
+    menu.style.display = 'none';
+  }
+}
+
+window.toggleMobileProfileMenu = toggleMobileProfileMenu;
+window.closeMobileProfileMenu  = closeMobileProfileMenu;
+
 document.addEventListener('DOMContentLoaded', init);

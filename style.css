@@ -5000,3 +5000,148 @@ body {
   margin-top: 20px !important;
   margin-bottom: 4px !important;
 }
+
+/* ----------------------------------------------------------
+   Notifications
+   ---------------------------------------------------------- */
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  pointer-events: none;
+}
+
+.notif-btn {
+  position: relative;
+}
+
+.notif-box {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.notif-loading,
+.notif-empty {
+  text-align: center;
+  color: var(--text3);
+  padding: 40px 20px;
+  font-size: 14px;
+}
+
+.notif-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 16px 0 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.notif-card {
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--surface2);
+  margin-bottom: 8px;
+  border-left: 3px solid transparent;
+  transition: background 0.15s;
+}
+
+.notif-card.notif-unread {
+  border-left-color: var(--accent);
+  background: var(--accent)10;
+}
+
+.notif-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.notif-card-text {
+  font-size: 12px;
+  color: var(--text2);
+  margin-bottom: 4px;
+}
+
+.notif-card-time {
+  font-size: 11px;
+  color: var(--text3);
+}
+
+/* ----------------------------------------------------------
+   Menu profil mobile
+   ---------------------------------------------------------- */
+.mobile-profile-menu {
+  position: fixed;
+  bottom: 70px;
+  right: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 1100;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
+  min-width: 180px;
+}
+
+.mobile-profile-menu-item {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.15s;
+}
+
+.mobile-profile-menu-item:hover {
+  background: var(--surface2);
+}
+
+.notif-badge-inline {
+  background: #ef4444;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  margin-left: auto;
+}
+
+/* Bouton profil mobile — position relative pour le badge */
+#mnav-profile {
+  position: relative;
+}
+
+#mnav-profile .notif-badge {
+  top: 2px;
+  right: 2px;
+}

@@ -207,9 +207,11 @@ function renderAuthBar() {
         <span class="auth-points" id="auth-season-pts">⭐ ${currentProfile.points} pts</span>
         ${currentProfile.streak > 0 ? `<span class="auth-streak" title="Série de ${currentProfile.streak}">🔥 ${currentProfile.streak}</span>` : ''}
         <button class="auth-btn small" onclick="showLeaderboard()">🏆</button>
-        <button class="auth-btn small" onclick="showLeaguesPage ? showLeaguesPage() : null">⚔️</button>
-        <button class="auth-btn small" onclick="showProfilePage()">⚙️</button>
-        <button class="auth-btn small logout" onclick="handleLogout()">↩</button>
+<button class="auth-btn small" onclick="showLeaguesPage ? showLeaguesPage() : null">⚔️</button>
+<button class="auth-btn small notif-btn" onclick="showNotificationsPage()" title="Notifications" style="position:relative">🔔<span class="notif-badge" style="display:none">0</span></button>
+  🔔<span class="notif-badge" style="display:none">0</span>
+</button>
+<button class="auth-btn small logout" onclick="handleLogout()">↩</button>
       </div>`;
 
     // Charger les points saisonniers + Gravatar
@@ -496,8 +498,19 @@ function initPredictions() {
     currentUser    = user;
     currentProfile = user ? await getUserProfile(user.uid) : null;
     renderAuthBar();
+    if (user && window.loadNotifications) window.loadNotifications();
     const favBtn = document.getElementById('fav-nav-btn');
-    if (favBtn) favBtn.style.display = user ? 'flex' : 'none';
+if (favBtn) favBtn.style.display = user ? 'flex' : 'none';
+
+// Bouton profil mobile
+const mnavProfile = document.getElementById('mnav-profile');
+if (mnavProfile) mnavProfile.style.display = user ? 'flex' : 'none';
+
+// Mettre à jour le pseudo dans le bouton mobile
+if (user && currentProfile) {
+  const label = document.getElementById('mnav-profile-label');
+  if (label) label.textContent = currentProfile.username || 'Profil';
+}
 
     // Landing page ou matchs selon connexion
     if (window.handleLandingDisplay) {

@@ -77,6 +77,7 @@
   <script src="esport-info.js"></script>
   <script src="champions.js"></script>
   <script src="seasons.js"></script>
+  <script src="notifications.js"></script>
   <script src="app.js"></script>
 
   <!-- Drawer jeux mobile -->
@@ -102,7 +103,22 @@
     <button class="mobile-nav-btn" onclick="showLeaderboard && showLeaderboard()">
       <span class="nav-icon">🏆</span><span>Classement</span>
     </button>
+    <button class="mobile-nav-btn" onclick="toggleMobileProfileMenu(this)" id="mnav-profile" style="display:none;position:relative">
+      <span class="nav-icon" id="mnav-profile-icon">👤</span>
+      <span id="mnav-profile-label">Profil</span>
+      <span class="notif-badge" id="mobile-notif-badge" style="display:none">0</span>
+    </button>
   </nav>
+
+  <!-- Menu déroulant profil mobile -->
+  <div id="mobile-profile-menu" class="mobile-profile-menu" style="display:none">
+    <button class="mobile-profile-menu-item" onclick="closeMobileProfileMenu();showProfilePage()">
+      👤 Mon Profil
+    </button>
+    <button class="mobile-profile-menu-item" onclick="closeMobileProfileMenu();showNotificationsPage()">
+      🔔 Notifications <span class="notif-badge-inline" id="mobile-notif-badge-menu" style="display:none">0</span>
+    </button>
+  </div>
 
 </body>
 </html>
