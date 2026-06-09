@@ -134,7 +134,6 @@ function getDaysLeftInSeason(date) {
 //  Rang saisonnier
 // ----------------------------------------------------------
 function getSeasonRank(seasonPoints, globalRank) {
-  if (globalRank !== null && globalRank !== undefined && globalRank <= 500) return SEASON_OMNI_RANK;
   for (var i = SEASON_RANKS.length - 1; i >= 0; i--) {
     if (seasonPoints >= SEASON_RANKS[i].min) return SEASON_RANKS[i];
   }
