@@ -2,7 +2,7 @@
 //  team-detail.js — Fiche d'équipe
 // ============================================================
 
-async function showTeamDetail(teamName, game, fromMatch = null, teamLogo = '') {
+async function showTeamDetail(teamName, game, fromMatch = null, teamLogo = '', fromProfile = false) {
   document.getElementById('team-detail-modal')?.remove();
 
   const cfg    = window.EsportAPI?.GAME_CONFIG?.[game];
@@ -17,6 +17,7 @@ async function showTeamDetail(teamName, game, fromMatch = null, teamLogo = '') {
     <div class="modal-box wide team-detail-box">
       <div class="modal-header">
         <div style="display:flex;align-items:center;gap:10px">
+          ${fromProfile ? '<button class="back-btn" onclick="closeTeamDetail();showProfilePage()">← Profil</button>' : ''}
           ${fromMatch ? '<button class="back-btn" onclick="closeTeamDetail();showMatchDetail(window._lastOpenedMatch)">← Match</button>' : ''}
           ${teamLogo ? '<img src="' + teamLogo + '" class="td-logo-header-img">' : ''}
           <div>
