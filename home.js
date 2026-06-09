@@ -129,14 +129,17 @@ function buildHomeHTML() {
 }
 
 function _getHomeRank(pts) {
-  if (window.getRankInfo) return getRankInfo(pts);
-  // Fallback inline si ranks.js pas encore chargé
-  if (pts < 100)  return { icon: '🥉', label: 'Bronze' };
-  if (pts < 300)  return { icon: '🥈', label: 'Argent' };
-  if (pts < 700)  return { icon: '🥇', label: 'Or' };
-  if (pts < 1500) return { icon: '💎', label: 'Platine' };
-  if (pts < 3000) return { icon: '💠', label: 'Diamant' };
-  if (pts < 7000) return { icon: '🔮', label: 'Maître' };
+  if (window.getSeasonRank) {
+    const r = window.getSeasonRank(pts);
+    return { icon: r.icon, label: r.name };
+  }
+  // Fallback seuils saisonniers
+  if (pts < 25)   return { icon: '🥉', label: 'Bronze' };
+  if (pts < 75)   return { icon: '🥈', label: 'Argent' };
+  if (pts < 175)  return { icon: '🥇', label: 'Or' };
+  if (pts < 375)  return { icon: '💎', label: 'Platine' };
+  if (pts < 750)  return { icon: '💠', label: 'Diamant' };
+  if (pts < 1750) return { icon: '🔮', label: 'Maître' };
   return { icon: '👑', label: 'Champion' };
 }
 async function renderHomeLeaderboard() {
