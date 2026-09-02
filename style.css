@@ -5216,3 +5216,50 @@ body {
   .onetap-btn  { margin-left: 8px; flex-shrink: 0; }
   .onetap-done { margin-left: 8px; flex-shrink: 0; }
 }
+
+/* ── Nom compétition visible sur mobile en bas de carte ── */
+@media (max-width: 768px) {
+  .match-meta {
+    display: block !important;
+    font-size: 10px;
+    color: var(--text3);
+    text-align: right;
+    margin-top: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+}
+
+/* ── Match bottom : heure à gauche, tournoi à droite ── */
+.match-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  gap: 8px;
+}
+
+.match-time-left {
+  font-size: 11px;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.match-tournament-right {
+  font-size: 11px;
+  color: var(--text3);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+@media (max-width: 768px) {
+  .match-tournament-right { max-width: 150px; font-size: 10px; }
+}

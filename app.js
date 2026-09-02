@@ -403,7 +403,10 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
           ${!isUpcoming && m.score2 !== null ? `<span class="team-score-inline">${m.score2}</span>` : ''}
         </div>
       </div>
-      ${timeInfo ? `<div class="match-time">${timeInfo}</div>` : ''}
+      <div class="match-bottom">
+        ${timeInfo ? `<span class="match-time-left">${timeInfo}</span>` : ''}
+        <span class="match-tournament-right">${m.tournament} · ${m.format}</span>
+      </div>
     </div>
   `;
 }
@@ -538,7 +541,10 @@ function renderMatchCardSimple(m, isUpcoming = false, isLive = false) {
         <div class="match-score">${score}</div>
         <div class="team-block right ${w2class}"><span class="team-name">${m.team2.name}</span>${logo2}</div>
       </div>
-      ${timeInfo ? `<div class="match-time">${timeInfo}</div>` : ''}
+      <div class="match-bottom">
+        ${timeInfo ? `<span class="match-time-left">${timeInfo}</span>` : ''}
+        <span class="match-tournament-right">${m.tournament} · ${m.format}</span>
+      </div>
     </div>
   `;
 }
