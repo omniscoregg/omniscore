@@ -5165,22 +5165,28 @@ body {
 @media (max-width: 768px) {
   .match-body {
     flex-direction: column;
-    gap: 6px;
+    gap: 0;
     align-items: stretch;
   }
+
+  /* Cacher le score central — on l'affiche inline */
+  .match-score { display: none !important; }
 
   .team-block {
     flex-direction: row !important;
     justify-content: flex-start;
     text-align: left !important;
     width: 100%;
-    padding: 4px 0;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
   }
 
   .team-block.right {
     flex-direction: row !important;
     justify-content: flex-start;
     text-align: left !important;
+    border-bottom: none;
   }
 
   .team-name {
@@ -5192,22 +5198,21 @@ body {
     flex: 1;
   }
 
-  .match-score {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    min-width: unset;
-    width: 100%;
-    padding: 2px 0;
+  /* Score inline à droite de chaque équipe via data attribute */
+  .team-block .team-score-inline {
+    font-size: 15px;
+    font-weight: 700;
     color: var(--text3);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    order: 2;
+    margin-left: auto;
+    flex-shrink: 0;
+    min-width: 20px;
+    text-align: right;
   }
 
-  .team-block:first-child { order: 1; }
-  .team-block.right       { order: 3; }
-  .onetap-btn             { margin-left: auto; flex-shrink: 0; }
-  .onetap-done            { margin-left: auto; flex-shrink: 0; }
+  .team-block.winner .team-score-inline {
+    color: var(--accent);
+  }
+
+  .onetap-btn  { margin-left: 8px; flex-shrink: 0; }
+  .onetap-done { margin-left: 8px; flex-shrink: 0; }
 }
