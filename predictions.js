@@ -200,18 +200,21 @@ function renderAuthBar() {
 
     el.innerHTML = `
       <div class="auth-user">
+        <!-- Avatar cliquable → profil -->
         <div class="auth-avatar lb-avatar-frame ${frameClass}" id="auth-avatar-wrap" onclick="showProfilePage()" style="cursor:pointer;--rank-color:${rankObj.color};width:30px;height:30px">
           <div class="lb-avatar-initials" style="display:flex;color:${rankObj.color};font-size:12px">${initials}</div>
         </div>
-        <span class="auth-username" onclick="showProfilePage()" style="cursor:pointer">${currentProfile.username}</span>
-        <span class="auth-points" id="auth-season-pts">⭐ ${currentProfile.points} pts</span>
-        ${currentProfile.streak > 0 ? `<span class="auth-streak" title="Série de ${currentProfile.streak}">🔥 ${currentProfile.streak}</span>` : ''}
-        <button class="auth-btn small" onclick="showLeaderboard()">🏆</button>
-<button class="auth-btn small" onclick="showLeaguesPage ? showLeaguesPage() : null">⚔️</button>
-<button class="auth-btn small notif-btn desktop-only" onclick="showNotificationsPage()" title="Notifications" style="position:relative">🔔<span class="notif-badge" style="display:none">0</span></button>
-  🔔<span class="notif-badge" style="display:none">0</span>
-</button>
-<button class="auth-btn small logout" onclick="handleLogout()">↩</button>
+        <!-- Pseudo + points : masqués sur mobile -->
+        <span class="auth-username desktop-only" onclick="showProfilePage()" style="cursor:pointer">${currentProfile.username}</span>
+        <span class="auth-points desktop-only" id="auth-season-pts">⭐ ${currentProfile.points} pts</span>
+        <!-- Points mobile : version courte -->
+        <span class="auth-points mobile-only" id="auth-season-pts-mobile">⭐ ${currentProfile.points}</span>
+        ${currentProfile.streak > 0 ? `<span class="auth-streak desktop-only" title="Série de ${currentProfile.streak}">🔥 ${currentProfile.streak}</span>` : ''}
+        <!-- Boutons desktop uniquement -->
+        <button class="auth-btn small desktop-only" onclick="showLeaderboard()">🏆</button>
+        <button class="auth-btn small desktop-only" onclick="showLeaguesPage ? showLeaguesPage() : null">⚔️</button>
+        <button class="auth-btn small desktop-only" onclick="showProfilePage()">⚙️</button>
+        <button class="auth-btn small logout desktop-only" onclick="handleLogout()">↩</button>
       </div>`;
 
     // Charger les points saisonniers + Gravatar
@@ -219,6 +222,8 @@ function renderAuthBar() {
       window.getSeasonPoints(currentUser.uid).then(seasonPts => {
         const pts = document.getElementById('auth-season-pts');
         if (pts) pts.textContent = '⭐ ' + seasonPts + ' pts saison';
+        const ptsMobile = document.getElementById('auth-season-pts-mobile');
+        if (ptsMobile) ptsMobile.textContent = '⭐ ' + seasonPts;
       });
     }
     // Charger l'avatar Gravatar
