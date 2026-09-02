@@ -5263,3 +5263,8 @@ body {
 @media (max-width: 768px) {
   .match-tournament-right { max-width: 150px; font-size: 10px; }
 }
+
+/* Cacher match-meta sur mobile (tournoi déjà affiché en bas) */
+@media (max-width: 768px) {
+  .match-meta { display: none !important; }
+}
