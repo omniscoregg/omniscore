@@ -283,6 +283,10 @@ body {
   font-size: 13px;
   font-weight: 500;
   color: #c8cedd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
 }
 
 .team-block.winner .team-name { color: var(--text); }
@@ -1971,6 +1975,7 @@ body {
 
   /* Cartes de match */
   .match-card { padding: 10px 12px; }
+  .team-name { font-size: 12px; max-width: 85px; }
   .match-top { gap: 4px; }
   .match-game { font-size: 10px; }
   .match-meta { font-size: 10px; display: none; }
