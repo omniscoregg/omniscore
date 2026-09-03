@@ -324,7 +324,19 @@ window.getValidScores = getValidScores;
 async function confirmPredWithScore(matchId, game, team1, team2, winner, s1, s2) {
   document.getElementById('score-row-' + matchId)?.remove();
   document.querySelectorAll('.onetap-score-panel, .score-choice-panel').forEach(e => e.remove());
+
+  // Fermer la fiche de match si ouverte
+  const matchModal = document.getElementById('match-detail-modal');
+  if (matchModal) matchModal.remove();
+
+  // Son immédiat (avant await pour ne pas bloquer)
+  playPredictionSound();
+
+  // Sauvegarder la prédiction
   await predict(matchId, game, team1, team2, winner, s1, s2);
+
+  // Effet glow après save
+  glowMatchCard(matchId, game, winner, s1, s2);
 }
 window.confirmPredWithScore = confirmPredWithScore;
 
