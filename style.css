@@ -5322,3 +5322,98 @@ body {
   background: rgba(239, 68, 68, 0.25);
   border-color: #f87171;
 }
+
+/* ── Historique prédictions catégorisé ── */
+.pred-view-toggle {
+  display: flex;
+  gap: 4px;
+}
+
+.pred-view-btn {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.pred-view-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.pred-view-btn:hover { color: var(--text); }
+
+/* ── Groupe par jeu ── */
+.pred-game-group {
+  margin-bottom: 16px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.pred-game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--surface2);
+  gap: 8px;
+}
+
+.pred-game-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pred-game-label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pred-game-stats {
+  font-size: 11px;
+  color: var(--text3);
+}
+
+.pred-game-pct {
+  font-size: 20px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* ── Groupe par tournoi ── */
+.pred-tournoi-group {
+  border-top: 1px solid var(--border);
+}
+
+.pred-tournoi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px;
+  background: var(--surface);
+}
+
+.pred-tournoi-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2);
+}
+
+.pred-tournoi-stats {
+  font-size: 10px;
+  color: var(--text3);
+}
+
+.pred-tournoi-group .pred-history-row {
+  padding-left: 24px;
+}
+
+@media (max-width: 768px) {
+  .pred-game-pct { font-size: 16px; }
+  .pred-game-header { padding: 8px 10px; }
+}

@@ -229,6 +229,7 @@ async function loadProfileContent(user) {
     `;
 
     renderDailyStreak(dayStreak, nextBonus);
+    _predCache = predictions;
 
     // Avatar Gravatar + cadre rang
     const avatarColor = window.getSeasonRank ? window.getSeasonRank(profile.points || 0).color : '#a78bfa';
@@ -322,6 +323,87 @@ function renderDailyStreak(dayStreak, nextBonus) {
     + '<div class="daily-streak-bar">' + dayDots + '</div>'
     + '<div class="daily-streak-info">' + info + '</div>';
 }
+
+// ----------------------------------------------------------
+//  Historique prédictions — Vue liste
+// ----------------------------------------------------------
+function renderPredHistoryList(preds) {
+  return preds.map(p => renderPredRow(p)).join('');
+}
+
+// ----------------------------------------------------------
+//  Historique prédictions — Vue par jeu
+// ----------------------------------------------------------
+function renderPredHistoryByGame(preds) {
+  // Grouper par jeu
+  const byGame = {};
+  preds.forEach(p => {
+    if (!byGame[p.game]) byGame[p.game] = [];
+    byGame[p.game].push(p);
+  });
+
+  return Object.entries(byGame).map(([game, gamePreds]) => {
+    const cfg    = EsportAPI.GAME_CONFIG[game];
+    const colors = window.GENRE_COLORS?.[cfg?.genre] || {};
+    const accent = colors.accent || '#a78bfa';
+    const label  = cfg?.label || game;
+
+    const resolved = gamePreds.filter(p => p.result !== null);
+    const correct  = gamePreds.filter(p => p.result === 'correct' || p.result === 'perfect').length;
+    const perfect  = gamePreds.filter(p => p.result === 'perfect').length;
+    const pct      = resolved.length > 0 ? Math.round((correct / resolved.length) * 100) : 0;
+
+    // Grouper par tournoi
+    const byTournoi = {};
+    gamePreds.forEach(p => {
+      const t = p.tournament || 'Autre';
+      if (!byTournoi[t]) byTournoi[t] = [];
+      byTournoi[t].push(p);
+    });
+
+    const tournoiHtml = Object.entries(byTournoi).map(([tournoi, tPreds]) => {
+      const tCorrect = tPreds.filter(p => p.result === 'correct' || p.result === 'perfect').length;
+      const tResolved = tPreds.filter(p => p.result !== null).length;
+      const tPct = tResolved > 0 ? Math.round((tCorrect / tResolved) * 100) : 0;
+      return `
+        <div class="pred-tournoi-group">
+          <div class="pred-tournoi-header">
+            <span class="pred-tournoi-name">🏆 ${tournoi}</span>
+            <span class="pred-tournoi-stats">${tPreds.length} préd · ${tPct}% ✅</span>
+          </div>
+          ${tPreds.slice(0, 5).map(p => renderPredRow(p)).join('')}
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="pred-game-group">
+        <div class="pred-game-header" style="border-left:3px solid ${accent}">
+          <div class="pred-game-info">
+            <span class="pred-game-label" style="color:${accent}">${label}</span>
+            <span class="pred-game-stats">${gamePreds.length} prédictions · ${pct}% de réussite · 🏆 ${perfect} parfaites</span>
+          </div>
+          <div class="pred-game-pct" style="color:${pct >= 60 ? '#4ade80' : pct >= 40 ? '#fbbf24' : '#f87171'}">${pct}%</div>
+        </div>
+        ${tournoiHtml}
+      </div>`;
+  }).join('');
+}
+
+// Switcher de vue
+let _predViewMode = 'list';
+let _predCache = [];
+function switchPredView(mode) {
+  _predViewMode = mode;
+  document.querySelectorAll('.pred-view-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('pred-view-' + mode);
+  if (btn) btn.classList.add('active');
+  const container = document.getElementById('pred-history-container');
+  if (!container || _predCache.length === 0) return;
+  container.innerHTML = mode === 'game'
+    ? renderPredHistoryByGame(_predCache)
+    : renderPredHistoryList(_predCache.slice(0, 20));
+}
+window.switchPredView = switchPredView;
 
 window.showProfilePage = showProfilePage;
 console.log('[profile] chargé ✓');
