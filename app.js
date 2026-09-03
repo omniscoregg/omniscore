@@ -385,7 +385,7 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
   }
 
   return `
-    <div class="match-card ${isUpcoming ? 'upcoming-match' : ''}" style="border-left:3px solid ${colors.accent}30;cursor:pointer" onclick="openMatchDetail('${storeKey}')" data-key="${storeKey}">
+    <div class="match-card ${isUpcoming ? 'upcoming-match' : ''}" style="border-left:3px solid ${colors.accent}30;cursor:pointer" onclick="openMatchDetail('${storeKey}')" data-key="${storeKey}" data-match-id="${m.id}">
       <div class="match-top">
         <span class="match-game" style="color:${colors.accent}">${m.gameLabel}</span>
         <span class="match-meta">${m.tournament} · ${m.format}</span>
@@ -533,7 +533,7 @@ function renderMatchCardSimple(m, isUpcoming = false, isLive = false) {
   const storeKey = `match_${m.id}`;
   matchStore.set(storeKey, m);
   return `
-    <div class="match-card ${isUpcoming ? 'upcoming-match' : ''}" style="border-left:3px solid ${colors.accent}30;cursor:pointer" onclick="openMatchDetail('${storeKey}')" data-key="${storeKey}">
+    <div class="match-card ${isUpcoming ? 'upcoming-match' : ''}" style="border-left:3px solid ${colors.accent}30;cursor:pointer" onclick="openMatchDetail('${storeKey}')" data-key="${storeKey}" data-match-id="${m.id}">
       <div class="match-top">
         <span class="match-game" style="color:${colors.accent}">${m.gameLabel}</span>
         <span class="match-meta">${m.tournament} · ${m.format}</span>
