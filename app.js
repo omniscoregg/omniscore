@@ -373,6 +373,8 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
       tapBtn1 = '<button class="onetap-btn predict pred-pill" data-id="' + id + '" data-game="' + gm + '" data-t1="' + t1 + '" data-t2="' + t2 + '" data-winner="' + t1 + '" data-format="' + fmt + '" onclick="event.stopPropagation();selectPredTeam(this,\'' + id + '\',\'' + gm + '\',\'' + t1 + '\',\'' + t2 + '\',\'' + t1 + '\',\'' + fmt + '\')" title="Prédire ' + t1 + '"><span class="pred-pill-dot"></span></button>';
       tapBtn2 = '<button class="onetap-btn predict pred-pill" data-id="' + id + '" data-game="' + gm + '" data-t1="' + t1 + '" data-t2="' + t2 + '" data-winner="' + t2 + '" data-format="' + fmt + '" onclick="event.stopPropagation();selectPredTeam(this,\'' + id + '\',\'' + gm + '\',\'' + t1 + '\',\'' + t2 + '\',\'' + t2 + '\',\'' + fmt + '\')" title="Prédire ' + t2 + '"><span class="pred-pill-dot"></span></button>';
     } else if (predBtn.includes('pred-existing') || predBtn.includes('Prédit')) {
+      const id = String(m.id);
+      const t1 = String(m.team1?.name || '');
       const predData = window._predStore?.[id] || {};
       const isWinner1 = predData.winner === t1;
       const scoreStr1 = predData.score1 !== null && predData.score1 !== undefined ? predData.score1 : '';
