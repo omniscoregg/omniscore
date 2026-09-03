@@ -67,11 +67,21 @@ async function getLeaderboard(limitCount = 20) {
 }
 
 async function getLeaderboardByGame(game, limitCount = 20) {
-  const snap   = await db.collection('predictions').orderBy('points', 'desc').get();
+  // Filtrer par saison courante
+  const seasonKey = window.getCurrentSeason ? window.getCurrentSeason().seasonKey : null;
+  let snap;
+  if (seasonKey) {
+    snap = await db.collection('predictions')
+      .where('game', '==', game)
+      .where('seasonKey', '==', seasonKey)
+      .get();
+  } else {
+    snap = await db.collection('predictions').where('game', '==', game).get();
+  }
   const byUser = {};
-  snap.docs.map(d => d.data()).filter(p => p.game === game).forEach(p => {
+  snap.docs.map(d => d.data()).forEach(p => {
     if (!byUser[p.uid]) byUser[p.uid] = { uid: p.uid, points: 0, predictions: 0 };
-    byUser[p.uid].points      += p.points;
+    byUser[p.uid].points      += (p.points || 0);
     byUser[p.uid].predictions += 1;
   });
 
