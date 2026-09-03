@@ -220,15 +220,24 @@ async function loadProfileContent(user) {
       <div id="season-section-wrap"></div>
 
       <div class="profile-section">
-        <div class="profile-section-title">📋 Dernières prédictions</div>
+        <div class="profile-section-title" style="display:flex;justify-content:space-between;align-items:center">
+          <span>📋 Historique</span>
+          <div class="pred-view-toggle">
+            <button class="pred-view-btn active" id="pred-view-list" onclick="switchPredView('list')">Liste</button>
+            <button class="pred-view-btn" id="pred-view-game" onclick="switchPredView('game')">Par jeu</button>
+          </div>
+        </div>
+        <div id="pred-history-container">
         ${predictions.length === 0
           ? '<div class="lb-empty">Aucune prédiction pour l\'instant.</div>'
-          : predictions.slice(0, 10).map(p => renderPredRow(p)).join('')
+          : predictions.slice(0, 20).map(p => renderPredRow(p)).join('')
         }
+        </div>
       </div>
     `;
 
     renderDailyStreak(dayStreak, nextBonus);
+    _predCache = predictions;
     _predCache = predictions;
 
     // Avatar Gravatar + cadre rang
