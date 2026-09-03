@@ -82,6 +82,7 @@ async function getLeaderboardByGame(game, limitCount = 20) {
     try {
       const userSnap = await db.collection('users').doc(u.uid).get();
       u.username = userSnap.exists ? (userSnap.data().username || '—') : '—';
+      u.email    = userSnap.exists ? (userSnap.data().email    || '')  : '';
     } catch(e) { u.username = '—'; }
   }));
 
