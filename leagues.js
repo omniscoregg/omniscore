@@ -228,7 +228,10 @@ function renderLeagueCard(league, currentUid) {
           <div class="league-code" onclick="copyCode('${league.code}')" title="Cliquez pour copier">
             🔑 ${league.code}
           </div>
-          ${!isCreator ? `<button class="league-leave-btn" onclick="handleLeaveLeague('${league.id}')">Quitter</button>` : ''}
+          ${isCreator 
+            ? `<button class="league-leave-btn delete" onclick="handleDeleteLeague('${league.id}')">🗑️ Supprimer</button>`
+            : `<button class="league-leave-btn" onclick="handleLeaveLeague('${league.id}')">Quitter</button>`
+          }
         </div>
       </div>
       <table class="lb-table" style="margin-top:10px">
@@ -363,6 +366,29 @@ async function handleJoinLeague() {
   }
 }
 
+async function handleDeleteLeague(leagueId) {
+  const user = window.FirebaseService?.getCurrentUser();
+  if (!user) return;
+  if (!confirm('Supprimer définitivement cette ligue ? Tous les membres seront exclus.')) return;
+  try {
+    // Supprimer la ligue de tous les membres
+    const leagueSnap = await firebase.firestore().collection('leagues').doc(leagueId).get();
+    if (!leagueSnap.exists) return;
+    const members = leagueSnap.data().members || [];
+    await Promise.all(members.map(m =>
+      firebase.firestore().collection('users').doc(m.uid).update({
+        leagues: firebase.firestore.FieldValue.arrayRemove(leagueId)
+      })
+    ));
+    // Supprimer la ligue
+    await firebase.firestore().collection('leagues').doc(leagueId).delete();
+    showLeaguesPage();
+  } catch(e) {
+    console.error('[Leagues] Erreur suppression:', e);
+    alert('Erreur lors de la suppression.');
+  }
+}
+
 async function handleLeaveLeague(leagueId) {
   const user = window.FirebaseService?.getCurrentUser();
   if (!user) return;
@@ -389,6 +415,7 @@ window.handleCreateLeague = handleCreateLeague;
 window.showJoinLeague     = showJoinLeague;
 window.handleJoinLeague   = handleJoinLeague;
 window.handleLeaveLeague  = handleLeaveLeague;
+window.handleDeleteLeague = handleDeleteLeague;
 window.copyCode           = copyCode;
 
 console.log('[leagues] chargé ✓');

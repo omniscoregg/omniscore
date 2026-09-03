@@ -5311,3 +5311,14 @@ body {
 .tooltip-btn:hover::after {
   opacity: 1;
 }
+
+/* ── Bouton supprimer ligue ── */
+.league-leave-btn.delete {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.league-leave-btn.delete:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: #f87171;
+}
