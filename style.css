@@ -5410,7 +5410,16 @@ body {
 }
 
 .pred-tournoi-group .pred-history-row {
-  padding-left: 24px;
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+.pred-game-group {
+  overflow: hidden;
+}
+
+.pred-history-row {
+  padding-right: 4px;
 }
 
 @media (max-width: 768px) {
