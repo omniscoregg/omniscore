@@ -5269,3 +5269,16 @@ body {
 @media (max-width: 768px) {
   .match-meta { display: none !important; }
 }
+
+/* ── Favoris profil : 1 colonne sur mobile ── */
+@media (max-width: 768px) {
+  .profile-favs-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .profile-fav-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+  }
+}
