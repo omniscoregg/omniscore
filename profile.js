@@ -121,7 +121,7 @@ async function loadProfileContent(user) {
         <div id="profile-avatar-container"></div>
         <div class="profile-info">
           <div class="profile-username">${profile.username}</div>
-          <div class="profile-email">${profile.email}</div>
+          <div class="profile-email">${profile.email ? profile.email.replace(/(.{2}).*(@.*)/, '$1***$2') : ''}</div>
           <div class="profile-since">Membre depuis ${formatDate(profile.createdAt)}</div>
           ${window.renderSeasonRankBadge ? window.renderSeasonRankBadge(profile.points, rank || 9999, 'normal') : (window.renderRankBadge ? window.renderRankBadge(profile.points, rank || 9999, 'normal') : '')}
         </div>

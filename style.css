@@ -4620,11 +4620,11 @@ body {
 }
 
 .season-stats-row {
-  display: flex;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
   align-items: center;
   margin-bottom: 14px;
-  flex-wrap: wrap;
 }
 
 .season-stat {
@@ -4632,15 +4632,16 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  text-align: center;
 }
 
 .season-stat-value {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
 }
 
 .season-stat-label {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text3);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -4714,8 +4715,8 @@ body {
 
 /* ── Mobile ── */
 @media (max-width: 768px) {
-  .season-stats-row { gap: 10px; }
-  .season-stat-value { font-size: 18px; }
+  .season-stats-row { gap: 6px; }
+  .season-stat-value { font-size: 16px; }
 }
 /* ── Favoris profil redesign ── */
 .profile-favs-category {
