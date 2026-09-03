@@ -460,7 +460,7 @@ async function loadLeaderboard(type, btn) {
     const avatarMap = {};
     if (typeof md5 === 'function') {
       data.forEach(u => {
-        if (u.email) avatarMap[u.id] = 'https://www.gravatar.com/avatar/' + md5(u.email.trim().toLowerCase()) + '?s=36&d=404';
+       if (u.email) avatarMap[u.id] = 'https://www.gravatar.com/avatar/' + md5(u.email.trim().toLowerCase()) + '?s=36&d=blank';
       });
     }
 
