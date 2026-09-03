@@ -5426,3 +5426,72 @@ body {
   .pred-game-pct { font-size: 16px; }
   .pred-game-header { padding: 8px 10px; }
 }
+
+/* ============================================================
+   Pastilles de prédiction
+   ============================================================ */
+
+/* Bouton pastille vide (avant prédiction) */
+.pred-pill {
+  background: transparent !important;
+  border: none !important;
+  padding: 4px !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pred-pill-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  background: transparent;
+  display: block;
+  transition: all 0.2s ease;
+}
+
+.pred-pill:hover .pred-pill-dot {
+  border-color: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.1);
+}
+
+/* Pastille remplie après prédiction */
+.pred-pill-result {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.pred-pill-dot.filled {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: none;
+  display: block;
+}
+
+/* Gagnant — glow blanc */
+.pred-pill-result.win {
+  color: #ffffff;
+}
+.pred-pill-result.win .pred-pill-dot.filled {
+  background: #ffffff;
+  box-shadow: 0 0 8px #ffffff, 0 0 16px #ffffff80;
+}
+
+/* Perdant — glow rouge */
+.pred-pill-result.lose {
+  color: #f87171;
+}
+.pred-pill-result.lose .pred-pill-dot.filled {
+  background: #f87171;
+  box-shadow: 0 0 8px #f87171, 0 0 16px #f8717180;
+}
+
+/* Supprimer l'ancien style onetap-done */
+.onetap-done { display: none; }

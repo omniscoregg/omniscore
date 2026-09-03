@@ -67,21 +67,11 @@ async function getLeaderboard(limitCount = 20) {
 }
 
 async function getLeaderboardByGame(game, limitCount = 20) {
-  // Filtrer par saison courante
-  const seasonKey = window.getCurrentSeason ? window.getCurrentSeason().seasonKey : null;
-  let snap;
-  if (seasonKey) {
-    snap = await db.collection('predictions')
-      .where('game', '==', game)
-      .where('seasonKey', '==', seasonKey)
-      .get();
-  } else {
-    snap = await db.collection('predictions').where('game', '==', game).get();
-  }
+  const snap   = await db.collection('predictions').orderBy('points', 'desc').get();
   const byUser = {};
-  snap.docs.map(d => d.data()).forEach(p => {
+  snap.docs.map(d => d.data()).filter(p => p.game === game).forEach(p => {
     if (!byUser[p.uid]) byUser[p.uid] = { uid: p.uid, points: 0, predictions: 0 };
-    byUser[p.uid].points      += (p.points || 0);
+    byUser[p.uid].points      += p.points;
     byUser[p.uid].predictions += 1;
   });
 
@@ -339,6 +329,57 @@ async function confirmPredWithScore(matchId, game, team1, team2, winner, s1, s2)
 window.confirmPredWithScore = confirmPredWithScore;
 
 // ----------------------------------------------------------
+//  Son de validation prédiction
+// ----------------------------------------------------------
+function playPredictionSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    // Note 1 — montée
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.connect(gain1); gain1.connect(ctx.destination);
+    osc1.frequency.setValueAtTime(440, ctx.currentTime);
+    osc1.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.1);
+    gain1.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    osc1.start(ctx.currentTime); osc1.stop(ctx.currentTime + 0.15);
+    // Note 2 — plus haute
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.connect(gain2); gain2.connect(ctx.destination);
+    osc2.frequency.setValueAtTime(880, ctx.currentTime + 0.12);
+    gain2.gain.setValueAtTime(0.2, ctx.currentTime + 0.12);
+    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    osc2.start(ctx.currentTime + 0.12); osc2.stop(ctx.currentTime + 0.35);
+  } catch(e) {}
+}
+window.playPredictionSound = playPredictionSound;
+
+// ----------------------------------------------------------
+//  Effet glow sur la carte de match après prédiction
+// ----------------------------------------------------------
+function glowMatchCard(matchId, game, winner, s1, s2) {
+  const card = document.querySelector('[data-match-id="' + matchId + '"]');
+  if (!card) return;
+
+  // Couleur selon le jeu
+  const cfg    = EsportAPI.GAME_CONFIG[game];
+  const colors = window.GENRE_COLORS?.[cfg?.genre] || {};
+  const glowColor = colors.accent || '#a78bfa';
+
+  // Glow sur le cadre
+  card.style.transition = 'box-shadow 0.2s ease, border-color 0.2s ease';
+  card.style.boxShadow  = '0 0 20px ' + glowColor + '80, 0 0 40px ' + glowColor + '40';
+  card.style.borderColor = glowColor;
+
+  setTimeout(() => {
+    card.style.boxShadow  = '';
+    card.style.borderColor = '';
+  }, 1200);
+}
+window.glowMatchCard = glowMatchCard;
+
+// ----------------------------------------------------------
 //  Bouton prédiction sur les cartes
 // ----------------------------------------------------------
 async function renderPredictionBtn(matchId, game, team1, team2, status, format = 'Bo3') {
@@ -408,10 +449,15 @@ function selectPredTeam(btn, matchId, game, team1, team2, winner, format = 'Bo3'
   }
 }
 
+// Store local des prédictions pour affichage pastilles
+window._predStore = window._predStore || {};
+
 async function predict(matchId, game, team1, team2, winner, score1 = null, score2 = null) {
   if (!currentUser) { showAuthModal('login'); return; }
   try {
     await savePrediction(currentUser.uid, matchId, game, team1, team2, winner, score1, score2);
+    // Stocker localement pour les pastilles
+    window._predStore[matchId] = { winner, score1, score2 };
     // Mettre à jour le daily streak
     await window.FirebaseService.updateDailyActivity(currentUser.uid);
     currentProfile = await getUserProfile(currentUser.uid);
