@@ -447,9 +447,10 @@ function selectPredTeam(btn, matchId, game, team1, team2, winner, format = 'Bo3'
       <button class="score-skip-btn" onclick="event.stopPropagation();confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',null,null)">Sans score</button>
     </div>`;
 
+  const stopAll = e => e.stopPropagation();
   if (scoreContainer) {
     scoreContainer.innerHTML = panelHTML;
-    scoreContainer.addEventListener('click', e => e.stopPropagation());
+    ['click','mousedown','touchstart','touchend'].forEach(ev => scoreContainer.addEventListener(ev, stopAll));
   } else {
     // Panel flottant pour les cartes onetap
     const panel = document.createElement('div');
@@ -461,8 +462,7 @@ function selectPredTeam(btn, matchId, game, team1, team2, winner, format = 'Bo3'
       <button class="score-skip-btn" onclick="event.stopPropagation();confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',null,null)">Sans score</button>
       <button class="pred-cancel-btn" onclick="event.stopPropagation();document.getElementById('score-row-${matchId}')?.remove()">✕</button>
     `;
-    panel.addEventListener('click', e => e.stopPropagation());
-    panel.addEventListener('mousedown', e => e.stopPropagation());
+    ['click','mousedown','touchstart','touchend'].forEach(ev => panel.addEventListener(ev, stopAll));
     const card = btn.closest('.match-card');
     if (card) card.appendChild(panel);
   }
