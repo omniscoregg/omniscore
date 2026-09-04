@@ -474,7 +474,8 @@ async function predict(matchId, game, team1, team2, winner, score1 = null, score
     await window.FirebaseService.updateDailyActivity(currentUser.uid);
     currentProfile = await getUserProfile(currentUser.uid);
     renderAuthBar();
-    if (window.renderMatches) window.renderMatches();
+    // Mettre à jour uniquement les pastilles de la carte (pas toute la liste)
+    updateMatchCardPills(matchId, winner, score1, score2);
   } catch (err) { console.error('Erreur prédiction:', err); }
 }
 
@@ -607,6 +608,40 @@ window.showAuthModal       = showAuthModal;
 window.handleAuth          = handleAuth;
 window.handleLogout        = handleLogout;
 window.predict             = predict;
+
+// ----------------------------------------------------------
+//  Mettre à jour uniquement les pastilles d'une carte
+// ----------------------------------------------------------
+function updateMatchCardPills(matchId, winner, score1, score2) {
+  const card = document.querySelector('[data-match-id="' + matchId + '"]');
+  if (!card) return;
+
+  // Trouver les deux boutons pastille
+  const pills = card.querySelectorAll('.pred-pill');
+  if (pills.length < 2) return;
+
+  const pill1 = pills[0];
+  const pill2 = pills[1];
+
+  const t1 = pill1.dataset.t1 || pill1.dataset.winner;
+  const isWinner1 = winner === t1;
+
+  const s1 = score1 !== null && score1 !== undefined ? score1 : '';
+  const s2 = score2 !== null && score2 !== undefined ? score2 : '';
+
+  // Remplacer pill1 par span résultat
+  const span1 = document.createElement('span');
+  span1.className = 'pred-pill-result ' + (isWinner1 ? 'win' : 'lose');
+  span1.innerHTML = (s1 !== '' ? s1 + ' ' : '') + '<span class="pred-pill-dot filled"></span>';
+  pill1.replaceWith(span1);
+
+  // Remplacer pill2 par span résultat
+  const span2 = document.createElement('span');
+  span2.className = 'pred-pill-result ' + (!isWinner1 ? 'win' : 'lose');
+  span2.innerHTML = '<span class="pred-pill-dot filled"></span>' + (s2 !== '' ? ' ' + s2 : '');
+  pill2.replaceWith(span2);
+}
+window.updateMatchCardPills = updateMatchCardPills;
 window.selectPredTeam      = selectPredTeam;
 window.selectPredTeamGlobal = selectPredTeamGlobal;
 window.showLeaderboard     = showLeaderboard;
