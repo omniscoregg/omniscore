@@ -322,21 +322,28 @@ function getValidScores(format) {
 window.getValidScores = getValidScores;
 
 async function confirmPredWithScore(matchId, game, team1, team2, winner, s1, s2) {
+  // 1. Stocker immédiatement
+  window._predStore[matchId] = { winner, score1: s1, score2: s2 };
+
+  // 2. Mettre à jour les pastilles AVANT de fermer quoi que ce soit
+  updateMatchCardPills(matchId, winner, s1, s2);
+
+  // 3. Supprimer le panel de score
   document.getElementById('score-row-' + matchId)?.remove();
   document.querySelectorAll('.onetap-score-panel, .score-choice-panel').forEach(e => e.remove());
 
-  // Fermer la fiche de match si ouverte
+  // 4. Fermer la fiche de match si ouverte
   const matchModal = document.getElementById('match-detail-modal');
   if (matchModal) matchModal.remove();
 
-  // Son immédiat (avant await pour ne pas bloquer)
+  // 5. Son
   playPredictionSound();
 
-  // Sauvegarder la prédiction
-  await predict(matchId, game, team1, team2, winner, s1, s2);
-
-  // Effet glow après save
+  // 6. Glow
   glowMatchCard(matchId, game, winner, s1, s2);
+
+  // 7. Sauvegarder en arrière-plan
+  await predict(matchId, game, team1, team2, winner, s1, s2);
 }
 window.confirmPredWithScore = confirmPredWithScore;
 
@@ -468,13 +475,10 @@ async function predict(matchId, game, team1, team2, winner, score1 = null, score
   if (!currentUser) { showAuthModal('login'); return; }
   try {
     await savePrediction(currentUser.uid, matchId, game, team1, team2, winner, score1, score2);
-    // Stocker localement pour les pastilles
     window._predStore[matchId] = { winner, score1, score2 };
-    // Mettre à jour le daily streak
     await window.FirebaseService.updateDailyActivity(currentUser.uid);
     currentProfile = await getUserProfile(currentUser.uid);
     renderAuthBar();
-    if (window.renderMatches) window.renderMatches();
   } catch (err) { console.error('Erreur prédiction:', err); }
 }
 
