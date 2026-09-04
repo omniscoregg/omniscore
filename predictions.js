@@ -500,6 +500,26 @@ function selectPredTeam(btn, matchId, game, team1, team2, winner, format = 'Bo3'
 // Store local des prédictions pour affichage pastilles
 window._predStore = window._predStore || {};
 
+// Charger les prédictions existantes depuis Firebase au démarrage
+async function loadPredStore(uid) {
+  try {
+    const snap = await firebase.firestore().collection('predictions')
+      .where('uid', '==', uid)
+      .where('result', '==', null)
+      .get();
+    snap.docs.forEach(d => {
+      const p = d.data();
+      window._predStore[p.matchId] = {
+        winner: p.predictedWinner,
+        score1: p.predictedScore1,
+        score2: p.predictedScore2
+      };
+    });
+    console.log('[Predictions] PredStore chargé:', Object.keys(window._predStore).length, 'prédictions');
+  } catch(e) { console.warn('[Predictions] loadPredStore:', e); }
+}
+window.loadPredStore = loadPredStore;
+
 async function predict(matchId, game, team1, team2, winner, score1 = null, score2 = null) {
   if (!currentUser) { showAuthModal('login'); return; }
   try {
@@ -605,6 +625,7 @@ function initPredictions() {
     currentUser    = user;
     currentProfile = user ? await getUserProfile(user.uid) : null;
     renderAuthBar();
+    if (user) loadPredStore(user.uid);
     if (user && window.loadNotifications) window.loadNotifications();
     const favBtn = document.getElementById('fav-nav-btn');
 if (favBtn) favBtn.style.display = user ? 'flex' : 'none';

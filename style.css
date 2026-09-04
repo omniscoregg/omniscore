@@ -5204,12 +5204,11 @@ body {
     flex: 1;
   }
 
-  /* Score inline à droite de chaque équipe via data attribute */
+  /* Score inline */
   .team-block .team-score-inline {
     font-size: 15px;
     font-weight: 700;
     color: var(--text3);
-    margin-left: auto;
     flex-shrink: 0;
     min-width: 20px;
     text-align: right;
@@ -5219,8 +5218,15 @@ body {
     color: var(--accent);
   }
 
-  .onetap-btn  { margin-left: 8px; flex-shrink: 0; }
-  .onetap-done { margin-left: 8px; flex-shrink: 0; }
+  .onetap-btn  { margin-left: auto; flex-shrink: 0; }
+  .onetap-done { margin-left: auto; flex-shrink: 0; }
+
+  /* Pastilles mobile — alignement */
+  .pred-pill { margin-left: auto; }
+  .pred-pill-result { margin-left: auto; }
+
+  /* Cacher score central sur mobile (déjà dans les pastilles) */
+  .match-score { display: none !important; }
 }
 
 /* ── Nom compétition visible sur mobile en bas de carte ── */
@@ -5460,6 +5466,11 @@ body {
   font-weight: 700;
   min-width: 30px;
   flex-shrink: 0;
+}
+
+/* Cacher le score central quand pastilles affichées */
+.match-body:has(.pred-pill-result) .match-score {
+  display: none !important;
 }
 
 /* Gagnant prédit — glow blanc */
