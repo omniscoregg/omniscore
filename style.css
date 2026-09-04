@@ -5453,7 +5453,43 @@ body {
 
 /* Score visible sur PC aussi */
 .pred-pill-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 13px;
   font-weight: 700;
   min-width: 30px;
+  flex-shrink: 0;
 }
+
+/* Gagnant prédit — glow blanc */
+.pred-pill-result.win {
+  color: #ffffff;
+}
+.pred-pill-result.win .pred-pill-dot.filled {
+  background: #ffffff;
+  box-shadow: 0 0 8px #ffffff, 0 0 16px #ffffff80;
+  border: none;
+}
+
+/* Perdant prédit — glow rouge */
+.pred-pill-result.lose {
+  color: #f87171;
+}
+.pred-pill-result.lose .pred-pill-dot.filled {
+  background: #f87171;
+  box-shadow: 0 0 8px #f87171, 0 0 16px #f8717180;
+  border: none;
+}
+
+/* Pastille remplie */
+.pred-pill-dot.filled {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Cacher l'ancien onetap-done */
+.onetap-done { display: none !important; }
