@@ -5448,7 +5448,14 @@ body {
 
 /* Score visible sur PC aussi */
 .pred-pill-result {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 13px;
   font-weight: 700;
   min-width: 30px;
+  flex-shrink: 0;
 }
+
+/* Cacher l'ancien onetap-done */
+.onetap-done { display: none !important; }
