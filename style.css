@@ -3535,6 +3535,9 @@ body {
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, color 0.15s;
   white-space: nowrap;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 .score-choice-btn:hover,
 .score-choice-btn:active {
@@ -3552,6 +3555,8 @@ body {
   padding: 4px 8px;
   text-decoration: underline;
   transition: color 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 .score-skip-btn:hover { color: var(--text2); }
 
@@ -5448,14 +5453,7 @@ body {
 
 /* Score visible sur PC aussi */
 .pred-pill-result {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
   font-size: 13px;
   font-weight: 700;
   min-width: 30px;
-  flex-shrink: 0;
 }
-
-/* Cacher l'ancien onetap-done */
-.onetap-done { display: none !important; }
