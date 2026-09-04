@@ -401,7 +401,7 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
           ${tapBtn1}
           ${!isUpcoming && m.score1 !== null ? `<span class="team-score-inline">${m.score1}</span>` : ''}
         </div>
-        <div class="match-score">${score}</div>
+        ${tapBtn1.includes('pred-pill-result') ? '' : `<div class="match-score">${score}</div>`}
         <div class="team-block right ${w2class}">
           ${logo2}
           <span class="team-name">${m.team2.name}</span>
@@ -544,7 +544,7 @@ function renderMatchCardSimple(m, isUpcoming = false, isLive = false) {
       </div>
       <div class="match-body">
         <div class="team-block ${w1class}"><span class="team-name">${m.team1.name}</span>${logo1}</div>
-        <div class="match-score">${score}</div>
+        ${tapBtn1.includes('pred-pill-result') ? '' : `<div class="match-score">${score}</div>`}
         <div class="team-block right ${w2class}"><span class="team-name">${m.team2.name}</span>${logo2}</div>
       </div>
       <div class="match-bottom">
