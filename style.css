@@ -5448,13 +5448,14 @@ body {
   .team-block:first-child .pred-pill-result .pred-pill-dot { order: 2; }
   .team-block:first-child .pred-pill-result span:not(.pred-pill-dot) { order: 1; }
 
-  /* Équipe du bas (team2) — score à gauche de la pastille */
+  /* Équipe du bas (team2) — aligné à droite comme équipe du haut */
   .team-block.right .pred-pill-result {
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: flex-end;
+    margin-left: auto;
   }
-  .team-block.right .pred-pill-result .pred-pill-dot { order: 1; }
-  .team-block.right .pred-pill-result span:not(.pred-pill-dot) { order: 2; }
+  .team-block.right .pred-pill-result .pred-pill-dot { order: 2; }
+  .team-block.right .pred-pill-result span:not(.pred-pill-dot) { order: 1; }
 }
 
 /* Score visible sur PC aussi */
@@ -5470,6 +5471,11 @@ body {
 
 /* Cacher le score central quand pastilles affichées */
 .match-body:has(.pred-pill-result) .match-score {
+  display: none !important;
+}
+
+/* Fallback pour navigateurs sans :has() */
+.match-score-hidden {
   display: none !important;
 }
 
