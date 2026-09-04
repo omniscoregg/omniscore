@@ -466,17 +466,14 @@ function selectPredTeam(btn, matchId, game, team1, team2, winner, format = 'Bo3'
   const btns = validScores.map(([w, l]) => {
     const s1 = isTeam1Winner ? w : l;
     const s2 = isTeam1Winner ? l : w;
-    return `<button class="score-choice-btn" 
-  onclick="event.stopPropagation();event.preventDefault();confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',${s1},${s2})"
-  ontouchend="event.stopPropagation();event.preventDefault();confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',${s1},${s2})"
->${s1} - ${s2}</button>`;
+    return `<button class="score-choice-btn" onclick="event.stopPropagation();if(!this._touched){confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',${s1},${s2})}" ontouchend="event.stopPropagation();event.preventDefault();this._touched=true;confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',${s1},${s2})">${s1} - ${s2}</button>`;
   }).join('');
 
   const panelHTML = `
     <div class="score-choice-panel">
       <span class="pred-score-label">Score prédit <span style="color:var(--text3);font-size:10px">(optionnel)</span></span>
       <div class="score-choice-btns">${btns}</div>
-      <button class="score-skip-btn" onclick="event.stopPropagation();event.preventDefault();confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',null,null)" ontouchend="event.stopPropagation();event.preventDefault();confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',null,null)">Sans score</button>
+      <button class="score-skip-btn" onclick="event.stopPropagation();if(!this._touched){confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',null,null)}" ontouchend="event.stopPropagation();event.preventDefault();this._touched=true;confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',null,null)">Sans score</button>
     </div>`;
 
   const stopAll = e => e.stopPropagation();
@@ -491,7 +488,7 @@ function selectPredTeam(btn, matchId, game, team1, team2, winner, format = 'Bo3'
     panel.innerHTML = `
       <span class="pred-score-label">Score prédit <span style="color:var(--text3);font-size:10px">(optionnel)</span></span>
       <div class="score-choice-btns">${btns}</div>
-      <button class="score-skip-btn" onclick="event.stopPropagation();event.preventDefault();confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',null,null)" ontouchend="event.stopPropagation();event.preventDefault();confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',null,null)">Sans score</button>
+      <button class="score-skip-btn" onclick="event.stopPropagation();if(!this._touched){confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',null,null)}" ontouchend="event.stopPropagation();event.preventDefault();this._touched=true;confirmPredWithScore('${matchId}','${game}','${team1}','${team2}','${winner}',null,null)">Sans score</button>
       <button class="pred-cancel-btn" onclick="event.stopPropagation();document.getElementById('score-row-${matchId}')?.remove()">✕</button>
     `;
     ['click','mousedown','touchstart','touchend'].forEach(ev => panel.addEventListener(ev, stopAll));
