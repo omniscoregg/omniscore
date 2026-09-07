@@ -358,6 +358,26 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
 
   const storeKey = `match_${m.id}`;
   matchStore.set(storeKey, m);
+
+  // Classe de cadre selon statut prédiction
+  let predBorderClass = '';
+  const predStoreData = window._predStore?.[String(m.id)];
+  if (predStoreData) {
+    if (m.status === 'upcoming') {
+      predBorderClass = 'pred-border-upcoming';
+    } else if (m.status === 'running') {
+      predBorderClass = 'pred-border-live';
+    } else if (m.status === 'past') {
+      // Chercher le résultat dans les prédictions résolues
+      const resolvedPred = window._resolvedStore?.[String(m.id)];
+      if (resolvedPred) {
+        if (resolvedPred.result === 'perfect') predBorderClass = 'pred-border-perfect';
+        else if (resolvedPred.result === 'correct') predBorderClass = 'pred-border-correct';
+        else predBorderClass = 'pred-border-wrong';
+      }
+    }
+  }
+
   // One-tap prediction : boutons directement sur les équipes
   let tapBtn1 = '', tapBtn2 = '';
   if (isUpcoming && !isDemo) {
@@ -385,7 +405,7 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
   }
 
   return `
-    <div class="match-card ${isUpcoming ? 'upcoming-match' : ''}" style="border-left:3px solid ${colors.accent}30;cursor:pointer" onclick="openMatchDetail('${storeKey}')" data-key="${storeKey}" data-match-id="${m.id}">
+    <div class="match-card ${isUpcoming ? 'upcoming-match' : ''} ${predBorderClass}" style="border-left:3px solid ${colors.accent}30;cursor:pointer" onclick="openMatchDetail('${storeKey}')" data-key="${storeKey}" data-match-id="${m.id}">
       <div class="match-top">
         <span class="match-game" style="color:${colors.accent}">${m.gameLabel}</span>
         <span class="match-meta">${m.tournament} · ${m.format}</span>
@@ -533,7 +553,7 @@ function renderMatchCardSimple(m, isUpcoming = false, isLive = false) {
   const storeKey = `match_${m.id}`;
   matchStore.set(storeKey, m);
   return `
-    <div class="match-card ${isUpcoming ? 'upcoming-match' : ''}" style="border-left:3px solid ${colors.accent}30;cursor:pointer" onclick="openMatchDetail('${storeKey}')" data-key="${storeKey}" data-match-id="${m.id}">
+    <div class="match-card ${isUpcoming ? 'upcoming-match' : ''} ${predBorderClass}" style="border-left:3px solid ${colors.accent}30;cursor:pointer" onclick="openMatchDetail('${storeKey}')" data-key="${storeKey}" data-match-id="${m.id}">
       <div class="match-top">
         <span class="match-game" style="color:${colors.accent}">${m.gameLabel}</span>
         <span class="match-meta">${m.tournament} · ${m.format}</span>

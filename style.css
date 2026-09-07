@@ -5510,3 +5510,42 @@ body {
 
 /* Cacher l'ancien onetap-done */
 .onetap-done { display: none !important; }
+
+/* ============================================================
+   Cadres colorés des cartes de match selon statut prédiction
+   ============================================================ */
+
+/* À venir prédit — violet/blanc glow */
+.pred-border-upcoming {
+  border: 1px solid rgba(167, 139, 250, 0.6) !important;
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.25), inset 0 0 8px rgba(167, 139, 250, 0.05) !important;
+}
+
+/* En direct prédit — rouge pulsé */
+.pred-border-live {
+  border: 1px solid rgba(248, 113, 113, 0.7) !important;
+  box-shadow: 0 0 16px rgba(248, 113, 113, 0.3) !important;
+  animation: pulse-live-pred 1.5s ease-in-out infinite;
+}
+@keyframes pulse-live-pred {
+  0%, 100% { box-shadow: 0 0 16px rgba(248, 113, 113, 0.3); }
+  50%       { box-shadow: 0 0 28px rgba(248, 113, 113, 0.5); }
+}
+
+/* Prédiction parfaite — doré glow */
+.pred-border-perfect {
+  border: 1px solid rgba(251, 191, 36, 0.7) !important;
+  box-shadow: 0 0 14px rgba(251, 191, 36, 0.3) !important;
+}
+
+/* Prédiction correcte — vert glow */
+.pred-border-correct {
+  border: 1px solid rgba(74, 222, 128, 0.6) !important;
+  box-shadow: 0 0 12px rgba(74, 222, 128, 0.25) !important;
+}
+
+/* Prédiction manquée — rouge discret */
+.pred-border-wrong {
+  border: 1px solid rgba(248, 113, 113, 0.3) !important;
+  box-shadow: 0 0 8px rgba(248, 113, 113, 0.1) !important;
+}

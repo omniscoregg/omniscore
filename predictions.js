@@ -354,10 +354,6 @@ function updateMatchCardPills(matchId, winner, score1, score2) {
   const card = document.querySelector('[data-match-id="' + matchId + '"]');
   if (!card) return;
 
-  // Cacher le score central
-  const matchScore = card.querySelector('.match-score');
-  if (matchScore) matchScore.classList.add('match-score-hidden');
-
   const pills = card.querySelectorAll('.pred-pill');
   if (pills.length < 2) return;
 
