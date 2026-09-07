@@ -600,6 +600,48 @@ async function loadLeaderboard(type, btn) {
 // ----------------------------------------------------------
 //  Init — écoute auth
 // ----------------------------------------------------------
+// ----------------------------------------------------------
+//  Stores locaux pour les cadres et pastilles
+// ----------------------------------------------------------
+window._predStore     = window._predStore     || {};
+window._resolvedStore = window._resolvedStore || {};
+
+async function loadPredStore(uid) {
+  try {
+    const snap = await firebase.firestore().collection('predictions')
+      .where('uid', '==', uid)
+      .where('result', '==', null)
+      .get();
+    window._predStore = {};
+    snap.docs.forEach(d => {
+      const p = d.data();
+      window._predStore[String(p.matchId)] = {
+        winner: p.predictedWinner,
+        score1: p.predictedScore1,
+        score2: p.predictedScore2
+      };
+    });
+    console.log('[Predictions] PredStore:', Object.keys(window._predStore).length, 'en attente');
+  } catch(e) { console.warn('[Predictions] loadPredStore:', e); }
+}
+
+async function loadResolvedStore(uid) {
+  try {
+    const snap = await firebase.firestore().collection('predictions')
+      .where('uid', '==', uid)
+      .where('result', 'in', ['correct', 'perfect', 'wrong'])
+      .orderBy('createdAt', 'desc')
+      .limit(100)
+      .get();
+    window._resolvedStore = {};
+    snap.docs.forEach(d => {
+      const p = d.data();
+      window._resolvedStore[String(p.matchId)] = { result: p.result, points: p.points };
+    });
+    console.log('[Predictions] ResolvedStore:', Object.keys(window._resolvedStore).length, 'résolues');
+  } catch(e) { console.warn('[Predictions] loadResolvedStore:', e); }
+}
+
 function initPredictions() {
   auth.onAuthStateChanged(async user => {
     currentUser    = user;
@@ -618,6 +660,11 @@ if (user && currentProfile) {
   const label = document.getElementById('mnav-profile-label');
   if (label) label.textContent = currentProfile.username || 'Profil';
 }
+
+    // Charger les stores de prédictions AVANT de rendre les cartes
+    if (user) {
+      await Promise.all([loadPredStore(user.uid), loadResolvedStore(user.uid)]);
+    }
 
     // Landing page ou matchs selon connexion
     if (window.handleLandingDisplay) {
@@ -646,5 +693,7 @@ window.showLeaderboard     = showLeaderboard;
 window.loadLeaderboard     = loadLeaderboard;
 window.renderPredictionBtn = renderPredictionBtn;
 window.initPredictions     = initPredictions;
+window.loadPredStore       = loadPredStore;
+window.loadResolvedStore   = loadResolvedStore;
 
 console.log('[Predictions] chargé ✓');
