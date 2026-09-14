@@ -212,6 +212,7 @@ function renderAuthBar() {
         <span class="auth-points mobile-only" id="auth-season-pts-mobile">⭐ ${currentProfile.points}</span>
         ${currentProfile.streak > 0 ? `<span class="auth-streak desktop-only" title="Série de ${currentProfile.streak}">🔥 ${currentProfile.streak}</span>` : ''}
         <!-- Boutons desktop uniquement -->
+        <button class="auth-btn small desktop-only tooltip-btn notif-btn" onclick="showNotificationsPage()" data-tooltip="Notifications" style="position:relative">🔔<span class="notif-badge" style="display:none"></span></button>
         <button class="auth-btn small desktop-only tooltip-btn" onclick="showLeaderboard()" data-tooltip="Classement">🏆</button>
         <button class="auth-btn small desktop-only tooltip-btn" onclick="showLeaguesPage ? showLeaguesPage() : null" data-tooltip="Ligues">⚔️</button>
         <button class="auth-btn small desktop-only tooltip-btn" onclick="showProfilePage()" data-tooltip="Profil">⚙️</button>

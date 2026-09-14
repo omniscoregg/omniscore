@@ -1,133 +1,215 @@
-// notifications.js — Omniscore
+// ============================================================
+//  notifications.js — Onglet notifications Omniscore
+//  - Résultats de prédictions récentes
+//  - Prochains matchs des équipes favorites
+//  - Badge compteur non lues
+// ============================================================
 
-window.notificationsUnread = 0;
+const NOTIF_STORAGE_KEY = 'omniscore_notifs_read';
 
-function updateNotifBadge(count) {
-  window.notificationsUnread = count;
-  const badges = document.querySelectorAll('.notif-badge');
-  badges.forEach(b => {
-    b.textContent = count > 9 ? '9+' : count;
-    b.style.display = count > 0 ? 'flex' : 'none';
+// ----------------------------------------------------------
+//  Charger les notifications
+// ----------------------------------------------------------
+async function loadNotifications() {
+  const user = window.FirebaseService?.getCurrentUser();
+  if (!user) return;
+
+  try {
+    const [predictions, favorites] = await Promise.all([
+      loadPredictionNotifs(user.uid),
+      loadFavoriteMatchNotifs(user.uid),
+    ]);
+
+    const all = [...predictions, ...favorites].sort((a, b) => b.timestamp - a.timestamp);
+    window._notifications = all;
+
+    updateNotifBadge(all);
+  } catch(e) {
+    console.error('[Notifications] Erreur:', e);
+  }
+}
+
+// Prédictions résolues récentes
+async function loadPredictionNotifs(uid) {
+  try {
+    const snap = await firebase.firestore().collection('predictions')
+      .where('uid', '==', uid)
+      .where('result', 'in', ['correct', 'perfect', 'wrong'])
+      .orderBy('createdAt', 'desc')
+      .limit(20)
+      .get();
+
+    return snap.docs.map(d => {
+      const p = d.data();
+      const icons = { correct: '✅', perfect: '🏆', wrong: '❌' };
+      const labels = { correct: 'Correct', perfect: 'Parfait !', wrong: 'Manqué' };
+      const pts = p.points > 0 ? ` +${p.points} pts` : '';
+      const cfg = EsportAPI?.GAME_CONFIG?.[p.game];
+      return {
+        id: d.id,
+        type: 'prediction',
+        result: p.result,
+        icon: icons[p.result] || '⏳',
+        title: labels[p.result] || p.result,
+        body: `${p.predictedWinner}${pts}`,
+        sub: cfg?.label || p.game,
+        timestamp: new Date(p.createdAt).getTime(),
+        color: p.result === 'perfect' ? '#fbbf24' : p.result === 'correct' ? '#4ade80' : '#f87171',
+      };
+    });
+  } catch(e) { return []; }
+}
+
+// Prochains matchs des équipes favorites
+async function loadFavoriteMatchNotifs(uid) {
+  try {
+    const userSnap = await firebase.firestore().collection('users').doc(uid).get();
+    const favs = userSnap.data()?.favorites || [];
+    if (favs.length === 0) return [];
+
+    const notifs = [];
+    const now = Date.now();
+    const in48h = now + 48 * 3600 * 1000;
+
+    if (window.matchStore) {
+      for (const [, m] of window.matchStore) {
+        if (m.status !== 'upcoming') continue;
+        const matchTime = new Date(m.date).getTime();
+        if (matchTime < now || matchTime > in48h) continue;
+
+        const isFav = favs.some(f =>
+          (f.game === m.game) && (
+            f.teamName?.toLowerCase() === m.team1?.name?.toLowerCase() ||
+            f.teamName?.toLowerCase() === m.team2?.name?.toLowerCase()
+          )
+        );
+
+        if (isFav) {
+          const favTeam = favs.find(f =>
+            f.teamName?.toLowerCase() === m.team1?.name?.toLowerCase() ||
+            f.teamName?.toLowerCase() === m.team2?.name?.toLowerCase()
+          );
+          const hoursLeft = Math.round((matchTime - now) / 3600000);
+          const cfg = EsportAPI?.GAME_CONFIG?.[m.game];
+          notifs.push({
+            id: 'match_' + m.id,
+            type: 'match',
+            icon: '📅',
+            title: favTeam?.teamName || 'Équipe favorite',
+            body: `${m.team1?.name} vs ${m.team2?.name}`,
+            sub: `Dans ${hoursLeft}h · ${cfg?.label || m.game}`,
+            timestamp: matchTime,
+            color: '#38bdf8',
+            matchId: m.id,
+          });
+        }
+      }
+    }
+
+    return notifs;
+  } catch(e) { return []; }
+}
+
+// ----------------------------------------------------------
+//  Badge compteur
+// ----------------------------------------------------------
+function updateNotifBadge(notifs) {
+  const readIds = getReadNotifIds();
+  const unread  = notifs.filter(n => !readIds.includes(n.id)).length;
+
+  document.querySelectorAll('.notif-badge').forEach(badge => {
+    if (unread > 0) {
+      badge.textContent = unread > 9 ? '9+' : unread;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
   });
 }
 
-async function loadNotifications() {
-  const user = firebase.auth().currentUser;
-  if (!user) return;
-
-  const container = document.getElementById('notifications-list');
-  if (container) container.innerHTML = '<p class="notif-loading">Chargement...</p>';
-
-  firebase.firestore()
-    .collection('users').doc(user.uid)
-    .collection('notifications')
-    .orderBy('createdAt', 'desc')
-    .limit(50)
-    .onSnapshot(snapshot => {
-      let unread = 0;
-      const notifs = [];
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        if (!d.read) unread++;
-        notifs.push({ id: doc.id, ...d });
-      });
-      updateNotifBadge(unread);
-      renderNotifications(notifs);
-    });
+function getReadNotifIds() {
+  try { return JSON.parse(localStorage.getItem(NOTIF_STORAGE_KEY) || '[]'); }
+  catch(e) { return []; }
 }
 
-function renderNotifications(notifs) {
-  const container = document.getElementById('notifications-list');
-  if (!container) return;
-
-  if (notifs.length === 0) {
-    container.innerHTML = '<p class="notif-empty">Aucune notification pour l\'instant.</p>';
-    return;
-  }
-
-  const predictions = notifs.filter(n => n.type === 'prediction');
-  const favorites = notifs.filter(n => n.type === 'favorite_match');
-
-  let html = '';
-
-  if (predictions.length > 0) {
-    html += '<div class="notif-section-title">🏆 Résultats prédictions</div>';
-    predictions.forEach(n => {
-      html += notifCard(n);
-    });
-  }
-
-  if (favorites.length > 0) {
-    html += '<div class="notif-section-title">📅 Matchs équipes favorites</div>';
-    favorites.forEach(n => {
-      html += notifCard(n);
-    });
-  }
-
-  container.innerHTML = html;
+function markAllAsRead() {
+  const ids = (window._notifications || []).map(n => n.id);
+  localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(ids));
+  updateNotifBadge([]);
+  // Mettre à jour l'affichage
+  document.querySelectorAll('.notif-item').forEach(el => el.classList.remove('unread'));
+  const markBtn = document.getElementById('notif-mark-all');
+  if (markBtn) markBtn.style.display = 'none';
 }
 
-function notifCard(n) {
-  const date = n.createdAt?.toDate ? n.createdAt.toDate() : new Date();
-  const timeAgo = formatTimeAgo(date);
-  const unreadClass = !n.read ? 'notif-unread' : '';
-  return `
-    <div class="notif-card ${unreadClass}" data-id="${n.id}">
-      <div class="notif-card-body">
-        <div class="notif-card-title">${n.title || ''}</div>
-        <div class="notif-card-text">${n.body || ''}</div>
-        <div class="notif-card-time">${timeAgo}</div>
-      </div>
-    </div>
-  `;
-}
-
-function formatTimeAgo(date) {
-  const diff = Math.floor((Date.now() - date.getTime()) / 1000);
-  if (diff < 60) return 'À l\'instant';
-  if (diff < 3600) return `Il y a ${Math.floor(diff/60)} min`;
-  if (diff < 86400) return `Il y a ${Math.floor(diff/3600)}h`;
-  return `Il y a ${Math.floor(diff/86400)}j`;
-}
-
-async function markAllNotifsRead() {
-  const user = firebase.auth().currentUser;
-  if (!user) return;
-  const snap = await firebase.firestore()
-    .collection('users').doc(user.uid)
-    .collection('notifications')
-    .where('read', '==', false)
-    .get();
-  const batch = firebase.firestore().batch();
-  snap.forEach(doc => batch.update(doc.ref, { read: true }));
-  await batch.commit();
-}
-
+// ----------------------------------------------------------
+//  Afficher le panneau notifications
+// ----------------------------------------------------------
 function showNotificationsPage() {
-  document.getElementById('notifications-modal')?.remove();
-  closeMobileProfileMenu && closeMobileProfileMenu();
+  // Fermer si déjà ouvert
+  const existing = document.getElementById('notif-panel');
+  if (existing) { existing.remove(); return; }
 
-  const modal = document.createElement('div');
-  modal.id        = 'notifications-modal';
-  modal.className = 'modal-overlay';
-  modal.innerHTML = `
-    <div class="modal-box wide notif-box">
-      <div class="modal-header">
-        <div class="modal-title">🔔 Notifications</div>
-        <button class="modal-close" onclick="document.getElementById('notifications-modal').remove()">✕</button>
+  const notifs  = window._notifications || [];
+  const readIds = getReadNotifIds();
+
+  const panel = document.createElement('div');
+  panel.id = 'notif-panel';
+  panel.className = 'notif-panel';
+
+  const unreadCount = notifs.filter(n => !readIds.includes(n.id)).length;
+
+  panel.innerHTML = `
+    <div class="notif-panel-header">
+      <span class="notif-panel-title">🔔 Notifications</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        ${unreadCount > 0 ? `<button class="notif-mark-btn" id="notif-mark-all" onclick="markAllAsRead()">Tout lire</button>` : ''}
+        <button class="notif-close-btn" onclick="document.getElementById('notif-panel').remove()">✕</button>
       </div>
-      <div id="notifications-list"><div class="notif-loading">Chargement...</div></div>
+    </div>
+    <div class="notif-list">
+      ${notifs.length === 0
+        ? '<div class="notif-empty">Aucune notification pour l\'instant</div>'
+        : notifs.map(n => renderNotifItem(n, readIds)).join('')
+      }
     </div>
   `;
 
-  document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  // Positionner sous le bouton cloche
+  document.body.appendChild(panel);
 
-  markAllNotifsRead();
+  // Fermer en cliquant dehors
+  setTimeout(() => {
+    document.addEventListener('click', function closePanel(e) {
+      if (!panel.contains(e.target) && !e.target.closest('.notif-btn')) {
+        panel.remove();
+        document.removeEventListener('click', closePanel);
+      }
+    });
+  }, 100);
 }
 
-window.showNotificationsPage = showNotificationsPage;
+function renderNotifItem(n, readIds) {
+  const isUnread = !readIds.includes(n.id);
+  const date = new Date(n.timestamp).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
-window.loadNotifications = loadNotifications;
-window.markAllNotifsRead = markAllNotifsRead;
-window.updateNotifBadge = updateNotifBadge;
+  return `<div class="notif-item ${isUnread ? 'unread' : ''}" style="border-left:3px solid ${n.color}">
+    <span class="notif-icon">${n.icon}</span>
+    <div class="notif-content">
+      <div class="notif-title" style="color:${n.color}">${n.title}</div>
+      <div class="notif-body">${n.body}</div>
+      <div class="notif-sub">${n.sub} · ${date}</div>
+    </div>
+    ${isUnread ? '<span class="notif-dot"></span>' : ''}
+  </div>`;
+}
+
+// ----------------------------------------------------------
+//  Exposer globalement
+// ----------------------------------------------------------
+window.loadNotifications    = loadNotifications;
+window.showNotificationsPage = showNotificationsPage;
+window.markAllAsRead        = markAllAsRead;
+window.updateNotifBadge     = updateNotifBadge;
+
+console.log('[notifications] chargé ✓');
