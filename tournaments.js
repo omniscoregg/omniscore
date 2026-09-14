@@ -174,7 +174,7 @@ async function loadTournamentPredForm(t, uid, accent) {
   // Formulaire de prédiction
   body.innerHTML = `
     <div class="tourn-pred-form" data-tourn-id="${t.id}">
-      <div class="tourn-section-title">🎯 Choisis tes 4 équipes qualifiées pour les playoffs</div>
+      <div class="tourn-section-title">🎯 Choisis les 4 meilleures équipes</div>
       <div class="tourn-teams-grid" id="semis-grid-${t.id}">
         ${teams.map(team => `
           <button class="tourn-team-btn" 
