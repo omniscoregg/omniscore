@@ -289,6 +289,7 @@ function calculateStreak(predictions) {
 
 function renderPredRow(p) {
   const resultColors = { correct: '#4ade80', wrong: '#f87171', perfect: '#fbbf24' };
+  const borderClass = { correct: 'pred-border-correct', wrong: 'pred-border-wrong', perfect: 'pred-border-perfect' }[p.result] || '';
   const dotColor = resultColors[p.result] || 'var(--text3)';
   const pts    = p.points > 0 ? `+${p.points} pts` : '';
   const score  = (p.predictedScore1 !== null && p.predictedScore2 !== null)
@@ -296,8 +297,7 @@ function renderPredRow(p) {
   const cfg    = EsportAPI.GAME_CONFIG[p.game];
   const colors = window.GENRE_COLORS?.[cfg?.genre] || { accent: '#a78bfa' };
   const date   = p.createdAt ? new Date(p.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '—';
-  return `<div class="pred-history-row">
-    <span class="pred-history-dot" style="background:${dotColor};box-shadow:0 0 8px ${dotColor}"></span>
+  return `<div class="pred-history-row ${borderClass}">
     <div class="pred-history-info">
       <span class="pred-history-game" style="color:${colors.accent}">${cfg?.label || p.game}</span>
       <span class="pred-history-team">${p.predictedWinner}${score}</span>
