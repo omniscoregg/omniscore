@@ -365,7 +365,7 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
     if (window._predStore?.[String(m.id)]) predBorderClass = 'pred-border-upcoming';
   } else if (m.status === 'running') {
     if (window._predStore?.[String(m.id)]) predBorderClass = 'pred-border-live';
-  } else if (m.status === 'past') {
+  } else if (m.status === 'finished') {
     // Chercher le résultat dans les prédictions résolues (indépendant de _predStore,
     // qui ne contient que les prédictions encore en attente)
     const resolvedPred = window._resolvedStore?.[String(m.id)];
