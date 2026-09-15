@@ -425,6 +425,9 @@ function glowMatchCard(matchId, game, winner, s1, s2) {
   setTimeout(() => {
     card.style.boxShadow  = '';
     card.style.borderColor = '';
+    // Le flash temporaire cède la place au cadre violet persistant
+    // (normalement appliqué seulement au rendu complet de la carte)
+    card.classList.add('pred-border-upcoming');
   }, 1200);
 }
 window.glowMatchCard = glowMatchCard;
