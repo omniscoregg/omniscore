@@ -426,6 +426,11 @@ async function confirmDetailPred(matchId, game, team1, team2, winner, s1, s2) {
 
   await window.FirebaseService.savePrediction(user.uid, matchId, game, team1, team2, winner, s1, s2);
 
+  // Mettre à jour le cache local AVANT le re-render, sinon renderMatches()
+  // ne voit pas encore la nouvelle prédiction et le cadre violet n'apparaît pas
+  window._predStore = window._predStore || {};
+  window._predStore[String(matchId)] = { winner, score1: s1, score2: s2 };
+
   const match = window._lastOpenedMatch;
   if (match) await loadPredAction(match, window.GENRE_COLORS?.[match.genre] || { accent: '#a78bfa' });
   if (window.renderMatches) window.renderMatches();
