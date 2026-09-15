@@ -431,6 +431,11 @@ async function confirmDetailPred(matchId, game, team1, team2, winner, s1, s2) {
   window._predStore = window._predStore || {};
   window._predStore[String(matchId)] = { winner, score1: s1, score2: s2 };
 
+  // Mettre à jour immédiatement les pastilles de la carte en arrière-plan
+  // (sans attendre le re-render complet, comme confirmPredWithScore le fait déjà)
+  if (window.updateMatchCardPills) window.updateMatchCardPills(matchId, winner, s1, s2);
+  if (window.glowMatchCard) window.glowMatchCard(matchId, game, winner, s1, s2);
+
   const match = window._lastOpenedMatch;
   if (match) await loadPredAction(match, window.GENRE_COLORS?.[match.genre] || { accent: '#a78bfa' });
   if (window.renderMatches) window.renderMatches();
