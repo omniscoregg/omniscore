@@ -441,7 +441,8 @@ async function renderPredictionBtn(matchId, game, team1, team2, status, format =
   if (existing) {
     const resultColors = { correct: '#4ade80', wrong: '#f87171', perfect: '#fbbf24' };
     const color = existing.result ? (resultColors[existing.result] || '') : '';
-    return `<div class="pred-existing">${existing.result ? `<span style="color:${color};font-weight:700">${existing.points} pts</span>` : `Prédit : ${existing.predictedWinner}`}</div>`;
+    const badgeStyle = `color:${color};font-weight:700;border:1px solid ${color}70;box-shadow:0 0 10px ${color}40;border-radius:20px;padding:2px 10px;display:inline-block`;
+    return `<div class="pred-existing">${existing.result ? `<span style="${badgeStyle}">${existing.points} pts</span>` : `Prédit : ${existing.predictedWinner}`}</div>`;
   }
   return `
     <div class="pred-buttons">

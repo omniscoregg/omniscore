@@ -297,14 +297,14 @@ function renderPredRow(p) {
   const colors = window.GENRE_COLORS?.[cfg?.genre] || { accent: '#a78bfa' };
   const date   = p.createdAt ? new Date(p.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '—';
   return `<div class="pred-history-row">
-    <span class="pred-history-dot" style="background:${dotColor}"></span>
+    <span class="pred-history-dot" style="background:${dotColor};box-shadow:0 0 8px ${dotColor}"></span>
     <div class="pred-history-info">
       <span class="pred-history-game" style="color:${colors.accent}">${cfg?.label || p.game}</span>
       <span class="pred-history-team">${p.predictedWinner}${score}</span>
       <span class="pred-history-match">vs ${p.team1 === p.predictedWinner ? p.team2 : p.team1}</span>
     </div>
     <div class="pred-history-right">
-      ${pts ? `<span class="pred-history-pts" style="color:${dotColor}">${pts}</span>` : ''}
+      ${pts ? `<span class="pred-history-pts" style="color:${dotColor};font-weight:700;border:1px solid ${dotColor}70;box-shadow:0 0 8px ${dotColor}40;border-radius:20px;padding:1px 8px">${pts}</span>` : ''}
       <span class="pred-history-date">${date}</span>
     </div>
   </div>`;
