@@ -77,6 +77,43 @@ function drawUsername(ctx, username, rankName, rankColor, rankIcon) {
   }
 }
 
+// Réduit la police d'un nom d'équipe pour qu'il tienne dans maxWidth ;
+// si même à taille minimale ça ne rentre pas sur une ligne, le découpe
+// sur 2 lignes (au meilleur endroit possible entre les mots).
+function fitOrWrapTeamText(ctx, text, maxWidth, baseSize = 52, minSize = 30) {
+  const words = text.split(' ');
+
+  const bestSplit = () => {
+    if (words.length < 2) return null;
+    let best = null;
+    for (let i = 1; i < words.length; i++) {
+      const line1 = words.slice(0, i).join(' ');
+      const line2 = words.slice(i).join(' ');
+      const w = Math.max(ctx.measureText(line1).width, ctx.measureText(line2).width);
+      if (!best || w < best.w) best = { line1, line2, w };
+    }
+    return best;
+  };
+
+  for (let size = baseSize; size >= minSize; size -= 2) {
+    ctx.font = `bold ${size}px system-ui, sans-serif`;
+    if (ctx.measureText(text).width <= maxWidth) {
+      return { lines: [text], size, lineHeight: size * 1.15 };
+    }
+    const split = bestSplit();
+    if (split && split.w <= maxWidth) {
+      return { lines: [split.line1, split.line2], size, lineHeight: size * 1.05 };
+    }
+  }
+
+  // Taille minimale atteinte : on garde 2 lignes (ou 1 si un seul mot) même si ça déborde un peu
+  ctx.font = `bold ${minSize}px system-ui, sans-serif`;
+  const split = bestSplit();
+  return split
+    ? { lines: [split.line1, split.line2], size: minSize, lineHeight: minSize * 1.05 }
+    : { lines: [text], size: minSize, lineHeight: minSize * 1.15 };
+}
+
 function downloadCanvas(canvas, filename) {
   const link = document.createElement('a');
   link.download = filename;
@@ -161,13 +198,36 @@ async function shareMatchPrediction(matchData) {
   ctx.fillStyle = '#4a5568';
   ctx.fillText(game + (tournament ? ' · ' + tournament : ''), SHARE_W / 2, 420);
 
-  // Équipes + score
-  ctx.font        = 'bold 52px system-ui, sans-serif';
+  // Score — on mesure sa largeur d'abord pour contraindre les noms d'équipe
+  const scoreText = `${score1}  :  ${score2}`;
+  ctx.font = 'bold 80px system-ui, sans-serif';
+  const scoreWidth = ctx.measureText(scoreText).width;
+
+  const CANVAS_PAD = 60;
+  const TEAM_GAP   = 30; // espace entre le nom d'équipe et le score
+  const maxTeamWidth = (SHARE_W / 2) - (scoreWidth / 2) - CANVAS_PAD - TEAM_GAP;
+
+  // Équipes (taille auto-ajustée, retour à la ligne si nom trop long)
   ctx.fillStyle   = '#e8eaf0';
   ctx.textAlign   = 'left';
-  ctx.fillText(team1, 60, 510);
+  const fit1 = fitOrWrapTeamText(ctx, team1, maxTeamWidth);
+  ctx.font = `bold ${fit1.size}px system-ui, sans-serif`;
+  if (fit1.lines.length === 1) {
+    ctx.fillText(fit1.lines[0], 60, 510);
+  } else {
+    ctx.fillText(fit1.lines[0], 60, 510 - fit1.lineHeight / 2);
+    ctx.fillText(fit1.lines[1], 60, 510 + fit1.lineHeight / 2);
+  }
+
   ctx.textAlign   = 'right';
-  ctx.fillText(team2, SHARE_W - 60, 510);
+  const fit2 = fitOrWrapTeamText(ctx, team2, maxTeamWidth);
+  ctx.font = `bold ${fit2.size}px system-ui, sans-serif`;
+  if (fit2.lines.length === 1) {
+    ctx.fillText(fit2.lines[0], SHARE_W - 60, 510);
+  } else {
+    ctx.fillText(fit2.lines[0], SHARE_W - 60, 510 - fit2.lineHeight / 2);
+    ctx.fillText(fit2.lines[1], SHARE_W - 60, 510 + fit2.lineHeight / 2);
+  }
 
   // Score
   ctx.textAlign   = 'center';
@@ -175,7 +235,7 @@ async function shareMatchPrediction(matchData) {
   ctx.fillStyle   = '#ffffff';
   ctx.shadowColor = 'rgba(255,255,255,0.3)';
   ctx.shadowBlur  = 10;
-  ctx.fillText(`${score1}  :  ${score2}`, SHARE_W / 2, 510);
+  ctx.fillText(scoreText, SHARE_W / 2, 510);
   ctx.shadowBlur  = 0;
 
   // Séparateur 2
