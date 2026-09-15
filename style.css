@@ -5743,22 +5743,8 @@ body {
 /* ============================================================
    Notifications — panneau
    ============================================================ */
-.notif-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  background: #ef4444;
-  color: white;
-  font-size: 9px;
-  font-weight: 800;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
+/* (définition .notif-badge dupliquée avec !important supprimée —
+   voir la définition unique plus haut dans le fichier) */
 
 .notif-panel {
   position: fixed;
