@@ -320,7 +320,7 @@ async function shareGlobalStats(statsData) {
   ctx.fillRect(20, 20, SHARE_W - 40, 4);
 
   drawLogo(ctx);
-  drawUsername(ctx, username, rankName, rankColor, rankIcon);
+  drawUsername(ctx, username, '', '', '');
 
   // Titre
   ctx.textAlign   = 'center';
