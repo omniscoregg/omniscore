@@ -486,7 +486,7 @@ function closeEsportInfoPage() {
 //  Page liste — tous les jeux
 // ----------------------------------------------------------
 function renderEsportInfoList(lang) {
-  const titles = { fr: 'Infos Esport', en: 'Esport Info', es: 'Info Esport' };
+  const titles = { fr: 'Informations', en: 'Esport Info', es: 'Info Esport' };
   const subtitles = { fr: 'Découvre les formats, règles et circuits de chaque jeu', en: 'Discover the formats, rules and circuits of each game', es: 'Descubre los formatos, reglas y circuitos de cada juego' };
 
   const cards = Object.entries(ESPORT_INFO).map(([key, info]) => {
@@ -541,7 +541,7 @@ function renderEsportInfoDetail(key, lang, activeTab) {
   const formatLabel = { fr: 'Format & Règles', en: 'Format & Rules', es: 'Formato & Reglas' };
   const leaguesLabel = { fr: 'Circuits & Ligues', en: 'Circuits & Leagues', es: 'Circuitos & Ligas' };
   const linksLabel  = { fr: 'Liens utiles', en: 'Useful links', es: 'Enlaces útiles' };
-  const tabInfoLabel = { fr: 'Infos Esport', en: 'Esport Info', es: 'Info Esport' };
+  const tabInfoLabel = { fr: 'Informations', en: 'Esport Info', es: 'Info Esport' };
   const tabChampLabel = { fr: 'Champions & Agents', en: 'Champions & Agents', es: 'Campeones & Agentes' };
   const tierLabels = {
     0: { fr: 'Mondial', en: 'Worldwide', es: 'Mundial', color: '#fbbf24' },
