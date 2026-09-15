@@ -12,15 +12,21 @@ const firebaseConfig = {
   measurementId:     "G-JK2QY60L8Z"
 };
 
+// ── Debug token App Check pour le dev local ──
+// À activer UNIQUEMENT en local (localhost / 127.0.0.1), jamais en prod.
+if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+  self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+}
+
 firebase.initializeApp(firebaseConfig);
 
-// ── App Check temporairement désactivé (erreur reCAPTCHA) ──
-// try {
-//   const appCheck = firebase.appCheck();
-//   appCheck.activate('6Le4IAktAAAAAdw5qymbxT-eDAH1BhJ8mW2KsdTa', true);
-//   console.log('[App Check] Activé ✓');
-// } catch(e) {
-//   console.warn('[App Check] Non disponible:', e.message);
-// }
+// ── App Check ──
+try {
+  const appCheck = firebase.appCheck();
+  appCheck.activate('6Le4IAktAAAAAdw5qymbxT-eDAH1BhJ8mW2KsdTa', true);
+  console.log('[App Check] Activé ✓');
+} catch (e) {
+  console.warn('[App Check] Non disponible:', e.message);
+}
 
 console.log('[Firebase] Initialisé ✓');
