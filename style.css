@@ -972,6 +972,32 @@ body {
 }
 .main-tab.live-tab:hover { border-color: #f87171; color: #f87171; }
 
+/* ----------------------------------------------------------
+   Onglets page Infos Esport (Infos Esport / Champions & Agents)
+   ---------------------------------------------------------- */
+.esport-info-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.esport-info-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text3);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+.esport-info-tab:hover { color: var(--text2); }
+.esport-info-tab.active { font-weight: 600; }
+
 .live-dot-small {
   width: 7px;
   height: 7px;

@@ -578,12 +578,12 @@ function renderEsportInfoDetail(key, lang, activeTab) {
       <button class="esport-info-tab ${activeTab === 'info' ? 'active' : ''}"
         style="${activeTab === 'info' ? `color:${accent};border-bottom-color:${accent}` : ''}"
         onclick="showEsportInfoPage('${key}', 'info')">
-        📋 ${tabInfoLabel[lang] || tabInfoLabel.fr}
+        ${tabInfoLabel[lang] || tabInfoLabel.fr}
       </button>
       <button class="esport-info-tab ${activeTab === 'champions' ? 'active' : ''}"
         style="${activeTab === 'champions' ? `color:${accent};border-bottom-color:${accent}` : ''}"
         onclick="showEsportInfoPage('${key}', 'champions')">
-        ⚔️ ${tabChampLabel[lang] || tabChampLabel.fr}
+        ${tabChampLabel[lang] || tabChampLabel.fr}
       </button>
     </div>
   ` : '';
