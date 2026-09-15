@@ -85,14 +85,14 @@ function renderMainTabs() {
   tabs.className = 'main-tabs';
   tabs.innerHTML = `
     <button class="main-tab ${state.activeMainTab === 'results' ? 'active' : ''}" onclick="setMainTab('results')">
-      📋 Résultats
+      Résultats
     </button>
     <button class="main-tab live-tab ${state.activeMainTab === 'live' ? 'active' : ''}" onclick="setMainTab('live')">
       <span class="live-dot-small"></span> En direct
       ${(state.liveMatches && state.liveMatches.length > 0) ? '<span class="live-count">' + state.liveMatches.length + '</span>' : ''}
     </button>
     <button class="main-tab ${state.activeMainTab === 'upcoming' ? 'active' : ''}" onclick="setMainTab('upcoming')">
-      🕐 À venir
+      À venir
     </button>
   `;
 
@@ -281,7 +281,7 @@ async function renderMatches() {
   if (source.length === 0) {
     let msg;
     if (state.activeMainTab === 'live') {
-      msg = '🔴 Aucun match en direct pour le moment.';
+      msg = 'Aucun match en direct pour le moment.';
     } else if (state.activeMainTab === 'upcoming') {
       msg = i18n.t('noUpcoming');
     } else {
@@ -365,7 +365,7 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
     if (window._predStore?.[String(m.id)]) predBorderClass = 'pred-border-upcoming';
   } else if (m.status === 'running') {
     if (window._predStore?.[String(m.id)]) predBorderClass = 'pred-border-live';
-  } else if (m.status === 'finished') {
+  } else if (m.status === 'past') {
     // Chercher le résultat dans les prédictions résolues (indépendant de _predStore,
     // qui ne contient que les prédictions encore en attente)
     const resolvedPred = window._resolvedStore?.[String(m.id)];
@@ -505,12 +505,12 @@ function formatMatchTime(m, isUpcoming = false) {
   const end   = m.end_at ? formatTime(m.end_at) : null;
   const dur   = formatDuration(m.date, m.end_at);
   if (isUpcoming || m.status === 'upcoming') {
-    return `<span class="time-icon">🕐</span> ${i18n.t('start')} : <strong>${start}</strong>`;
+    return `${i18n.t('start')} : <strong>${start}</strong>`;
   }
   if (end && dur) {
-    return `<span class="time-icon">🕐</span> ${start} → ${end} <span class="time-dur">(${dur})</span>`;
+    return `${start} → ${end} <span class="time-dur">(${dur})</span>`;
   }
-  return `<span class="time-icon">🕐</span> ${start}`;
+  return `${start}`;
 }
 
 function formatDate(iso) {
@@ -706,7 +706,6 @@ function renderDrawerGames() {
   const genreLabels = { moba: 'MOBA', fps: 'FPS / Tir', fighting: 'Combat', br: 'Battle Royale', sport: 'Sport', card: 'Carte' };
 
   el.innerHTML = '<div class="drawer-game-item" onclick="selectGame(null);closeGameDrawer()" style="margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:12px">'
-    + '<span style="font-size:16px">🌐</span>'
     + '<span class="drawer-game-label" style="font-weight:600">Tous les jeux</span>'
     + '</div>'
     + Object.entries(byGenre).map(([genre, games]) => 

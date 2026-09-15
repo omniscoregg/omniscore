@@ -41,7 +41,6 @@ async function loadPredictionNotifs(uid) {
 
     return snap.docs.map(d => {
       const p = d.data();
-      const icons = { correct: '✅', perfect: '🏆', wrong: '❌' };
       const labels = { correct: 'Correct', perfect: 'Parfait !', wrong: 'Manqué' };
       const pts = p.points > 0 ? ` +${p.points} pts` : '';
       const cfg = EsportAPI?.GAME_CONFIG?.[p.game];
@@ -49,7 +48,7 @@ async function loadPredictionNotifs(uid) {
         id: d.id,
         type: 'prediction',
         result: p.result,
-        icon: icons[p.result] || '⏳',
+        icon: '',
         title: labels[p.result] || p.result,
         body: `${p.predictedWinner}${pts}`,
         sub: cfg?.label || p.game,
@@ -94,7 +93,7 @@ async function loadFavoriteMatchNotifs(uid) {
           notifs.push({
             id: 'match_' + m.id,
             type: 'match',
-            icon: '📅',
+            icon: '',
             title: favTeam?.teamName || 'Équipe favorite',
             body: `${m.team1?.name} vs ${m.team2?.name}`,
             sub: `Dans ${hoursLeft}h · ${cfg?.label || m.game}`,
@@ -117,7 +116,7 @@ function updateNotifBadge(notifs) {
   const readIds = getReadNotifIds();
   const unread  = notifs.filter(n => !readIds.includes(n.id)).length;
 
-  document.querySelectorAll('.notif-badge, .notif-badge-inline').forEach(badge => {
+  document.querySelectorAll('.notif-badge').forEach(badge => {
     if (unread > 0) {
       badge.textContent = unread > 9 ? '9+' : unread;
       badge.style.display = 'flex';

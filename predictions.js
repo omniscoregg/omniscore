@@ -435,16 +435,15 @@ window.glowMatchCard = glowMatchCard;
 async function renderPredictionBtn(matchId, game, team1, team2, status, format = 'Bo3') {
   if (status !== 'upcoming') return '';
   if (!currentUser) {
-    return `<div class="pred-cta" onclick="showAuthModal('login')">🎯 Connectez-vous pour prédire</div>`;
+    return `<div class="pred-cta" onclick="showAuthModal('login')">Connectez-vous pour prédire</div>`;
   }
   const existing = await hasPredicted(currentUser.uid, matchId);
   if (existing) {
-    const icons = { correct: '✅', wrong: '❌', perfect: '🏆' };
-    return `<div class="pred-existing">${existing.result ? `${icons[existing.result]||'⏳'} ${existing.points} pts` : `⏳ Prédit : ${existing.predictedWinner}`}</div>`;
+    return `<div class="pred-existing">${existing.result ? `${existing.points} pts` : `Prédit : ${existing.predictedWinner}`}</div>`;
   }
   return `
     <div class="pred-buttons">
-      <span class="pred-label">🎯 Qui va gagner ?</span>
+      <span class="pred-label">Qui va gagner ?</span>
       <div class="pred-teams-row">
         <button class="pred-btn" onclick="selectPredTeam(this,'${matchId}','${game}','${team1}','${team2}','${team1}','${format}')">${team1}</button>
         <button class="pred-btn" onclick="selectPredTeam(this,'${matchId}','${game}','${team1}','${team2}','${team2}','${format}')">${team2}</button>
@@ -533,7 +532,7 @@ async function showLeaderboard() {
       </div>
       <div class="leaderboard-tabs">
         <button class="lb-tab active" onclick="loadLeaderboard('global', this)">Global</button>
-        <button class="lb-tab" onclick="loadLeaderboard('season', this)">🏅 Saison</button>
+        <button class="lb-tab" onclick="loadLeaderboard('season', this)">Saison</button>
         ${Object.entries(EsportAPI.GAME_CONFIG)
           .filter(([, c]) => c.source === 'pandascore')
           .map(([k, c]) => `<button class="lb-tab" onclick="loadLeaderboard('${k}', this)">${c.label}</button>`)
@@ -582,7 +581,7 @@ async function loadLeaderboard(type, btn) {
           </div>`;
           return `
           <tr class="${u.id === currentUser?.uid ? 'lb-me' : ''}">
-            <td class="lb-rank">${u.rank === 1 ? '🥇' : u.rank === 2 ? '🥈' : u.rank === 3 ? '🥉' : u.rank}</td>
+            <td class="lb-rank">${u.rank}</td>
             <td class="lb-name">
               <div style="display:flex;align-items:center;gap:8px">
                 ${avatarHtml}
@@ -590,8 +589,8 @@ async function loadLeaderboard(type, btn) {
               </div>
             </td>
             <td>${rankBadge}</td>
-            <td class="lb-pts">⭐ ${u.points}</td>
-            <td class="lb-streak">${u.streak > 0 ? '🔥 ' + u.streak : '—'}</td>
+            <td class="lb-pts">${u.points}</td>
+            <td class="lb-streak">${u.streak > 0 ? u.streak : '—'}</td>
           </tr>`;
         }).join('')}
         </tbody>
@@ -638,13 +637,7 @@ async function loadResolvedStore(uid) {
     window._resolvedStore = {};
     snap.docs.forEach(d => {
       const p = d.data();
-      window._resolvedStore[String(p.matchId)] = {
-        result: p.result,
-        points: p.points,
-        winner: p.predictedWinner,
-        score1: p.predictedScore1,
-        score2: p.predictedScore2
-      };
+      window._resolvedStore[String(p.matchId)] = { result: p.result, points: p.points };
     });
     console.log('[Predictions] ResolvedStore:', Object.keys(window._resolvedStore).length, 'résolues');
   } catch(e) { console.warn('[Predictions] loadResolvedStore:', e); }

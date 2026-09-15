@@ -103,7 +103,7 @@ async function loadProfileContent(user) {
     if (!profile) { el.innerHTML = '<div class="lb-empty">Profil introuvable.</div>'; return; }
 
     const rank      = leaderboard.findIndex(u => u.id === user.uid) + 1;
-    const rankLabel = rank === 0 ? '—' : rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '#' + rank;
+    const rankLabel = rank === 0 ? '—' : '#' + rank;
 
     const total   = predictions.length;
     const correct = predictions.filter(p => p.result === 'correct' || p.result === 'perfect').length;
@@ -140,29 +140,29 @@ async function loadProfileContent(user) {
           <div class="profile-stat-label">Réussite</div>
         </div>
         <div class="profile-stat">
-          <div class="profile-stat-value" style="color:#fbbf24">🔥 ${streak}</div>
+          <div class="profile-stat-value" style="color:#fbbf24">${streak}</div>
           <div class="profile-stat-label">Série</div>
         </div>
       </div>
 
       <div class="profile-points-row">
         <div class="profile-stat">
-          <div class="profile-stat-value" style="color:#a78bfa;font-size:28px">⭐ ${profile.points}</div>
+          <div class="profile-stat-value" style="color:#a78bfa;font-size:28px">${profile.points}</div>
           <div class="profile-stat-label">Points saison</div>
           <button class="share-btn-small" onclick="shareFromProfile('season')" title="Partager mes stats saison">📤</button>
         </div>
         <div class="profile-stat">
-          <div class="profile-stat-value" style="color:#fbbf24;font-size:22px">🏅 ${profile.totalPoints || profile.points}</div>
+          <div class="profile-stat-value" style="color:#fbbf24;font-size:22px">${profile.totalPoints || profile.points}</div>
           <div class="profile-stat-label">Points carrière</div>
           <button class="share-btn-small" onclick="shareFromProfile('global')" title="Partager mes stats globales">📤</button>
         </div>
       </div>
 
       <div class="profile-pred-detail centered">
-        <span class="pred-detail-item correct">✅ ${correct} correctes</span>
-        <span class="pred-detail-item perfect">🏆 ${perfect} parfaites</span>
-        <span class="pred-detail-item wrong">❌ ${wrong} manquées</span>
-        <span class="pred-detail-item pending">⏳ ${pending} en attente</span>
+        <span class="pred-detail-item correct">${correct} correctes</span>
+        <span class="pred-detail-item perfect">${perfect} parfaites</span>
+        <span class="pred-detail-item wrong">${wrong} manquées</span>
+        <span class="pred-detail-item pending">${pending} en attente</span>
       </div>
 
       ${favTeams.length > 0 || favGames.length > 0 ? `
@@ -170,7 +170,7 @@ async function loadProfileContent(user) {
         <div class="profile-section-title">⭐ Mes Favoris</div>
         ${favGames.length > 0 ? `
         <div class="profile-favs-category">
-          <div class="profile-favs-label">🎮 Jeux</div>
+          <div class="profile-favs-label">Jeux</div>
           <div class="profile-favs-grid">
             ${favGames.map(g => {
               const cfg = EsportAPI.GAME_CONFIG[g];
@@ -186,7 +186,7 @@ async function loadProfileContent(user) {
         </div>` : ''}
         ${favTeams.length > 0 ? `
         <div class="profile-favs-category">
-          <div class="profile-favs-label">🏆 Équipes</div>
+          <div class="profile-favs-label">Équipes</div>
           <div class="profile-favs-grid">
             ${favTeams.map(f => {
               const cfg    = EsportAPI.GAME_CONFIG[f.game];
@@ -223,7 +223,7 @@ async function loadProfileContent(user) {
 
       <div class="profile-section">
         <div class="profile-section-title" style="display:flex;justify-content:space-between;align-items:center">
-          <span>📋 Historique</span>
+          <span>Historique</span>
           <div class="pred-view-toggle">
             <button class="pred-view-btn active" id="pred-view-list" onclick="switchPredView('list')">Liste</button>
             <button class="pred-view-btn" id="pred-view-game" onclick="switchPredView('game')">Par jeu</button>
@@ -288,8 +288,6 @@ function calculateStreak(predictions) {
 }
 
 function renderPredRow(p) {
-  const icons  = { correct: '✅', perfect: '🏆', wrong: '❌', null: '⏳' };
-  const icon   = icons[p.result] || '⏳';
   const pts    = p.points > 0 ? `+${p.points} pts` : '';
   const score  = (p.predictedScore1 !== null && p.predictedScore2 !== null)
     ? ` (${p.predictedScore1}-${p.predictedScore2})` : '';
@@ -297,7 +295,6 @@ function renderPredRow(p) {
   const colors = window.GENRE_COLORS?.[cfg?.genre] || { accent: '#a78bfa' };
   const date   = p.createdAt ? new Date(p.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '—';
   return `<div class="pred-history-row">
-    <span class="pred-history-icon">${icon}</span>
     <div class="pred-history-info">
       <span class="pred-history-game" style="color:${colors.accent}">${cfg?.label || p.game}</span>
       <span class="pred-history-team">${p.predictedWinner}${score}</span>
@@ -328,9 +325,9 @@ function renderDailyStreak(dayStreak, nextBonus) {
   }).join('');
   let info = '';
   if (dayStreak === 0) info = 'Faites une prédiction aujourd\'hui pour commencer votre série !';
-  else if (nextBonus === 7) info = '🎉 Bonus de 7 jours atteint ! Prochain bonus dans 7 jours.';
+  else if (nextBonus === 7) info = 'Bonus de 7 jours atteint ! Prochain bonus dans 7 jours.';
   else info = 'Encore <strong>' + nextBonus + ' jour' + (nextBonus > 1 ? 's' : '') + '</strong> pour le bonus +5 pts !';
-  el.innerHTML = '<div class="daily-streak-title">📅 Activité quotidienne <span style="color:var(--text3);font-size:11px">— Bonus +5 pts tous les 7 jours</span></div>'
+  el.innerHTML = '<div class="daily-streak-title">Activité quotidienne <span style="color:var(--text3);font-size:11px">— Bonus +5 pts tous les 7 jours</span></div>'
     + '<div class="daily-streak-bar">' + dayDots + '</div>'
     + '<div class="daily-streak-info">' + info + '</div>';
 }
@@ -379,8 +376,8 @@ function renderPredHistoryByGame(preds) {
       return `
         <div class="pred-tournoi-group">
           <div class="pred-tournoi-header">
-            <span class="pred-tournoi-name">🏆 ${tournoi}</span>
-            <span class="pred-tournoi-stats">${tPreds.length} préd · ${tPct}% ✅</span>
+            <span class="pred-tournoi-name">${tournoi}</span>
+            <span class="pred-tournoi-stats">${tPreds.length} préd · ${tPct}%</span>
           </div>
           ${tPreds.slice(0, 5).map(p => renderPredRow(p)).join('')}
         </div>`;
@@ -391,7 +388,7 @@ function renderPredHistoryByGame(preds) {
         <div class="pred-game-header" style="border-left:3px solid ${accent}">
           <div class="pred-game-info">
             <span class="pred-game-label" style="color:${accent}">${label}</span>
-            <span class="pred-game-stats">${gamePreds.length} prédictions · ${pct}% de réussite · 🏆 ${perfect} parfaites</span>
+            <span class="pred-game-stats">${gamePreds.length} prédictions · ${pct}% de réussite · ${perfect} parfaites</span>
           </div>
           <div class="pred-game-pct" style="color:${pct >= 60 ? '#4ade80' : pct >= 40 ? '#fbbf24' : '#f87171'}">${pct}%</div>
         </div>
