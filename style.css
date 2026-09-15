@@ -259,6 +259,17 @@ body {
   text-align: right;
 }
 
+.team-identity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+.team-block.right .team-identity {
+  flex-direction: row-reverse;
+}
+
 .team-logo-img {
   width: 28px;
   height: 28px;

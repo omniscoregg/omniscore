@@ -414,15 +414,13 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
       </div>
       <div class="match-body">
         <div class="team-block ${w1class}">
-          ${logo1}
-          <span class="team-name">${m.team1.name}</span>
+          <span class="team-identity">${logo1}<span class="team-name">${m.team1.name}</span></span>
           ${tapBtn1}
           ${!isUpcoming && m.score1 !== null ? `<span class="team-score-inline">${m.score1}</span>` : ''}
         </div>
         ${(tapBtn1.includes('pred-pill-result') || (!isUpcoming && m.score1 !== null)) ? '' : `<div class="match-score">${score}</div>`}
         <div class="team-block right ${w2class}">
-          ${logo2}
-          <span class="team-name">${m.team2.name}</span>
+          <span class="team-identity">${logo2}<span class="team-name">${m.team2.name}</span></span>
           ${tapBtn2}
           ${!isUpcoming && m.score2 !== null ? `<span class="team-score-inline">${m.score2}</span>` : ''}
         </div>
@@ -564,9 +562,9 @@ function renderMatchCardSimple(m, isUpcoming = false, isLive = false) {
         ${isLive ? '<span class="live-pill"><span class="live-dot-small"></span> LIVE</span>' : ''}
       </div>
       <div class="match-body">
-        <div class="team-block ${w1class}"><span class="team-name">${m.team1.name}</span>${logo1}</div>
-        ${(tapBtn1.includes('pred-pill-result') || (!isUpcoming && m.score1 !== null)) ? '' : `<div class="match-score">${score}</div>`}
-        <div class="team-block right ${w2class}"><span class="team-name">${m.team2.name}</span>${logo2}</div>
+        <div class="team-block ${w1class}"><span class="team-identity"><span class="team-name">${m.team1.name}</span>${logo1}</span></div>
+        ${!isUpcoming && m.score1 !== null ? '' : `<div class="match-score">${score}</div>`}
+        <div class="team-block right ${w2class}"><span class="team-identity"><span class="team-name">${m.team2.name}</span>${logo2}</span></div>
       </div>
       <div class="match-bottom">
         ${timeInfo ? `<span class="match-time-left">${timeInfo}</span>` : ''}
