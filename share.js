@@ -209,24 +209,32 @@ async function shareMatchPrediction(matchData) {
 
   // Équipes (taille auto-ajustée, retour à la ligne si nom trop long)
   ctx.fillStyle   = '#e8eaf0';
-  ctx.textAlign   = 'left';
   const fit1 = fitOrWrapTeamText(ctx, team1, maxTeamWidth);
   ctx.font = `bold ${fit1.size}px system-ui, sans-serif`;
   if (fit1.lines.length === 1) {
+    ctx.textAlign = 'left';
     ctx.fillText(fit1.lines[0], 60, 510);
   } else {
-    ctx.fillText(fit1.lines[0], 60, 510 - fit1.lineHeight / 2);
-    ctx.fillText(fit1.lines[1], 60, 510 + fit1.lineHeight / 2);
+    // Bloc ancré à gauche (x=60), mais les 2 lignes centrées entre elles
+    const blockWidth1 = Math.max(ctx.measureText(fit1.lines[0]).width, ctx.measureText(fit1.lines[1]).width);
+    const cx1 = 60 + blockWidth1 / 2;
+    ctx.textAlign = 'center';
+    ctx.fillText(fit1.lines[0], cx1, 510 - fit1.lineHeight / 2);
+    ctx.fillText(fit1.lines[1], cx1, 510 + fit1.lineHeight / 2);
   }
 
-  ctx.textAlign   = 'right';
   const fit2 = fitOrWrapTeamText(ctx, team2, maxTeamWidth);
   ctx.font = `bold ${fit2.size}px system-ui, sans-serif`;
   if (fit2.lines.length === 1) {
+    ctx.textAlign = 'right';
     ctx.fillText(fit2.lines[0], SHARE_W - 60, 510);
   } else {
-    ctx.fillText(fit2.lines[0], SHARE_W - 60, 510 - fit2.lineHeight / 2);
-    ctx.fillText(fit2.lines[1], SHARE_W - 60, 510 + fit2.lineHeight / 2);
+    // Bloc ancré à droite (x=SHARE_W-60), mais les 2 lignes centrées entre elles
+    const blockWidth2 = Math.max(ctx.measureText(fit2.lines[0]).width, ctx.measureText(fit2.lines[1]).width);
+    const cx2 = (SHARE_W - 60) - blockWidth2 / 2;
+    ctx.textAlign = 'center';
+    ctx.fillText(fit2.lines[0], cx2, 510 - fit2.lineHeight / 2);
+    ctx.fillText(fit2.lines[1], cx2, 510 + fit2.lineHeight / 2);
   }
 
   // Score
@@ -245,7 +253,7 @@ async function shareMatchPrediction(matchData) {
   // Prédiction
   ctx.font      = '20px system-ui, sans-serif';
   ctx.fillStyle = '#4a5568';
-  ctx.fillText('Ta prédiction', SHARE_W / 2, 620);
+  ctx.fillText('Prédiction', SHARE_W / 2, 620);
 
   ctx.font      = 'bold 36px system-ui, sans-serif';
   ctx.fillStyle = '#8892a4';
