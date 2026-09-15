@@ -146,7 +146,7 @@ function getSeasonRank(seasonPoints, globalRank) {
 function renderSeasonRankBadge(seasonPoints, globalRank, size) {
   size = size || 'normal';
   const rank   = getSeasonRank(seasonPoints, globalRank);
-  const stars  = rank.star > 0 ? '⭐'.repeat(rank.star) : '';
+  const stars  = rank.star > 0 ? (window.starToRoman ? window.starToRoman(rank.star) : rank.star) : '';
   const isOmni = rank.special;
 
   if (size === 'small') {
@@ -324,7 +324,7 @@ async function renderSeasonSection(uid, globalRank, lang) {
       <div class="season-current">
         <div class="season-stats-row">
           <div class="season-stat">
-            <div class="season-stat-value" style="color:${seasonRank.color}">⭐ ${seasonPts}</div>
+            <div class="season-stat-value" style="color:${seasonRank.color}">${seasonPts}</div>
             <div class="season-stat-label">${T.pts}</div>
           </div>
           <div class="season-stat">
@@ -339,9 +339,9 @@ async function renderSeasonSection(uid, globalRank, lang) {
         ${nextRank ? `
         <div class="season-progress-wrap">
           <div class="season-progress-label">
-            <span style="color:${seasonRank.color}">${seasonRank.icon} ${seasonRank.name} ${'⭐'.repeat(seasonRank.star)}</span>
+            <span style="color:${seasonRank.color}">${seasonRank.icon} ${seasonRank.name} ${window.starToRoman ? window.starToRoman(seasonRank.star) : seasonRank.star}</span>
             <span style="color:var(--text3)"> → </span>
-            <span style="color:${nextRank.color}">${nextRank.icon} ${nextRank.name} ${'⭐'.repeat(nextRank.star)}</span>
+            <span style="color:${nextRank.color}">${nextRank.icon} ${nextRank.name} ${window.starToRoman ? window.starToRoman(nextRank.star) : nextRank.star}</span>
           </div>
           <div class="rank-progress-bar">
             <div class="rank-progress-fill" style="width:${progress}%;background:${seasonRank.color}"></div>
@@ -393,13 +393,13 @@ async function renderSeasonLeaderboard(container, lang) {
       const profile  = profileMap[u.uid] || {};
       const username = profile.username || '—';
       const rank     = getSeasonRank(u.points, i + 1);
-      const rankStr  = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1);
+      const rankStr  = '#' + (i + 1);
       const isMe     = window.FirebaseService?.getCurrentUser()?.uid === u.uid;
 
       return '<tr class="' + (isMe ? 'lb-me' : '') + '">'
         + '<td class="lb-rank">' + rankStr + '</td>'
         + '<td class="lb-name">' + username + (isMe ? ' <span style="color:var(--text3);font-size:10px">(vous)</span>' : '') + '</td>'
-        + '<td class="lb-pts">⭐ ' + u.points + '</td>'
+        + '<td class="lb-pts">' + u.points + '</td>'
         + '<td>' + renderSeasonRankBadge(u.points, i + 1, 'small') + '</td>'
         + '</tr>';
     }).join('');
