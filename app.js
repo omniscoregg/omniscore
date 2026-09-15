@@ -432,6 +432,7 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
       <div class="match-bottom">
         ${timeInfo ? `<span class="match-time-left">${timeInfo}</span>` : ''}
         <span class="match-tournament-right">${m.tournament} · ${m.format}</span>
+        ${window._resolvedStore?.[String(m.id)] ? `<button class="share-btn-match" onclick="event.stopPropagation();shareMatch('${m.id}')" title="Partager">📤</button>` : ''}
       </div>
     </div>
   `;
@@ -570,6 +571,7 @@ function renderMatchCardSimple(m, isUpcoming = false, isLive = false) {
       <div class="match-bottom">
         ${timeInfo ? `<span class="match-time-left">${timeInfo}</span>` : ''}
         <span class="match-tournament-right">${m.tournament} · ${m.format}</span>
+        ${window._resolvedStore?.[String(m.id)] ? `<button class="share-btn-match" onclick="event.stopPropagation();shareMatch('${m.id}')" title="Partager">📤</button>` : ''}
       </div>
     </div>
   `;

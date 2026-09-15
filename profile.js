@@ -149,10 +149,12 @@ async function loadProfileContent(user) {
         <div class="profile-stat">
           <div class="profile-stat-value" style="color:#a78bfa;font-size:28px">⭐ ${profile.points}</div>
           <div class="profile-stat-label">Points saison</div>
+          <button class="share-btn-small" onclick="shareFromProfile('season')" title="Partager mes stats saison">📤</button>
         </div>
         <div class="profile-stat">
           <div class="profile-stat-value" style="color:#fbbf24;font-size:22px">🏅 ${profile.totalPoints || profile.points}</div>
           <div class="profile-stat-label">Points carrière</div>
+          <button class="share-btn-small" onclick="shareFromProfile('global')" title="Partager mes stats globales">📤</button>
         </div>
       </div>
 
