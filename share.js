@@ -510,10 +510,10 @@ async function shareFromProfile(type) {
     const pct = resolved > 0 ? Math.round((correct / resolved) * 100) : 0;
 
     await shareGlobalStats({
-      username:    profile.username,
-      rankName:    globalRank.name,
-      rankColor:   globalRank.color,
-      rankIcon:    globalRank.icon,
+  username:    profile.username,
+  rankName:    '',
+  rankColor:   '',
+  rankIcon:    '',
       totalPoints: totalPts,
       predCount,
       pct,
