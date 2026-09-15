@@ -216,7 +216,7 @@ function renderAuthBar() {
        <button class="auth-btn small desktop-only tooltip-btn" onclick="showTournamentsPage()" data-tooltip="Tournois">🎯</button>
 	   <button class="auth-btn small desktop-only tooltip-btn" onclick="showLeaderboard()" data-tooltip="Classement">🏆</button>
         <button class="auth-btn small desktop-only tooltip-btn" onclick="showLeaguesPage ? showLeaguesPage() : null" data-tooltip="Ligues">⚔️</button>
-        <button class="auth-btn small desktop-only tooltip-btn" onclick="showProfilePage()" data-tooltip="Profil">⚙️</button>
+        <button class="auth-btn small desktop-only tooltip-btn" onclick="showProfilePage()" data-tooltip="Profil">👤</button>
         <button class="auth-btn small logout desktop-only tooltip-btn" onclick="handleLogout()" data-tooltip="Déconnexion">↩</button>
       </div>`;
 
