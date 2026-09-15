@@ -648,6 +648,7 @@ function initPredictions() {
   auth.onAuthStateChanged(async user => {
     currentUser    = user;
     currentProfile = user ? await getUserProfile(user.uid) : null;
+window.currentProfile = currentProfile;
     renderAuthBar();
     if (user && window.loadNotifications) window.loadNotifications();
     const favBtn = document.getElementById('fav-nav-btn');
