@@ -66,7 +66,10 @@ async function getTournamentPrediction(uid, tournamentId) {
 // ----------------------------------------------------------
 async function showTournamentsPage() {
   // Masquer le contenu principal
-  document.querySelector('.layout')?.style.setProperty('display', 'none');
+  const layout = document.querySelector('.layout');
+  if (layout) layout.style.display = 'none';
+  const matchTabs = document.querySelector('.match-tabs');
+  if (matchTabs) matchTabs.style.display = 'none';
 
   // Créer ou récupérer le conteneur
   let page = document.getElementById('tournaments-page');
@@ -105,8 +108,14 @@ async function showTournamentsPage() {
 }
 
 function closeTournamentsPage() {
-  document.getElementById('tournaments-page')?.remove();
-  document.querySelector('.layout')?.style.removeProperty('display');
+  const page = document.getElementById('tournaments-page');
+  if (page) page.remove();
+  // Restaurer le layout principal
+  const layout = document.querySelector('.layout');
+  if (layout) layout.style.display = '';
+  // Restaurer les tabs de matchs
+  const matchTabsClose = document.querySelector('.match-tabs');
+  if (matchTabsClose) matchTabsClose.style.display = '';
 }
 
 async function selectTournGame(gameKey, btn) {
