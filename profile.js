@@ -291,7 +291,7 @@ function renderPredRow(p) {
   const resultColors = { correct: '#4ade80', wrong: '#f87171', perfect: '#fbbf24' };
   const borderClass = { correct: 'pred-border-correct', wrong: 'pred-border-wrong', perfect: 'pred-border-perfect' }[p.result] || '';
   const dotColor = resultColors[p.result] || 'var(--text3)';
-  const pts    = p.points > 0 ? `+${p.points} pts` : '';
+  const pts    = p.result ? `+${p.points} pts` : '';
   const score  = (p.predictedScore1 !== null && p.predictedScore2 !== null)
     ? ` (${p.predictedScore1}-${p.predictedScore2})` : '';
   const cfg    = EsportAPI.GAME_CONFIG[p.game];
