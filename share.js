@@ -270,19 +270,16 @@ async function shareSeasonStats(statsData) {
   ];
 
   stats.forEach((s, i) => {
-    const col  = i % 2;
-    const row  = Math.floor(i / 2);
-    const boxW = (SHARE_W - 140) / 2;
-    const x    = 60 + col * (boxW + 20);
-    const y    = 610 + row * 120;
-    drawRoundedRect(ctx, x, y, boxW, 100, 12, 'rgba(255,255,255,0.04)', null);
+    const x = 60 + (i % 2) * (SHARE_W / 2);
+    const y = 610 + Math.floor(i / 2) * 120;
+    drawRoundedRect(ctx, x + 10, y, SHARE_W / 2 - 80, 100, 12, 'rgba(255,255,255,0.04)', null);
     ctx.textAlign = 'center';
     ctx.font      = 'bold 40px system-ui, sans-serif';
-    ctx.fillStyle = s.color || '#e8eaf0';
-    ctx.fillText(s.value, x + boxW / 2, y + 55);
+    ctx.fillStyle = '#e8eaf0';
+    ctx.fillText(s.value, x + SHARE_W / 4 - 30, y + 55);
     ctx.font      = '18px system-ui, sans-serif';
     ctx.fillStyle = '#4a5568';
-    ctx.fillText(s.label, x + boxW / 2, y + 85);
+    ctx.fillText(s.label, x + SHARE_W / 4 - 30, y + 85);
   });
 
   // Footer
@@ -364,19 +361,16 @@ async function shareGlobalStats(statsData) {
   ];
 
   stats.forEach((s, i) => {
-    const col  = i % 2;
-    const row  = Math.floor(i / 2);
-    const boxW = (SHARE_W - 140) / 2;
-    const x    = 60 + col * (boxW + 20);
-    const y    = 610 + row * 120;
-    drawRoundedRect(ctx, x, y, boxW, 100, 12, 'rgba(255,255,255,0.04)', null);
+    const x = 60 + (i % 2) * (SHARE_W / 2);
+    const y = 610 + Math.floor(i / 2) * 120;
+    drawRoundedRect(ctx, x + 10, y, SHARE_W / 2 - 80, 100, 12, 'rgba(255,255,255,0.04)', null);
     ctx.textAlign = 'center';
     ctx.font      = 'bold 40px system-ui, sans-serif';
-    ctx.fillStyle = s.color || '#e8eaf0';
-    ctx.fillText(s.value, x + boxW / 2, y + 55);
+    ctx.fillStyle = s.color;
+    ctx.fillText(s.value, x + SHARE_W / 4 - 30, y + 55);
     ctx.font      = '18px system-ui, sans-serif';
     ctx.fillStyle = '#4a5568';
-    ctx.fillText(s.label, x + boxW / 2, y + 85);
+    ctx.fillText(s.label, x + SHARE_W / 4 - 30, y + 85);
   });
 
   // Footer
@@ -447,38 +441,44 @@ async function shareFromProfile(type) {
   const user    = window.FirebaseService?.getCurrentUser();
   if (!profile || !user) return;
 
-  const rank = window.getSeasonRank ? window.getSeasonRank(profile.points || 0) : { name: 'Bronze', color: '#cd7f32', icon: '🥉' };
+  // Rang saisonnier (pour carte saison)
+  const seasonPts  = await (window.getSeasonPoints ? window.getSeasonPoints(user.uid) : Promise.resolve(profile.points || 0));
+  const seasonRank = window.getSeasonRank ? window.getSeasonRank(seasonPts) : { name: 'Bronze', color: '#cd7f32', icon: '🥉' };
 
-  // Stats prédictions
-  let predCount = profile.predictions || 0;
-  let correct   = 0, perfect = 0, wrong = 0;
-  try {
-    const snap = await firebase.firestore().collection('predictions')
-      .where('uid', '==', user.uid)
-      .where('result', 'in', ['correct', 'perfect', 'wrong'])
-      .get();
-    snap.docs.forEach(d => {
-      const r = d.data().result;
-      if (r === 'correct') correct++;
-      if (r === 'perfect') { correct++; perfect++; }
-      if (r === 'wrong')   wrong++;
-    });
-    predCount = snap.size;
-  } catch(e) {}
-
-  const resolved = correct + wrong;
-  const pct = resolved > 0 ? Math.round((correct / resolved) * 100) : 0;
+  // Rang global (pour carte globale) — basé sur totalPoints
+  const totalPts   = profile.totalPoints || profile.points || 0;
+  const globalRank = window.getRank ? window.getRank(totalPts) : seasonRank;
 
   if (type === 'season') {
-    const season     = window.getCurrentSeason ? window.getCurrentSeason() : {};
-    const daysLeft   = window.getDaysLeftInSeason ? window.getDaysLeftInSeason() : 0;
-    const seasonPts  = await (window.getSeasonPoints ? window.getSeasonPoints(user.uid) : Promise.resolve(profile.points || 0));
+    // Stats saison uniquement
+    const season   = window.getCurrentSeason ? window.getCurrentSeason() : {};
+    const daysLeft = window.getDaysLeftInSeason ? window.getDaysLeftInSeason() : 0;
+
+    let predCount = 0, correct = 0, perfect = 0, wrong = 0;
+    try {
+      const snap = await firebase.firestore().collection('predictions')
+        .where('uid', '==', user.uid)
+        .where('seasonKey', '==', season.seasonKey || '')
+        .get();
+      snap.docs.forEach(d => {
+        const r = d.data().result;
+        if (r === 'correct') { correct++; predCount++; }
+        if (r === 'perfect') { correct++; perfect++; predCount++; }
+        if (r === 'wrong')   { wrong++; predCount++; }
+        if (r === null)      predCount++;
+      });
+    } catch(e) {
+      predCount = profile.predictions || 0;
+    }
+
+    const resolved = correct + wrong;
+    const pct = resolved > 0 ? Math.round((correct / resolved) * 100) : 0;
 
     await shareSeasonStats({
       username:     profile.username,
-      rankName:     rank.name,
-      rankColor:    rank.color,
-      rankIcon:     rank.icon,
+      rankName:     seasonRank.name,
+      rankColor:    seasonRank.color,
+      rankIcon:     seasonRank.icon,
       seasonPoints: seasonPts,
       seasonName:   season.name?.fr || 'Saison en cours',
       seasonIcon:   season.icon || '☀️',
@@ -487,13 +487,34 @@ async function shareFromProfile(type) {
       pct,
       perfect,
     });
+
   } else {
+    // Stats globales toutes saisons
+    let predCount = 0, correct = 0, perfect = 0, wrong = 0;
+    try {
+      const snap = await firebase.firestore().collection('predictions')
+        .where('uid', '==', user.uid)
+        .where('result', 'in', ['correct', 'perfect', 'wrong'])
+        .get();
+      snap.docs.forEach(d => {
+        const r = d.data().result;
+        if (r === 'correct') { correct++; predCount++; }
+        if (r === 'perfect') { correct++; perfect++; predCount++; }
+        if (r === 'wrong')   { wrong++; predCount++; }
+      });
+    } catch(e) {
+      predCount = profile.predictions || 0;
+    }
+
+    const resolved = correct + wrong;
+    const pct = resolved > 0 ? Math.round((correct / resolved) * 100) : 0;
+
     await shareGlobalStats({
       username:    profile.username,
-      rankName:    rank.name,
-      rankColor:   rank.color,
-      rankIcon:    rank.icon,
-      totalPoints: profile.totalPoints || profile.points || 0,
+      rankName:    globalRank.name,
+      rankColor:   globalRank.color,
+      rankIcon:    globalRank.icon,
+      totalPoints: totalPts,
       predCount,
       pct,
       perfect,
