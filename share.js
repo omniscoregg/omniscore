@@ -270,10 +270,8 @@ async function shareSeasonStats(statsData) {
   ];
 
   stats.forEach((s, i) => {
-    const col = i % 2;
-    const row = Math.floor(i / 2);
-    const x   = col; // utilisé pour bx dans le bloc
-    const y   = 610 + row * 120;
+    const x = 60 + (i % 2) * (SHARE_W / 2);
+    const y = 610 + Math.floor(i / 2) * 120;
     drawRoundedRect(ctx, x + 10, y, SHARE_W / 2 - 80, 100, 12, 'rgba(255,255,255,0.04)', null);
     ctx.textAlign = 'center';
     ctx.font      = 'bold 40px system-ui, sans-serif';
@@ -337,6 +335,14 @@ async function shareGlobalStats(statsData) {
   ctx.fillStyle   = '#4a5568';
   ctx.fillText('points carrière', SHARE_W / 2, 410);
 
+  // Rang
+  ctx.font        = 'bold 44px system-ui, sans-serif';
+  ctx.fillStyle   = rankColor || '#a78bfa';
+  ctx.shadowColor = rankColor || '#a78bfa';
+  ctx.shadowBlur  = 20;
+  ctx.fillText(`${rankIcon} ${rankName}`, SHARE_W / 2, 490);
+  ctx.shadowBlur  = 0;
+
   // Séparateur
   const sepGrad = ctx.createLinearGradient(60, 0, SHARE_W - 60, 0);
   sepGrad.addColorStop(0, 'transparent');
@@ -344,7 +350,7 @@ async function shareGlobalStats(statsData) {
   sepGrad.addColorStop(1, 'transparent');
   ctx.strokeStyle = sepGrad;
   ctx.lineWidth   = 1;
-  ctx.beginPath(); ctx.moveTo(60, 490); ctx.lineTo(SHARE_W - 60, 490); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(60, 540); ctx.lineTo(SHARE_W - 60, 540); ctx.stroke();
 
   // Stats
   const stats = [
@@ -355,10 +361,8 @@ async function shareGlobalStats(statsData) {
   ];
 
   stats.forEach((s, i) => {
-    const col = i % 2;
-    const row = Math.floor(i / 2);
-    const x   = col;
-    const y   = 540 + row * 120;
+    const x = 60 + (i % 2) * (SHARE_W / 2);
+    const y = 610 + Math.floor(i / 2) * 120;
     drawRoundedRect(ctx, x + 10, y, SHARE_W / 2 - 80, 100, 12, 'rgba(255,255,255,0.04)', null);
     ctx.textAlign = 'center';
     ctx.font      = 'bold 40px system-ui, sans-serif';
