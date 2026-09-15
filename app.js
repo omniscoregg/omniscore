@@ -361,20 +361,18 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
 
   // Classe de cadre selon statut prédiction
   let predBorderClass = '';
-  const predStoreData = window._predStore?.[String(m.id)];
-  if (predStoreData) {
-    if (m.status === 'upcoming') {
-      predBorderClass = 'pred-border-upcoming';
-    } else if (m.status === 'running') {
-      predBorderClass = 'pred-border-live';
-    } else if (m.status === 'past') {
-      // Chercher le résultat dans les prédictions résolues
-      const resolvedPred = window._resolvedStore?.[String(m.id)];
-      if (resolvedPred) {
-        if (resolvedPred.result === 'perfect') predBorderClass = 'pred-border-perfect';
-        else if (resolvedPred.result === 'correct') predBorderClass = 'pred-border-correct';
-        else predBorderClass = 'pred-border-wrong';
-      }
+  if (m.status === 'upcoming') {
+    if (window._predStore?.[String(m.id)]) predBorderClass = 'pred-border-upcoming';
+  } else if (m.status === 'running') {
+    if (window._predStore?.[String(m.id)]) predBorderClass = 'pred-border-live';
+  } else if (m.status === 'past') {
+    // Chercher le résultat dans les prédictions résolues (indépendant de _predStore,
+    // qui ne contient que les prédictions encore en attente)
+    const resolvedPred = window._resolvedStore?.[String(m.id)];
+    if (resolvedPred) {
+      if (resolvedPred.result === 'perfect') predBorderClass = 'pred-border-perfect';
+      else if (resolvedPred.result === 'correct') predBorderClass = 'pred-border-correct';
+      else predBorderClass = 'pred-border-wrong';
     }
   }
 
@@ -553,6 +551,8 @@ function renderMatchCardSimple(m, isUpcoming = false, isLive = false) {
   const timeInfo = formatMatchTime(m, isUpcoming);
   const storeKey = `match_${m.id}`;
   matchStore.set(storeKey, m);
+  // Version simple : pas de données de prédiction disponibles, donc pas de cadre coloré
+  const predBorderClass = '';
   return `
     <div class="match-card ${isUpcoming ? 'upcoming-match' : ''} ${predBorderClass}" style="border-left:3px solid ${colors.accent}30;cursor:pointer" onclick="openMatchDetail('${storeKey}')" data-key="${storeKey}" data-match-id="${m.id}">
       <div class="match-top">

@@ -5544,10 +5544,10 @@ body {
   box-shadow: 0 0 12px rgba(74, 222, 128, 0.25) !important;
 }
 
-/* Prédiction manquée — rouge discret */
+/* Prédiction manquée — rouge glow */
 .pred-border-wrong {
-  border: 1px solid rgba(248, 113, 113, 0.3) !important;
-  box-shadow: 0 0 8px rgba(248, 113, 113, 0.1) !important;
+  border: 1px solid rgba(248, 113, 113, 0.7) !important;
+  box-shadow: 0 0 14px rgba(248, 113, 113, 0.3) !important;
 }
 
 /* ============================================================
