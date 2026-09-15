@@ -638,7 +638,13 @@ async function loadResolvedStore(uid) {
     window._resolvedStore = {};
     snap.docs.forEach(d => {
       const p = d.data();
-      window._resolvedStore[String(p.matchId)] = { result: p.result, points: p.points };
+      window._resolvedStore[String(p.matchId)] = {
+        result: p.result,
+        points: p.points,
+        winner: p.predictedWinner,
+        score1: p.predictedScore1,
+        score2: p.predictedScore2
+      };
     });
     console.log('[Predictions] ResolvedStore:', Object.keys(window._resolvedStore).length, 'résolues');
   } catch(e) { console.warn('[Predictions] loadResolvedStore:', e); }
