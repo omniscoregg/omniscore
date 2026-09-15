@@ -117,7 +117,7 @@ function updateNotifBadge(notifs) {
   const readIds = getReadNotifIds();
   const unread  = notifs.filter(n => !readIds.includes(n.id)).length;
 
-  document.querySelectorAll('.notif-badge').forEach(badge => {
+  document.querySelectorAll('.notif-badge, .notif-badge-inline').forEach(badge => {
     if (unread > 0) {
       badge.textContent = unread > 9 ? '9+' : unread;
       badge.style.display = 'flex';
