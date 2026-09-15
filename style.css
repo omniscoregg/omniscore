@@ -5883,4 +5883,15 @@ body {
     border-left: none;
     border-right: none;
   }
+  
+  .tourn-header {
+  position: relative;
+  z-index: 999;
+}
+
+.tourn-header .back-btn {
+  position: relative;
+  z-index: 1000;
+  pointer-events: all;
+}
 }
