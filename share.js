@@ -269,17 +269,21 @@ async function shareSeasonStats(statsData) {
     { label: 'Jours restants', value: daysLeft + 'j' },
   ];
 
+  const PAD = 60, GAP = 20;
+  const BW  = (SHARE_W - PAD * 2 - GAP) / 2;
   stats.forEach((s, i) => {
-    const x = 60 + (i % 2) * (SHARE_W / 2);
-    const y = 610 + Math.floor(i / 2) * 120;
-    drawRoundedRect(ctx, x + 10, y, SHARE_W / 2 - 80, 100, 12, 'rgba(255,255,255,0.04)', null);
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const bx  = PAD + col * (BW + GAP);
+    const by  = 610 + row * 120;
+    drawRoundedRect(ctx, bx, by, BW, 100, 12, 'rgba(255,255,255,0.04)', null);
     ctx.textAlign = 'center';
     ctx.font      = 'bold 40px system-ui, sans-serif';
-    ctx.fillStyle = '#e8eaf0';
-    ctx.fillText(s.value, x + SHARE_W / 4 - 30, y + 55);
+    ctx.fillStyle = s.color || '#e8eaf0';
+    ctx.fillText(s.value, bx + BW / 2, by + 55);
     ctx.font      = '18px system-ui, sans-serif';
     ctx.fillStyle = '#4a5568';
-    ctx.fillText(s.label, x + SHARE_W / 4 - 30, y + 85);
+    ctx.fillText(s.label, bx + BW / 2, by + 85);
   });
 
   // Footer
@@ -335,14 +339,6 @@ async function shareGlobalStats(statsData) {
   ctx.fillStyle   = '#4a5568';
   ctx.fillText('points carrière', SHARE_W / 2, 410);
 
-  // Rang
-  ctx.font        = 'bold 44px system-ui, sans-serif';
-  ctx.fillStyle   = rankColor || '#a78bfa';
-  ctx.shadowColor = rankColor || '#a78bfa';
-  ctx.shadowBlur  = 20;
-  ctx.fillText(`${rankIcon} ${rankName}`, SHARE_W / 2, 490);
-  ctx.shadowBlur  = 0;
-
   // Séparateur
   const sepGrad = ctx.createLinearGradient(60, 0, SHARE_W - 60, 0);
   sepGrad.addColorStop(0, 'transparent');
@@ -360,17 +356,21 @@ async function shareGlobalStats(statsData) {
     { label: 'Meilleure série', value: '🔥 ' + bestStreak, color: '#f97316' },
   ];
 
+  const PAD2 = 60, GAP2 = 20;
+  const BW2  = (SHARE_W - PAD2 * 2 - GAP2) / 2;
   stats.forEach((s, i) => {
-    const x = 60 + (i % 2) * (SHARE_W / 2);
-    const y = 610 + Math.floor(i / 2) * 120;
-    drawRoundedRect(ctx, x + 10, y, SHARE_W / 2 - 80, 100, 12, 'rgba(255,255,255,0.04)', null);
+    const col = i % 2;
+    const row = Math.floor(i / 2);
+    const bx  = PAD2 + col * (BW2 + GAP2);
+    const by  = 560 + row * 120;
+    drawRoundedRect(ctx, bx, by, BW2, 100, 12, 'rgba(255,255,255,0.04)', null);
     ctx.textAlign = 'center';
     ctx.font      = 'bold 40px system-ui, sans-serif';
     ctx.fillStyle = s.color;
-    ctx.fillText(s.value, x + SHARE_W / 4 - 30, y + 55);
+    ctx.fillText(s.value, bx + BW2 / 2, by + 55);
     ctx.font      = '18px system-ui, sans-serif';
     ctx.fillStyle = '#4a5568';
-    ctx.fillText(s.label, x + SHARE_W / 4 - 30, y + 85);
+    ctx.fillText(s.label, bx + BW2 / 2, by + 85);
   });
 
   // Footer
