@@ -70,9 +70,11 @@ function drawUsername(ctx, username, rankName, rankColor, rankIcon) {
   ctx.font        = 'bold 24px system-ui, sans-serif';
   ctx.fillStyle   = '#e8eaf0';
   ctx.fillText(username, SHARE_W - 60, 80);
-  ctx.font        = '18px system-ui, sans-serif';
-  ctx.fillStyle   = rankColor || '#a78bfa';
-  ctx.fillText(`${rankIcon || '🔮'} ${rankName || 'Maître'}`, SHARE_W - 60, 108);
+  if (rankName) {
+    ctx.font      = '18px system-ui, sans-serif';
+    ctx.fillStyle = rankColor || '#a78bfa';
+    ctx.fillText(`${rankIcon || ''} ${rankName}`.trim(), SHARE_W - 60, 108);
+  }
 }
 
 function downloadCanvas(canvas, filename) {
