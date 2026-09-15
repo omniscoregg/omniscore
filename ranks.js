@@ -39,6 +39,13 @@ const OMNI_RANK = {
 };
 
 // ----------------------------------------------------------
+//  Convertir le niveau (1/2/3 étoiles) en chiffre romain
+// ----------------------------------------------------------
+function starToRoman(star) {
+  return { 1: 'I', 2: 'II', 3: 'III' }[star] || '';
+}
+
+// ----------------------------------------------------------
 //  Obtenir le rang selon les points (et optionnellement le rang global)
 // ----------------------------------------------------------
 function getRank(points, globalRank = null) {
@@ -56,7 +63,7 @@ function getRank(points, globalRank = null) {
 // ----------------------------------------------------------
 function renderRankBadge(points, globalRank = null, size = 'normal') {
   const rank  = getRank(points, globalRank);
-  const stars = rank.star > 0 ? '⭐'.repeat(rank.star) : '';
+  const stars = rank.star > 0 ? starToRoman(rank.star) : '';
   const isOmni = rank.special;
 
   if (size === 'small') {
@@ -104,9 +111,9 @@ function renderRankProgress(points, globalRank = null) {
 
   return '<div class="rank-progress-wrap">'
     + '<div class="rank-progress-label">'
-    + '<span style="color:' + rank.color + '">' + rank.icon + ' ' + rank.name + ' ' + '⭐'.repeat(rank.star) + '</span>'
+    + '<span style="color:' + rank.color + '">' + rank.icon + ' ' + rank.name + ' ' + starToRoman(rank.star) + '</span>'
     + '<span style="color:var(--text3)"> → </span>'
-    + '<span style="color:' + nextRank.color + '">' + nextRank.icon + ' ' + nextRank.name + ' ' + '⭐'.repeat(nextRank.star) + '</span>'
+    + '<span style="color:' + nextRank.color + '">' + nextRank.icon + ' ' + nextRank.name + ' ' + starToRoman(nextRank.star) + '</span>'
     + '</div>'
     + '<div class="rank-progress-bar">'
     + '<div class="rank-progress-fill" style="width:' + progress + '%;background:' + rank.color + '"></div>'
@@ -120,5 +127,6 @@ window.renderRankBadge  = renderRankBadge;
 window.renderRankProgress = renderRankProgress;
 window.RANKS            = RANKS;
 window.OMNI_RANK        = OMNI_RANK;
+window.starToRoman      = starToRoman;
 
 console.log('[ranks] chargé ✓');
