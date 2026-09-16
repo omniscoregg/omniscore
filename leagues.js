@@ -130,11 +130,19 @@ async function getUserLeagues(uid) {
   const leagueIds = userSnap.data()?.leagues || [];
   if (leagueIds.length === 0) return [];
 
+  // Requêtes groupées par paquets de 10 (limite Firestore pour "in"),
+  // au lieu d'une lecture individuelle par ligue.
+  const chunks = [];
+  for (let i = 0; i < leagueIds.length; i += 10) chunks.push(leagueIds.slice(i, i + 10));
+
+  const results = await Promise.all(chunks.map(chunk =>
+    firebase.firestore().collection('leagues')
+      .where(firebase.firestore.FieldPath.documentId(), 'in', chunk)
+      .get()
+  ));
+
   const leagues = [];
-  for (const id of leagueIds) {
-    const snap = await firebase.firestore().collection('leagues').doc(id).get();
-    if (snap.exists) leagues.push({ id: snap.id, ...snap.data() });
-  }
+  results.forEach(snap => snap.forEach(doc => leagues.push({ id: doc.id, ...doc.data() })));
   return leagues;
 }
 
