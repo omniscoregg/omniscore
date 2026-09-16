@@ -5,7 +5,6 @@
 // ============================================================
 
 const TOURN_CACHE_URL  = 'https://omniscore-cache.omniscoregg.workers.dev';
-const TOURN_PANDA_TOKEN = '4U4XspWxILG2eufIZkowjW0uDKwy2L2MbFOTXCISpCOHMRMBKZo';
 
 // ----------------------------------------------------------
 //  Récupérer les tournois en cours + à venir
@@ -16,8 +15,8 @@ async function fetchTournaments(gameKey) {
 
   try {
     const [running, upcoming] = await Promise.all([
-      fetch(`${TOURN_CACHE_URL}?type=tournaments&status=running&slug=${cfg.slug}&token=${TOURN_PANDA_TOKEN}&per_page=10`).then(r => r.json()).catch(() => []),
-      fetch(`${TOURN_CACHE_URL}?type=tournaments&status=upcoming&slug=${cfg.slug}&token=${TOURN_PANDA_TOKEN}&per_page=10`).then(r => r.json()).catch(() => []),
+      fetch(`${TOURN_CACHE_URL}?type=tournaments&status=running&slug=${cfg.slug}&per_page=10`).then(r => r.json()).catch(() => []),
+      fetch(`${TOURN_CACHE_URL}?type=tournaments&status=upcoming&slug=${cfg.slug}&per_page=10`).then(r => r.json()).catch(() => []),
     ]);
 
     const all = [...(Array.isArray(running) ? running : []), ...(Array.isArray(upcoming) ? upcoming : [])];

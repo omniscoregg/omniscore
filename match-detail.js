@@ -179,12 +179,11 @@ async function toggleFav(teamName, game, btn) {
 //  Forme des équipes
 // ----------------------------------------------------------
 async function getTeamForm(teamName, game) {
-  const cfg   = window.EsportAPI?.GAME_CONFIG?.[game];
-  const token = window._pandaToken;
-  if (!cfg || cfg.source !== 'pandascore' || !token || token === 'VOTRE_CLE_ICI') return null;
+  const cfg = window.EsportAPI?.GAME_CONFIG?.[game];
+  if (!cfg || cfg.source !== 'pandascore') return null;
 
   try {
-    const params = new URLSearchParams({ game, slug: cfg.slug, status: 'past', count: '50', token });
+    const params = new URLSearchParams({ game, slug: cfg.slug, status: 'past', count: '50' });
     const res    = await fetch('https://omniscore-cache.omniscoregg.workers.dev?' + params);
     if (!res.ok) return null;
     const data = await res.json();
@@ -229,12 +228,11 @@ function renderForm(formData) {
 //  Head-to-Head
 // ----------------------------------------------------------
 async function getH2H(team1, team2, game) {
-  const cfg   = window.EsportAPI?.GAME_CONFIG?.[game];
-  const token = window._pandaToken;
-  if (!cfg || cfg.source !== 'pandascore' || !token || token === 'VOTRE_CLE_ICI') return [];
+  const cfg = window.EsportAPI?.GAME_CONFIG?.[game];
+  if (!cfg || cfg.source !== 'pandascore') return [];
 
   try {
-    const params = new URLSearchParams({ game, slug: cfg.slug, status: 'past', count: '50', token });
+    const params = new URLSearchParams({ game, slug: cfg.slug, status: 'past', count: '50' });
     const res    = await fetch('https://omniscore-cache.omniscoregg.workers.dev?' + params);
     if (!res.ok) return [];
     const data = await res.json();

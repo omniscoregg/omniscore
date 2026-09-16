@@ -3,7 +3,6 @@
 //  Sources : PandaScore + Liquipedia
 // ============================================================
 
-const PANDASCORE_TOKEN = '4U4XspWxILG2eufIZkowjW0uDKwy2L2MbFOTXCISpCOHMRMBKZo'; // Remplacez par votre clé
 const PANDASCORE_CACHE = 'https://omniscore-cache.omniscoregg.workers.dev';
 const LIQUIPEDIA_PROXY = 'https://omniscore-proxy.omniscoregg.workers.dev';
 
@@ -29,15 +28,14 @@ const GAME_CONFIG = {
 async function fetchPandaScore(gameKey, status = 'past', count = 10) {
   const cfg = GAME_CONFIG[gameKey];
   if (!cfg || cfg.source !== 'pandascore') return [];
-  if (PANDASCORE_TOKEN === 'VOTRE_CLE_ICI') return getMockMatches(gameKey, count, status);
 
   // Passe par le cache Cloudflare au lieu d'appeler PandaScore directement
+  // (le token PandaScore est géré côté Worker, jamais exposé au client)
   const params = new URLSearchParams({
     game:   gameKey,
     slug:   cfg.slug,
     status: status,
     count:  String(count),
-    token:  PANDASCORE_TOKEN,
   });
   const url = `${PANDASCORE_CACHE}?${params}`;
 
@@ -206,4 +204,3 @@ function getMockMatches(gameKey, count, status) {
 }
 
 window.EsportAPI  = { getMatches, getUpcoming, GAME_CONFIG };
-window._pandaToken = PANDASCORE_TOKEN;
