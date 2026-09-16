@@ -289,7 +289,6 @@ function renderLeagueCard(league, currentUid, tournStarted) {
         <div>
           <div class="league-name">${league.name}</div>
           <div class="league-meta">${sorted.length} membre${sorted.length > 1 ? 's' : ''} · ${isCreator ? 'Créateur' : 'Membre'}</div>
-          ${tournBadge}
         </div>
         <div class="league-card-actions">
           <div class="league-code" onclick="copyCode('${league.code}')" title="Cliquez pour copier">
@@ -302,6 +301,7 @@ function renderLeagueCard(league, currentUid, tournStarted) {
           }
         </div>
       </div>
+      ${tournBadge}
       <table class="lb-table" style="margin-top:10px">
         <thead><tr><th>#</th><th>Pseudo</th><th>Points</th><th>Réussite</th><th>Prédictions</th></tr></thead>
         <tbody>${rows}</tbody>
