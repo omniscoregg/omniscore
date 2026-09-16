@@ -895,7 +895,10 @@ function closeTeamSearch() {
 
 document.addEventListener('click', e => {
   const wrap = document.querySelector('.team-search-wrap');
-  if (wrap && !wrap.contains(e.target) && !e.target.closest('.modal-overlay')) closeTeamSearch();
+  const results = document.getElementById('team-search-results');
+  const insideWrap    = wrap && wrap.contains(e.target);
+  const insideResults = results && results.contains(e.target);
+  if (!insideWrap && !insideResults && !e.target.closest('.modal-overlay')) closeTeamSearch();
 });
 
 window.handleTeamSearch = handleTeamSearch;
