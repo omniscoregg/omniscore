@@ -816,6 +816,7 @@ function handleTeamSearch(query) {
 }
 
 // Priorise les équipes principales sur les équipes académiques/réserve/amateur,
+// les équipes actives (avec roster/logo) sur les équipes vides ou obsolètes,
 // puis les correspondances les plus proches du texte recherché
 function sortTeamMatches(teams, query) {
   const q = query.trim().toLowerCase();
@@ -824,6 +825,15 @@ function sortTeamMatches(teams, query) {
     const aMinor = isMinor(a.name) ? 1 : 0;
     const bMinor = isMinor(b.name) ? 1 : 0;
     if (aMinor !== bMinor) return aMinor - bMinor; // équipes principales d'abord
+
+    const aInactive = (!a.players || a.players.length === 0) ? 1 : 0;
+    const bInactive = (!b.players || b.players.length === 0) ? 1 : 0;
+    if (aInactive !== bInactive) return aInactive - bInactive; // équipes avec roster d'abord
+
+    const aNoLogo = a.image_url ? 0 : 1;
+    const bNoLogo = b.image_url ? 0 : 1;
+    if (aNoLogo !== bNoLogo) return aNoLogo - bNoLogo; // équipes avec logo d'abord
+
     const aExact = (a.name || '').toLowerCase() === q ? 0 : 1;
     const bExact = (b.name || '').toLowerCase() === q ? 0 : 1;
     if (aExact !== bExact) return aExact - bExact;
@@ -839,7 +849,7 @@ async function runTeamSearch(query) {
 
   const results = await Promise.all(games.map(async ([key, cfg]) => {
     try {
-      const params = new URLSearchParams({ type: 'team', name: query, slug: cfg.slug, game: key, per_page: '20' });
+      const params = new URLSearchParams({ type: 'team', name: query, slug: cfg.slug, game: key, per_page: '50' });
       const res    = await fetch('https://omniscore-cache.omniscoregg.workers.dev?' + params);
       if (!res.ok) return [];
       const data = await res.json();
