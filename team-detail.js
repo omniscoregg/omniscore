@@ -6,7 +6,6 @@ async function showTeamDetail(teamName, game, fromMatch = null, teamLogo = '', f
   document.getElementById('team-detail-modal')?.remove();
 
   const cfg    = window.EsportAPI?.GAME_CONFIG?.[game];
-  const token  = window._pandaToken;
   const colors = window.GENRE_COLORS?.[cfg?.genre] || { bg: '#1a1e2c', accent: '#a78bfa' };
 
   // Créer la modal avec skeleton
@@ -41,19 +40,19 @@ async function showTeamDetail(teamName, game, fromMatch = null, teamLogo = '', f
   modal.addEventListener('click', e => { if (e.target === modal) closeTeamDetail(); });
 
   // Charger les données
-  await loadTeamDetail(teamName, game, token, cfg, colors, teamLogo);
+  await loadTeamDetail(teamName, game, cfg, colors, teamLogo);
 }
 
-async function loadTeamDetail(teamName, game, token, cfg, colors, teamLogo = '') {
+async function loadTeamDetail(teamName, game, cfg, colors, teamLogo = '') {
   const el = document.getElementById('td-content');
   if (!el) return;
 
   try {
     // Récupérer les données en parallèle
     const [teamData, recentMatches, upcomingMatches] = await Promise.all([
-      fetchTeamData(teamName, game, token, cfg),
-      fetchTeamMatches(teamName, game, token, cfg, 'past', 5),
-      fetchTeamMatches(teamName, game, token, cfg, 'upcoming', 3),
+      fetchTeamData(teamName, game, cfg),
+      fetchTeamMatches(teamName, game, cfg, 'past', 5),
+      fetchTeamMatches(teamName, game, cfg, 'upcoming', 3),
     ]);
 
     // Mettre à jour le nom
@@ -98,15 +97,14 @@ async function loadTeamDetail(teamName, game, token, cfg, colors, teamLogo = '')
 // ----------------------------------------------------------
 //  Récupérer les infos de l'équipe
 // ----------------------------------------------------------
-async function fetchTeamData(teamName, game, token, cfg) {
-  if (!token || token === 'VOTRE_CLE_ICI' || !cfg || cfg.source !== 'pandascore') return null;
+async function fetchTeamData(teamName, game, cfg) {
+  if (!cfg || cfg.source !== 'pandascore') return null;
   try {
     const params = new URLSearchParams({
       type: 'team',
       name: teamName,
       exact: '1',
       slug: cfg.slug,
-      token: token,
       game: game,
     });
     const res  = await fetch('https://omniscore-cache.omniscoregg.workers.dev?' + params);
@@ -119,13 +117,13 @@ async function fetchTeamData(teamName, game, token, cfg) {
 // ----------------------------------------------------------
 //  Récupérer les matchs d'une équipe via l'API (même logique que match-detail.js)
 // ----------------------------------------------------------
-async function fetchTeamMatches(teamName, game, token, cfg, status, count) {
+async function fetchTeamMatches(teamName, game, cfg, status, count) {
   // Toujours appeler l'API pour avoir un historique complet et cohérent
-  if (token && token !== 'VOTRE_CLE_ICI' && cfg && cfg.source === 'pandascore') {
+  if (cfg && cfg.source === 'pandascore') {
     try {
       const apiStatus = status === 'past' ? 'past' : 'upcoming';
       const params = new URLSearchParams({
-        game, slug: cfg.slug, status: apiStatus, count: '50', token,
+        game, slug: cfg.slug, status: apiStatus, count: '50',
       });
       const res  = await fetch('https://omniscore-cache.omniscoregg.workers.dev?' + params);
       if (res.ok) {
