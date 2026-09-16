@@ -46,25 +46,35 @@ function starToRoman(star) {
 }
 
 // ----------------------------------------------------------
-//  Obtenir le rang selon les points (et optionnellement le rang global)
+//  Résoudre un rang à partir d'une échelle de points donnée
+//  (générique : sert à la fois au système global ET saisonnier)
 // ----------------------------------------------------------
-function getRank(points, globalRank = null) {
-  // Top 500 = OMNI, mais seulement à partir du rang Maître minimum
+function resolveRank(points, globalRank, tiers, omniRank, omniMinPoints) {
+  // Top 500 = OMNI, mais seulement à partir d'un niveau minimum
   // (évite d'attribuer OMNI juste parce qu'on est seul/peu nombreux dans le classement)
-  if (globalRank !== null && globalRank <= 500 && points >= 3000) return OMNI_RANK;
-
-  for (let i = RANKS.length - 1; i >= 0; i--) {
-    if (points >= RANKS[i].min) return RANKS[i];
+  if (globalRank !== null && globalRank !== undefined && globalRank <= 500 && points >= omniMinPoints) {
+    return omniRank;
   }
-  return RANKS[0];
+  for (let i = tiers.length - 1; i >= 0; i--) {
+    if (points >= tiers[i].min) return tiers[i];
+  }
+  return tiers[0];
 }
 
 // ----------------------------------------------------------
-//  Rendu du badge de rang
+//  Obtenir le rang selon les points (et optionnellement le rang global)
 // ----------------------------------------------------------
-function renderRankBadge(points, globalRank = null, size = 'normal') {
-  const rank  = getRank(points, globalRank);
-  const stars = rank.star > 0 ? starToRoman(rank.star) : '';
+function getRank(points, globalRank = null) {
+  return resolveRank(points, globalRank, RANKS, OMNI_RANK, 3000);
+}
+
+// ----------------------------------------------------------
+//  Rendu générique d'un badge de rang à partir d'un objet rang déjà résolu
+//  (générique : sert à la fois au système global ET saisonnier)
+// ----------------------------------------------------------
+function renderGenericRankBadge(rank, size) {
+  size = size || 'normal';
+  const stars  = rank.star > 0 ? starToRoman(rank.star) : '';
   const isOmni = rank.special;
 
   if (size === 'small') {
@@ -87,6 +97,13 @@ function renderRankBadge(points, globalRank = null, size = 'normal') {
     + '<span class="rank-name-sm">' + rank.name + '</span>'
     + (stars ? '<span class="rank-stars-sm">' + stars + '</span>' : '<span class="rank-stars-sm" style="color:#ffd700">TOP 500</span>')
     + '</div>';
+}
+
+// ----------------------------------------------------------
+//  Rendu du badge de rang (système global)
+// ----------------------------------------------------------
+function renderRankBadge(points, globalRank = null, size = 'normal') {
+  return renderGenericRankBadge(getRank(points, globalRank), size);
 }
 
 // ----------------------------------------------------------
@@ -129,5 +146,7 @@ window.renderRankProgress = renderRankProgress;
 window.RANKS            = RANKS;
 window.OMNI_RANK        = OMNI_RANK;
 window.starToRoman      = starToRoman;
+window.resolveRank            = resolveRank;
+window.renderGenericRankBadge = renderGenericRankBadge;
 
 console.log('[ranks] chargé ✓');

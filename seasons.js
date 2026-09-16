@@ -134,9 +134,8 @@ function getDaysLeftInSeason(date) {
 //  Rang saisonnier
 // ----------------------------------------------------------
 function getSeasonRank(seasonPoints, globalRank) {
-  // Top 500 = OMNI, mais seulement à partir du rang Maître minimum saisonnier
-  if (globalRank !== null && globalRank !== undefined && globalRank <= 500 && seasonPoints >= 750) return SEASON_OMNI_RANK;
-
+  if (window.resolveRank) return window.resolveRank(seasonPoints, globalRank, SEASON_RANKS, SEASON_OMNI_RANK, 750);
+  // Repli si ranks.js n'est pas encore chargé (ne devrait pas arriver, chargé avant)
   for (var i = SEASON_RANKS.length - 1; i >= 0; i--) {
     if (seasonPoints >= SEASON_RANKS[i].min) return SEASON_RANKS[i];
   }
@@ -147,21 +146,9 @@ function getSeasonRank(seasonPoints, globalRank) {
 //  Rendu badge rang saisonnier
 // ----------------------------------------------------------
 function renderSeasonRankBadge(seasonPoints, globalRank, size) {
-  size = size || 'normal';
-  const rank   = getSeasonRank(seasonPoints, globalRank);
-  const stars  = rank.star > 0 ? (window.starToRoman ? window.starToRoman(rank.star) : rank.star) : '';
-  const isOmni = rank.special;
-
-  if (size === 'small') {
-    return '<span class="rank-badge rank-badge-small ' + (isOmni ? 'rank-omni' : '') + '" style="color:' + rank.color + ';background:' + rank.bg + '">'
-      + rank.icon + ' ' + rank.name + '</span>';
-  }
-
-  return '<div class="rank-badge-normal ' + (isOmni ? 'rank-omni' : '') + '" style="color:' + rank.color + ';background:' + rank.bg + ';border-color:' + rank.color + '40">'
-    + '<span class="rank-icon-sm">' + rank.icon + '</span>'
-    + '<span class="rank-name-sm">' + rank.name + '</span>'
-    + (stars ? '<span class="rank-stars-sm">' + stars + '</span>' : '<span class="rank-stars-sm" style="color:#ffd700">TOP 500</span>')
-    + '</div>';
+  const rank = getSeasonRank(seasonPoints, globalRank);
+  if (window.renderGenericRankBadge) return window.renderGenericRankBadge(rank, size || 'normal');
+  return '<span>' + rank.icon + ' ' + rank.name + '</span>';
 }
 
 // ----------------------------------------------------------

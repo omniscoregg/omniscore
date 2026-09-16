@@ -135,6 +135,22 @@ async function getFavoriteGames(uid) {
 }
 
 // ----------------------------------------------------------
+//  Calculer les stats agrégées à partir d'un tableau de prédictions
+//  (partagé entre profile.js et leagues.js, pour éviter la duplication)
+// ----------------------------------------------------------
+function computePredictionStats(preds) {
+  const total    = preds.length;
+  const correct  = preds.filter(p => p.result === 'correct' || p.result === 'perfect').length;
+  const perfect  = preds.filter(p => p.result === 'perfect').length;
+  const wrong    = preds.filter(p => p.result === 'wrong').length;
+  const pending  = preds.filter(p => p.result === null).length;
+  const resolved = total - pending;
+  const pct      = resolved > 0 ? Math.round((correct / resolved) * 100) : 0;
+  return { total, correct, perfect, wrong, pending, pct };
+}
+window.computePredictionStats = computePredictionStats;
+
+// ----------------------------------------------------------
 //  Exposer FirebaseService globalement
 // ----------------------------------------------------------
 window.FirebaseService = {

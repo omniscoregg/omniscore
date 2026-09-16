@@ -105,12 +105,13 @@ async function loadProfileContent(user) {
     const rank      = leaderboard.findIndex(u => u.id === user.uid) + 1;
     const rankLabel = rank === 0 ? '—' : '#' + rank;
 
-    const total   = predictions.length;
-    const correct = predictions.filter(p => p.result === 'correct' || p.result === 'perfect').length;
-    const perfect = predictions.filter(p => p.result === 'perfect').length;
-    const wrong   = predictions.filter(p => p.result === 'wrong').length;
-    const pending = predictions.filter(p => p.result === null).length;
-    const pct     = total > 0 ? Math.round((correct / (total - pending)) * 100) || 0 : 0;
+    const stats   = window.computePredictionStats(predictions);
+    const total   = stats.total;
+    const correct = stats.correct;
+    const perfect = stats.perfect;
+    const wrong   = stats.wrong;
+    const pending = stats.pending;
+    const pct     = stats.pct;
 
     const streak     = profile.streak || calculateStreak(predictions);
     const dayStreak  = profile.dayStreak || 0;

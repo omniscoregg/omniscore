@@ -72,28 +72,20 @@ async function computeMemberStats(uid, league) {
       .where('tournament', '==', league.tournamentName)
       .get();
     const preds    = predSnap.docs.map(d => d.data());
-    const total    = preds.length;
-    const correct  = preds.filter(p => p.result === 'correct' || p.result === 'perfect').length;
-    const pending  = preds.filter(p => p.result === null).length;
-    const resolved = total - pending;
-    const pct      = resolved > 0 ? Math.round((correct / resolved) * 100) : 0;
+    const stats    = window.computePredictionStats(preds);
     const matchPts = preds.reduce((sum, p) => sum + (p.points || 0), 0);
 
-    return { points: pickemPts + matchPts, correct, predictions: total, pct };
+    return { points: pickemPts + matchPts, correct: stats.correct, predictions: stats.total, pct: stats.pct };
   }
 
   const userSnap  = await firebase.firestore().collection('users').doc(uid).get();
   const userData  = userSnap.data() || {};
   const predSnap  = await firebase.firestore().collection('predictions')
     .where('uid', '==', uid).get();
-  const preds     = predSnap.docs.map(d => d.data());
-  const total     = preds.length;
-  const correct   = preds.filter(p => p.result === 'correct' || p.result === 'perfect').length;
-  const pending   = preds.filter(p => p.result === null).length;
-  const resolved  = total - pending;
-  const pct       = resolved > 0 ? Math.round((correct / resolved) * 100) : 0;
+  const preds  = predSnap.docs.map(d => d.data());
+  const stats  = window.computePredictionStats(preds);
 
-  return { points: userData.points || 0, correct, predictions: total, pct };
+  return { points: userData.points || 0, correct: stats.correct, predictions: stats.total, pct: stats.pct };
 }
 
 async function joinLeague(uid, username, code) {
