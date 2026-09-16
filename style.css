@@ -2069,7 +2069,8 @@ body {
     padding: 0 12px;
     height: 48px;
     flex-wrap: nowrap;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
   .navbar-tagline { display: none; }
   .source-badge { display: none; }
