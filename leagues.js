@@ -17,6 +17,7 @@ async function createLeague(uid, username, leagueName, tournament) {
   if (tournament) {
     leagueData.tournamentId    = tournament.id;
     leagueData.tournamentName  = tournament.name;
+    leagueData.tournamentDisplayName = tournament.displayName || tournament.name;
     leagueData.tournamentGame  = tournament.game;
     leagueData.tournamentTeams = tournament.teams || [];
   }
@@ -37,6 +38,7 @@ async function linkLeagueToTournament(leagueId, tournament) {
   await firebase.firestore().collection('leagues').doc(leagueId).update({
     tournamentId:    tournament.id,
     tournamentName:  tournament.name,
+    tournamentDisplayName: tournament.displayName || tournament.name,
     tournamentGame:  tournament.game,
     tournamentTeams: tournament.teams || [],
   });
@@ -264,7 +266,7 @@ function renderLeagueCard(league, currentUid, tournStarted) {
   }).join('');
 
   const tournBadge = isLinked
-    ? `<div class="league-tourn-badge">${league.tournamentName}${tournStarted ? ' · Prédictions classiques activées' : ' · Pick\'em en cours'}</div>`
+    ? `<div class="league-tourn-badge">${league.tournamentDisplayName || league.tournamentName}${tournStarted ? ' · Prédictions classiques activées' : ' · Pick\'em en cours'}</div>`
     : '';
 
   const tournAction = isLinked
@@ -370,7 +372,7 @@ async function loadLeagueTournOptions(gameKey, selectId) {
     return;
   }
   select.innerHTML = '<option value="">Choisir un tournoi</option>'
-    + tournaments.map(t => `<option value="${t.id}" data-game="${gameKey}">${t.name}</option>`).join('');
+    + tournaments.map(t => `<option value="${t.id}" data-game="${gameKey}">${t.league?.name ? t.league.name + ' — ' : ''}${t.name}</option>`).join('');
 }
 
 function getSelectedLeagueTournament(selectId) {
@@ -382,7 +384,10 @@ function getSelectedLeagueTournament(selectId) {
   if (!t) return null;
   return {
     id:    t.id,
-    name:  t.name,
+    // Le champ "tournament" des matchs (api.js) vaut m.league?.name — on doit
+    // stocker la même valeur ici pour que le filtrage des matchs fonctionne.
+    name:  t.league?.name || t.name,
+    displayName: t.league?.name ? t.league.name + ' — ' + t.name : t.name,
     game:  gameKey,
     teams: (t.teams || []).slice(0, 16).map(team => ({ name: team.name, image_url: team.image_url || null })),
   };
@@ -599,7 +604,7 @@ async function showLeaguePickemModal(leagueId) {
   modal.innerHTML = `
     <div class="modal-box wide">
       <div class="modal-header">
-        <div class="modal-title">${league.tournamentName}</div>
+        <div class="modal-title">${league.tournamentDisplayName || league.tournamentName}</div>
         <button class="modal-close" onclick="document.getElementById('league-pickem-modal').remove()">✕</button>
       </div>
       <div id="tourn-body-${league.tournamentId}"><div class="lb-loading">Chargement...</div></div>
