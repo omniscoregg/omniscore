@@ -876,7 +876,7 @@ async function runTeamSearch(query) {
       ? `<img src="${logo}" class="team-search-logo" onerror="this.style.display='none'">`
       : `<span class="team-search-dot" style="background:${accent}"></span>`;
     const tname = (t.name || '').replace(/'/g, "\\'");
-    return `<div class="team-search-item" onclick="closeTeamSearch();showTeamDetail('${tname}','${t._game}')">
+    return `<div class="team-search-item" onclick="showTeamDetail('${tname}','${t._game}')">
       ${logoHtml}
       <div class="team-search-info">
         <span class="team-search-name">${t.name}</span>
@@ -895,7 +895,7 @@ function closeTeamSearch() {
 
 document.addEventListener('click', e => {
   const wrap = document.querySelector('.team-search-wrap');
-  if (wrap && !wrap.contains(e.target)) closeTeamSearch();
+  if (wrap && !wrap.contains(e.target) && !e.target.closest('.modal-overlay')) closeTeamSearch();
 });
 
 window.handleTeamSearch = handleTeamSearch;
