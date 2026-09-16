@@ -45,6 +45,9 @@ body {
   position: sticky;
   top: 0;
   z-index: 10000;
+  isolation: isolate;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 .navbar-logo {
