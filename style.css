@@ -1924,6 +1924,16 @@ body {
 
 .league-name { font-size: 15px; font-weight: 600; color: var(--text); }
 .league-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.league-tourn-badge {
+  font-size: 11px;
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.12);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: 6px;
+  padding: 3px 8px;
+  margin-top: 6px;
+  display: inline-block;
+}
 
 .league-card-actions { display: flex; align-items: center; gap: 8px; }
 

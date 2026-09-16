@@ -576,8 +576,8 @@ async function loadLeaderboard(type, btn) {
       <table class="lb-table">
         <thead><tr><th>#</th><th>Joueur</th><th>Rang</th><th>Points</th><th>🔥</th></tr></thead>
         <tbody>${data.map(u => {
-          const rankObj   = window.getSeasonRank ? window.getSeasonRank(u.points) : { name: 'Bronze', color: '#cd7f32', icon: '🥉' };
-          const rankBadge = window.renderSeasonRankBadge ? window.renderSeasonRankBadge(u.points, u.rank, 'small') : '';
+          const rankObj   = window.getRank ? window.getRank(u.points, u.rank) : { name: 'Bronze', color: '#cd7f32', icon: '🥉' };
+          const rankBadge = window.renderRankBadge ? window.renderRankBadge(u.points, u.rank, 'small') : '';
           const frameClass = 'rank-frame-' + rankObj.name.toLowerCase().replace(/[îâêàùé]/g, c => ({'î':'i','â':'a','ê':'e','à':'a','ù':'u','é':'e'}[c]||c));
           const initials  = (u.username || '?')[0].toUpperCase();
           const avatarUrl = avatarMap[u.id];
