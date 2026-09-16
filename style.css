@@ -5259,6 +5259,10 @@ body {
     border-bottom: none;
   }
 
+  .team-block.right .team-identity {
+    flex-direction: row !important;
+  }
+
   .team-name {
     font-size: 13px !important;
     max-width: none !important;
