@@ -5937,7 +5937,21 @@ body {
     border-left: none;
     border-right: none;
   }
-  
+
+  /* Carte ligue : empiler nom et actions au lieu de les serrer côte à côte
+     (évite que le code de ligue se coupe sur 2 lignes faute de place) */
+  .league-card-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .league-card-actions {
+    flex-wrap: wrap;
+  }
+  .league-code {
+    white-space: nowrap;
+  }
+
   .tourn-header {
   position: relative;
   z-index: 999;
