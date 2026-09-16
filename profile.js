@@ -231,7 +231,7 @@ async function loadProfileContent(user) {
         </div>
         <div id="pred-history-container">
         ${predictions.length === 0
-          ? '<div class="lb-empty">Aucune prédiction pour l\'instant.</div>'
+          ? '<div class="lb-empty">Aucune prédiction pour l\'instant.<br><span style="font-size:12px;color:var(--text3)">Retourne sur la liste des matchs et prédis ton premier résultat !</span></div>'
           : predictions.slice(0, 20).map(p => renderPredRow(p)).join('')
         }
         </div>

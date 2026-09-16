@@ -563,7 +563,7 @@ async function loadLeaderboard(type, btn) {
       return;
     }
     const data = type === 'global' ? await getLeaderboard() : await getLeaderboardByGame(type);
-    if (data.length === 0) { el.innerHTML = '<div class="lb-empty">Aucune prédiction pour l\'instant.</div>'; return; }
+    if (data.length === 0) { el.innerHTML = '<div class="lb-empty">Aucune prédiction pour l\'instant.<br><span style="font-size:12px;color:var(--text3)">Sois le premier à prédire un match pour apparaître dans ce classement !</span></div>'; return; }
     // Générer les avatars Gravatar pour chaque joueur
     const avatarMap = {};
     if (typeof md5 === 'function') {

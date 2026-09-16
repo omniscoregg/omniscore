@@ -168,7 +168,7 @@ function showNotificationsPage() {
     </div>
     <div class="notif-list">
       ${notifs.length === 0
-        ? '<div class="notif-empty">Aucune notification pour l\'instant</div>'
+        ? '<div class="notif-empty">Aucune notification pour l\'instant<br><span style="font-size:12px;color:var(--text3)">Tu seras prévenu ici dès qu\'une de tes prédictions sera résolue, ou qu\'un match d\'une équipe favorite approche.</span></div>'
         : notifs.map(n => renderNotifItem(n, readIds)).join('')
       }
     </div>
