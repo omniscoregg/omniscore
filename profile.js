@@ -102,6 +102,29 @@ async function loadProfileContent(user) {
 
     if (!profile) { el.innerHTML = '<div class="lb-empty">Profil introuvable.</div>'; return; }
 
+    // Résoudre les logos des équipes favorites absentes du matchStore
+    // (fetchTeamData vient de team-detail.js, réutilisée pour éviter un point mort)
+    window._profileFavLogos = window._profileFavLogos || {};
+    await Promise.all(favTeams.map(async f => {
+      const logoKey = f.game + '|' + f.teamName.toLowerCase();
+      if (window._profileFavLogos[logoKey] !== undefined) return; // déjà résolu (cache session)
+      let logo = null;
+      if (window.matchStore) {
+        for (const [, m] of window.matchStore) {
+          if (m.game === f.game) {
+            if (m.team1?.name?.toLowerCase() === f.teamName.toLowerCase() && m.team1?.logo) { logo = m.team1.logo; break; }
+            if (m.team2?.name?.toLowerCase() === f.teamName.toLowerCase() && m.team2?.logo) { logo = m.team2.logo; break; }
+          }
+        }
+      }
+      if (!logo && typeof fetchTeamData === 'function') {
+        const cfg  = EsportAPI.GAME_CONFIG[f.game];
+        const data = await fetchTeamData(f.teamName, f.game, cfg);
+        logo = data?.image_url || data?.logo || null;
+      }
+      window._profileFavLogos[logoKey] = logo;
+    }));
+
     const rank      = leaderboard.findIndex(u => u.id === user.uid) + 1;
     const rankLabel = rank === 0 ? '—' : '#' + rank;
 
@@ -188,25 +211,18 @@ async function loadProfileContent(user) {
         ${favTeams.length > 0 ? `
         <div class="profile-favs-category">
           <div class="profile-favs-label">Équipes</div>
-          <div class="profile-favs-grid">
+          ${favTeams.length > 5 ? `<input type="text" id="profile-fav-search" class="form-input" placeholder="Rechercher une équipe..." oninput="filterProfileFavTeams(this.value)" style="margin-bottom:10px">` : ''}
+          <div class="profile-favs-grid" id="profile-favs-teams-grid">
             ${favTeams.map(f => {
               const cfg    = EsportAPI.GAME_CONFIG[f.game];
               const colors = window.GENRE_COLORS?.[cfg?.genre] || {};
               const accent = colors.accent || '#a78bfa';
-              let logo = null;
-              if (window.matchStore) {
-                for (const [, m] of window.matchStore) {
-                  if (m.game === f.game) {
-                    if (m.team1?.name?.toLowerCase() === f.teamName.toLowerCase() && m.team1?.logo) { logo = m.team1.logo; break; }
-                    if (m.team2?.name?.toLowerCase() === f.teamName.toLowerCase() && m.team2?.logo) { logo = m.team2.logo; break; }
-                  }
-                }
-              }
+              const logo   = window._profileFavLogos?.[f.game + '|' + f.teamName.toLowerCase()] || null;
               const logoHtml = logo
                 ? `<img src="${logo}" class="profile-fav-logo" onerror="this.style.display='none'">`
                 : `<span class="profile-fav-dot" style="background:${accent}"></span>`;
               const tname = f.teamName.replace(/'/g, "\\'");
-              return `<div class="profile-fav-card team" style="border-color:${accent}30;cursor:pointer" onclick="document.getElementById('profile-modal')?.remove();showTeamDetail('${tname}','${f.game}',null,'',true)">
+              return `<div class="profile-fav-card team" data-name="${f.teamName.toLowerCase()}" style="border-color:${accent}30;cursor:pointer" onclick="document.getElementById('profile-modal')?.remove();showTeamDetail('${tname}','${f.game}',null,'',true)">
                 ${logoHtml}
                 <div class="profile-fav-info">
                   <span class="profile-fav-name" style="color:${accent}">${f.teamName}</span>
@@ -416,6 +432,15 @@ function switchPredView(mode) {
     : renderPredHistoryList(_predCache.slice(0, 20));
 }
 window.switchPredView = switchPredView;
+
+function filterProfileFavTeams(query) {
+  const q = query.trim().toLowerCase();
+  document.querySelectorAll('#profile-favs-teams-grid .profile-fav-card').forEach(card => {
+    const match = !q || (card.dataset.name || '').includes(q);
+    card.style.display = match ? '' : 'none';
+  });
+}
+window.filterProfileFavTeams = filterProfileFavTeams;
 
 window.showProfilePage = showProfilePage;
 console.log('[profile] chargé ✓');

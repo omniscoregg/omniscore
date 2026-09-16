@@ -553,8 +553,7 @@ async function showLeaderboard() {
         <button class="modal-close" onclick="document.getElementById('leaderboard-modal').remove()">✕</button>
       </div>
       <div class="leaderboard-tabs">
-        <button class="lb-tab active" onclick="loadLeaderboard('global', this)">Global</button>
-        <button class="lb-tab" onclick="loadLeaderboard('season', this)">Saison</button>
+        <button class="lb-tab active" onclick="loadLeaderboard('season', this)">Global saisonnier</button>
         ${Object.entries(EsportAPI.GAME_CONFIG)
           .filter(([, c]) => c.source === 'pandascore')
           .map(([k, c]) => `<button class="lb-tab" onclick="loadLeaderboard('${k}', this)">${c.label}</button>`)
@@ -564,7 +563,7 @@ async function showLeaderboard() {
     </div>`;
   document.body.appendChild(modal);
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-  await loadLeaderboard('global', modal.querySelector('.lb-tab'));
+  await loadLeaderboard('season', modal.querySelector('.lb-tab'));
 }
 
 async function loadLeaderboard(type, btn) {
