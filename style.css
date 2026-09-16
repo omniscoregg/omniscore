@@ -129,11 +129,11 @@ body {
   max-width: 360px;
 }
 .navbar-team-search .team-search-results {
-  max-width: 360px;
-  width: 100%;
-  left: 50%;
-  right: auto;
-  transform: translateX(-50%);
+  max-width: none;
+  width: auto;
+  left: 12px;
+  right: 12px;
+  top: calc(100% + 4px);
 }
 .team-search-input {
   width: 100%;
