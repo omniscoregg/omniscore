@@ -791,4 +791,87 @@ function closeMobileProfileMenuOutside(e) {
 window.toggleMobileProfileMenu = toggleMobileProfileMenu;
 window.closeMobileProfileMenu  = closeMobileProfileMenu;
 
+// ----------------------------------------------------------
+//  Recherche d'équipe (sidebar accueil) — cherche sur tous les
+//  jeux PandaScore en parallèle, propose un menu déroulant
+// ----------------------------------------------------------
+let _teamSearchTimer = null;
+
+function handleTeamSearch(query) {
+  clearTimeout(_teamSearchTimer);
+  const resultsEl = document.getElementById('team-search-results');
+  const q = query.trim();
+
+  if (q.length < 2) {
+    if (resultsEl) { resultsEl.style.display = 'none'; resultsEl.innerHTML = ''; }
+    return;
+  }
+
+  if (resultsEl) {
+    resultsEl.style.display = 'block';
+    resultsEl.innerHTML = '<div class="team-search-loading">Recherche...</div>';
+  }
+
+  _teamSearchTimer = setTimeout(() => runTeamSearch(q), 400);
+}
+
+async function runTeamSearch(query) {
+  const resultsEl = document.getElementById('team-search-results');
+  if (!resultsEl) return;
+
+  const games = Object.entries(EsportAPI.GAME_CONFIG).filter(([, c]) => c.source === 'pandascore');
+
+  const results = await Promise.all(games.map(async ([key, cfg]) => {
+    try {
+      const params = new URLSearchParams({ type: 'team', name: query, slug: cfg.slug, game: key, per_page: '3' });
+      const res    = await fetch('https://omniscore-cache.omniscoregg.workers.dev?' + params);
+      if (!res.ok) return [];
+      const data = await res.json();
+      return (Array.isArray(data) ? data : []).map(t => ({ ...t, _game: key, _gameLabel: cfg.label }));
+    } catch(e) { return []; }
+  }));
+
+  // Vérifier que la recherche affichée correspond toujours à la saisie actuelle
+  const currentInput = document.getElementById('team-search-input');
+  if (!currentInput || currentInput.value.trim() !== query) return;
+
+  const flat = results.flat().filter(t => t.name);
+  if (flat.length === 0) {
+    resultsEl.innerHTML = '<div class="team-search-empty">Aucune équipe trouvée.</div>';
+    return;
+  }
+
+  resultsEl.innerHTML = flat.map(t => {
+    const colors = window.GENRE_COLORS?.[EsportAPI.GAME_CONFIG[t._game]?.genre] || {};
+    const accent = colors.accent || '#a78bfa';
+    const logo   = t.image_url || t.logo;
+    const logoHtml = logo
+      ? `<img src="${logo}" class="team-search-logo" onerror="this.style.display='none'">`
+      : `<span class="team-search-dot" style="background:${accent}"></span>`;
+    const tname = (t.name || '').replace(/'/g, "\\'");
+    return `<div class="team-search-item" onclick="closeTeamSearch();showTeamDetail('${tname}','${t._game}')">
+      ${logoHtml}
+      <div class="team-search-info">
+        <span class="team-search-name">${t.name}</span>
+        <span class="team-search-game">${t._gameLabel}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function closeTeamSearch() {
+  const input     = document.getElementById('team-search-input');
+  const resultsEl = document.getElementById('team-search-results');
+  if (input) input.value = '';
+  if (resultsEl) { resultsEl.style.display = 'none'; resultsEl.innerHTML = ''; }
+}
+
+document.addEventListener('click', e => {
+  const wrap = document.querySelector('.team-search-wrap');
+  if (wrap && !wrap.contains(e.target)) closeTeamSearch();
+});
+
+window.handleTeamSearch = handleTeamSearch;
+window.closeTeamSearch  = closeTeamSearch;
+
 document.addEventListener('DOMContentLoaded', init);
