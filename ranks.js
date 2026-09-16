@@ -49,8 +49,9 @@ function starToRoman(star) {
 //  Obtenir le rang selon les points (et optionnellement le rang global)
 // ----------------------------------------------------------
 function getRank(points, globalRank = null) {
-  // Top 500 = OMNI
-  if (globalRank !== null && globalRank <= 500) return OMNI_RANK;
+  // Top 500 = OMNI, mais seulement à partir du rang Maître minimum
+  // (évite d'attribuer OMNI juste parce qu'on est seul/peu nombreux dans le classement)
+  if (globalRank !== null && globalRank <= 500 && points >= 3000) return OMNI_RANK;
 
   for (let i = RANKS.length - 1; i >= 0; i--) {
     if (points >= RANKS[i].min) return RANKS[i];
