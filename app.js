@@ -815,6 +815,22 @@ function handleTeamSearch(query) {
   _teamSearchTimer = setTimeout(() => runTeamSearch(q), 400);
 }
 
+// Priorise les équipes principales sur les équipes académiques/réserve/amateur,
+// puis les correspondances les plus proches du texte recherché
+function sortTeamMatches(teams, query) {
+  const q = query.trim().toLowerCase();
+  const isMinor = name => /\b(academy|acad|reserve|amateur|next|young|female)\b/i.test(name || '');
+  return [...teams].sort((a, b) => {
+    const aMinor = isMinor(a.name) ? 1 : 0;
+    const bMinor = isMinor(b.name) ? 1 : 0;
+    if (aMinor !== bMinor) return aMinor - bMinor; // équipes principales d'abord
+    const aExact = (a.name || '').toLowerCase() === q ? 0 : 1;
+    const bExact = (b.name || '').toLowerCase() === q ? 0 : 1;
+    if (aExact !== bExact) return aExact - bExact;
+    return (a.name || '').length - (b.name || '').length; // nom le plus court ensuite
+  });
+}
+
 async function runTeamSearch(query) {
   const resultsEl = document.getElementById('team-search-results');
   if (!resultsEl) return;
@@ -823,11 +839,12 @@ async function runTeamSearch(query) {
 
   const results = await Promise.all(games.map(async ([key, cfg]) => {
     try {
-      const params = new URLSearchParams({ type: 'team', name: query, slug: cfg.slug, game: key, per_page: '3' });
+      const params = new URLSearchParams({ type: 'team', name: query, slug: cfg.slug, game: key, per_page: '20' });
       const res    = await fetch('https://omniscore-cache.omniscoregg.workers.dev?' + params);
       if (!res.ok) return [];
       const data = await res.json();
-      return (Array.isArray(data) ? data : []).map(t => ({ ...t, _game: key, _gameLabel: cfg.label }));
+      const teams = (Array.isArray(data) ? data : []).map(t => ({ ...t, _game: key, _gameLabel: cfg.label }));
+      return sortTeamMatches(teams, query).slice(0, 3);
     } catch(e) { return []; }
   }));
 
