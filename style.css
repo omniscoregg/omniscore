@@ -5224,6 +5224,11 @@ body {
 .lb-avatar-frame.rank-frame-ma-tre,
 .lb-avatar-frame.rank-frame-maitre  { background: linear-gradient(135deg, #a855f7, #7c3aed); box-shadow: 0 0 12px #a855f760; }
 .lb-avatar-frame.rank-frame-champion { background: linear-gradient(135deg, #f97316, #dc2626); box-shadow: 0 0 12px #f9731660; }
+
+.lb-avatar-frame.premium-ring {
+  outline: 2px solid #fbbf24;
+  outline-offset: 2px;
+}
 .lb-avatar-frame.rank-frame-omni    { background: linear-gradient(135deg, #ffffff, #a78bfa, #38bdf8); box-shadow: 0 0 14px #ffffff60; }
 
 /* ── Avatar navbar ── */
