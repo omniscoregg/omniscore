@@ -5082,70 +5082,110 @@ body {
   font-weight: 800;
 }
 
-/* ── Bronze ── */
-.rank-frame-bronze {
-  background: linear-gradient(135deg, #cd7f32, #a0522d);
-  box-shadow: 0 0 8px #cd7f3240;
+/* ============================================================
+   Cadres d'avatar par rang
+   Technique : anneau dessiné en ::before (masque "exclude"),
+   indépendant de la photo à l'intérieur → peut tourner (OMNI,
+   Maître premium) sans faire pivoter l'avatar.
+   Le premium ajoute un reflet (::after / .premium-shine) +
+   un glow renforcé, jamais un cadre différent.
+   ============================================================ */
+@keyframes rank-frame-spin { to { transform: rotate(360deg); } }
+
+@keyframes premium-shine-sweep {
+  0%   { transform: translateX(-150%) rotate(20deg); }
+  100% { transform: translateX(250%) rotate(20deg); }
 }
+
+.premium-shine {
+  position: absolute;
+  top: -50%;
+  left: 0;
+  width: 12%;
+  height: 200%;
+  background: linear-gradient(90deg, transparent 0%, transparent 10%, #ffffff90 48%, transparent 90%, transparent 100%);
+  filter: blur(1px);
+  animation: premium-shine-sweep 2.8s ease-in-out infinite;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+/* ── Bronze ── */
+.lb-avatar-frame.rank-frame-bronze::before {
+  background: conic-gradient(from 0deg, #7a4a1e, #cd7f32, #e8a45c, #cd7f32, #7a4a1e);
+  box-shadow: 0 0 8px #cd7f3250;
+}
+.lb-avatar-frame.is-premium.rank-frame-bronze::before { box-shadow: 0 0 14px #cd7f32a0; }
 
 /* ── Argent ── */
-.rank-frame-argent {
-  background: linear-gradient(135deg, #c0c0c0, #909090);
-  box-shadow: 0 0 10px #c0c0c040;
+.lb-avatar-frame.rank-frame-argent::before {
+  background: conic-gradient(from 0deg, #787878, #e8e8e8, #ffffff, #e8e8e8, #787878);
+  box-shadow: 0 0 10px #c0c0c060;
 }
+.lb-avatar-frame.is-premium.rank-frame-argent::before { box-shadow: 0 0 16px #c0c0c0c0; }
 
 /* ── Or ── */
-.rank-frame-or {
-  background: linear-gradient(135deg, #ffd700, #ffa500);
-  box-shadow: 0 0 12px #ffd70050;
+.lb-avatar-frame.rank-frame-or::before {
+  background: conic-gradient(from 0deg, #8a6300, #ffd700, #fff2a8, #ffd700, #8a6300);
+  box-shadow: 0 0 12px #ffd70070;
+}
+.lb-avatar-frame.is-premium.rank-frame-or::before { box-shadow: 0 0 18px #ffd700c0; }
+
+/* ── Platine — même technique qu'Argent/Or ── */
+.lb-avatar-frame.rank-frame-platine::before {
+  background: conic-gradient(from 0deg, #0a7a8a, #00d4ff, #bdf6ff, #00d4ff, #0a7a8a);
+  box-shadow: 0 0 14px #00d4ff70;
+}
+.lb-avatar-frame.is-premium.rank-frame-platine::before { box-shadow: 0 0 20px #00d4ffc0; }
+
+/* ── Diamant — même technique, anneau plus large ── */
+.lb-avatar-frame.rank-frame-diamant::before {
+  inset: -3px;
+  padding: 3px;
+  background: conic-gradient(from 0deg, #4fb8d0, #b9f2ff, #ffffff, #b9f2ff, #4fb8d0);
+  box-shadow: 0 0 18px #b9f2ff90;
+}
+.lb-avatar-frame.is-premium.rank-frame-diamant::before { box-shadow: 0 0 28px #b9f2ffd0; }
+
+/* ── Maître — anneau large et compact, spirale en premium ── */
+.lb-avatar-frame.rank-frame-ma-tre::before,
+.lb-avatar-frame.rank-frame-maitre::before {
+  inset: -4px;
+  padding: 4px;
+  background: #a855f7;
+  box-shadow: 0 0 16px #a855f7a0, inset 0 0 8px #a855f760;
+}
+.lb-avatar-frame.is-premium.rank-frame-ma-tre::before,
+.lb-avatar-frame.is-premium.rank-frame-maitre::before {
+  background: conic-gradient(from 0deg, #4c0f8f, #c084fc, #7c1fd6, #e9d5ff, #4c0f8f);
+  box-shadow: 0 0 28px #a855f7d0;
+  animation: rank-frame-spin 3s linear infinite;
 }
 
-/* ── Platine ── */
-.rank-frame-platine {
-  background: linear-gradient(135deg, #00d4ff, #0099cc);
-  box-shadow: 0 0 14px #00d4ff50;
+/* ── Champion — anneau plein, plus large ── */
+.lb-avatar-frame.rank-frame-champion::before {
+  inset: -3px;
+  padding: 3px;
+  background: #f97316;
+  box-shadow: 0 0 18px #f97316a0;
+}
+.lb-avatar-frame.is-premium.rank-frame-champion::before {
+  box-shadow: 0 0 32px #f97316e0, 0 0 50px #fbbf2480;
 }
 
-/* ── Diamant ── */
-.rank-frame-diamant {
-  background: linear-gradient(135deg, #b9f2ff, #38bdf8);
-  box-shadow: 0 0 16px #b9f2ff60;
+/* ── OMNI — anneau clair qui tourne doucement (sans nuages) ── */
+.lb-avatar-frame.rank-frame-omni::before {
+  inset: -3px;
+  padding: 3px;
+  background: conic-gradient(from 0deg, #ffffff40, #ffffff, #ffffff40);
+  box-shadow: 0 0 18px #ffffffb0;
+  animation: rank-frame-spin 5s linear infinite;
 }
-
-/* ── Maître ── */
-.rank-frame-ma-tre,
-.rank-frame-maitre {
-  background: linear-gradient(135deg, #a855f7, #7c3aed);
-  box-shadow: 0 0 18px #a855f760;
-  animation: pulse-maitre 2s ease-in-out infinite;
-}
-@keyframes pulse-maitre {
-  0%, 100% { box-shadow: 0 0 18px #a855f760; }
-  50%       { box-shadow: 0 0 28px #a855f790; }
-}
-
-/* ── Champion ── */
-.rank-frame-champion {
-  background: linear-gradient(135deg, #f97316, #dc2626);
-  box-shadow: 0 0 20px #f9731670;
-  animation: pulse-champion 1.5s ease-in-out infinite;
-}
-@keyframes pulse-champion {
-  0%, 100% { box-shadow: 0 0 20px #f9731670; }
-  50%       { box-shadow: 0 0 35px #f97316a0; }
-}
-
-/* ── OMNI ── */
-.rank-frame-omni {
-  background: linear-gradient(135deg, #ffffff, #a78bfa, #38bdf8, #ffffff);
-  background-size: 300% 300%;
-  box-shadow: 0 0 25px #ffffff80;
-  animation: omni-gradient 3s ease infinite;
-}
-@keyframes omni-gradient {
-  0%   { background-position: 0% 50%; box-shadow: 0 0 25px #ffffff60; }
-  50%  { background-position: 100% 50%; box-shadow: 0 0 40px #a78bfaa0; }
-  100% { background-position: 0% 50%; box-shadow: 0 0 25px #38bdf860; }
+.lb-avatar-frame.is-premium.rank-frame-omni::before {
+  background: conic-gradient(from 0deg, #ffffff30, #e0e0ff, #ffffff30, #c9b8ff, #ffffff30);
+  box-shadow: 0 0 28px #ffffffe0, 0 0 44px #b9a8ff90;
+  animation: rank-frame-spin 3.5s linear infinite;
 }
 
 /* ── Section avatar page d'accueil ── */
@@ -5194,7 +5234,23 @@ body {
   border-radius: 50%;
   padding: 2px;
   flex-shrink: 0;
+  overflow: visible;
 }
+
+/* Anneau de rang : dessiné derrière la photo, ne tourne pas avec elle */
+.lb-avatar-frame::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  padding: 2px;
+  box-sizing: border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 0;
+}
+.lb-avatar-frame > * { position: relative; z-index: 1; }
 
 .lb-avatar-img {
   width: 100%;
@@ -5214,39 +5270,6 @@ body {
   font-size: 14px;
   background: var(--surface2);
 }
-
-/* Appliquer les mêmes cadres de rang aux avatars lb */
-.lb-avatar-frame.rank-frame-bronze  { background: linear-gradient(135deg, #cd7f32, #a0522d); box-shadow: 0 0 6px #cd7f3240; }
-.lb-avatar-frame.rank-frame-argent  { background: linear-gradient(135deg, #c0c0c0, #909090); box-shadow: 0 0 6px #c0c0c040; }
-.lb-avatar-frame.rank-frame-or      { background: linear-gradient(135deg, #ffd700, #ffa500); box-shadow: 0 0 8px #ffd70050; }
-.lb-avatar-frame.rank-frame-platine { background: linear-gradient(135deg, #00d4ff, #0099cc); box-shadow: 0 0 8px #00d4ff50; }
-.lb-avatar-frame.rank-frame-diamant { background: linear-gradient(135deg, #b9f2ff, #38bdf8); box-shadow: 0 0 10px #b9f2ff60; }
-.lb-avatar-frame.rank-frame-ma-tre,
-.lb-avatar-frame.rank-frame-maitre  { background: linear-gradient(135deg, #a855f7, #7c3aed); box-shadow: 0 0 12px #a855f760; }
-.lb-avatar-frame.rank-frame-champion { background: linear-gradient(135deg, #f97316, #dc2626); box-shadow: 0 0 12px #f9731660; }
-
-.premium-frame-outer {
-  position: relative;
-  display: inline-block;
-  flex-shrink: 0;
-}
-.premium-flame-svg {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 180%;
-  height: 180%;
-  transform: translate(-50%, -50%);
-  z-index: 0;
-  pointer-events: none;
-  filter: drop-shadow(0 0 4px var(--spin-color, #a855f7)) drop-shadow(0 0 6px #fb923c90);
-}
-
-.premium-frame-outer .lb-avatar-frame {
-  position: relative;
-  z-index: 1;
-}
-.lb-avatar-frame.rank-frame-omni    { background: linear-gradient(135deg, #ffffff, #a78bfa, #38bdf8); box-shadow: 0 0 14px #ffffff60; }
 
 /* ── Avatar navbar ── */
 .auth-avatar {
