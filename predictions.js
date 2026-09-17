@@ -674,6 +674,9 @@ window.currentProfile = currentProfile;
     const favBtn = document.getElementById('fav-nav-btn');
 if (favBtn) favBtn.style.display = user ? 'flex' : 'none';
 
+const teamSearchWrap = document.querySelector('.navbar-team-search');
+if (teamSearchWrap) teamSearchWrap.style.display = user ? 'flex' : 'none';
+
 // Bouton profil mobile
 const mnavProfile = document.getElementById('mnav-profile');
 if (mnavProfile) mnavProfile.style.display = user ? 'flex' : 'none';
