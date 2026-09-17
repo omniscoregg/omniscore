@@ -66,10 +66,23 @@ async function getLeaderboard(limitCount = 20) {
   return snap.docs.map((d, i) => ({ rank: i + 1, id: d.id, ...d.data() }));
 }
 
+// Début de la saison en cours (reset les 1er janvier / mai / septembre,
+// même cadence que le reset des points de saison côté worker)
+function getCurrentSeasonStart() {
+  const now   = new Date();
+  const month = now.getMonth(); // 0 = janvier
+  const startMonth = month >= 8 ? 8 : month >= 4 ? 4 : 0;
+  return new Date(now.getFullYear(), startMonth, 1, 0, 0, 0, 0);
+}
+window.getCurrentSeasonStart = getCurrentSeasonStart;
+
 async function getLeaderboardByGame(game, limitCount = 20) {
-  const snap   = await db.collection('predictions').orderBy('points', 'desc').get();
+  const snap        = await db.collection('predictions').orderBy('points', 'desc').get();
+  const seasonStart = getCurrentSeasonStart();
   const byUser = {};
-  snap.docs.map(d => d.data()).filter(p => p.game === game).forEach(p => {
+  snap.docs.map(d => d.data())
+    .filter(p => p.game === game && p.createdAt && new Date(p.createdAt) >= seasonStart)
+    .forEach(p => {
     if (!byUser[p.uid]) byUser[p.uid] = { uid: p.uid, id: p.uid, points: 0, predictions: 0 };
     byUser[p.uid].points      += p.points;
     byUser[p.uid].predictions += 1;
