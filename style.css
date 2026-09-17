@@ -606,7 +606,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10500;
+  z-index: 11000;
   padding: 16px;
   isolation: isolate;
   transform: translateZ(0);
