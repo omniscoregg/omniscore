@@ -5092,23 +5092,25 @@ body {
    ============================================================ */
 @keyframes rank-frame-spin { to { transform: rotate(360deg); } }
 
+/* left animé en % du conteneur (pas de la barre elle-même) pour
+   traverser vraiment tout l'avatar, bord à bord */
 @keyframes premium-shine-sweep {
-  0%   { transform: translateX(-150%) rotate(20deg); }
-  100% { transform: translateX(250%) rotate(20deg); }
+  0%   { left: -35%; }
+  100% { left: 135%; }
 }
 
 .premium-shine {
   position: absolute;
-  top: -50%;
-  left: 0;
+  top: -60%;
+  left: -35%;
   width: 12%;
-  height: 200%;
+  height: 220%;
   background: linear-gradient(90deg, transparent 0%, transparent 10%, #ffffff90 48%, transparent 90%, transparent 100%);
   filter: blur(1px);
+  transform: rotate(20deg);
   animation: premium-shine-sweep 2.8s ease-in-out infinite;
   z-index: 2;
   pointer-events: none;
-  border-radius: 50%;
 }
 
 /* ── Bronze ── */
