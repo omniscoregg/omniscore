@@ -386,9 +386,22 @@ async function renderSeasonLeaderboard(container, lang) {
       const rankStr  = '#' + (i + 1);
       const isMe     = window.FirebaseService?.getCurrentUser()?.uid === u.uid;
 
+      const frameClass = 'rank-frame-' + rank.name.toLowerCase().replace(/[îâêàùé]/g, c => ({'î':'i','â':'a','ê':'e','à':'a','ù':'u','é':'e'}[c]||c));
+      const isPremium  = !!profile.premium;
+      const initials   = (username || '?')[0].toUpperCase();
+      const gravatarUrl = (typeof md5 === 'function' && profile.email)
+        ? 'https://www.gravatar.com/avatar/' + md5(profile.email.trim().toLowerCase()) + '?s=36&d=404'
+        : null;
+      const avatarHtml = '<div class="lb-avatar-frame ' + frameClass + (isPremium ? ' is-premium' : '') + '" style="--rank-color:' + rank.color + '">'
+        + '<div class="lb-avatar-photo">'
+        + (gravatarUrl ? '<img src="' + gravatarUrl + '" class="lb-avatar-img" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' : '')
+        + '<div class="lb-avatar-initials" style="' + (gravatarUrl ? 'display:none' : 'display:flex') + ';color:' + rank.color + '">' + initials + '</div>'
+        + (isPremium ? '<div class="premium-shine"></div>' : '')
+        + '</div></div>';
+
       return '<tr class="' + (isMe ? 'lb-me' : '') + '">'
         + '<td class="lb-rank">' + rankStr + '</td>'
-        + '<td class="lb-name">' + username + (isMe ? ' <span style="color:var(--text3);font-size:10px">(vous)</span>' : '') + '</td>'
+        + '<td class="lb-name"><div style="display:flex;align-items:center;gap:8px">' + avatarHtml + '<span>' + username + (isMe ? ' <span style="color:var(--text3);font-size:10px">(vous)</span>' : '') + '</span></div></td>'
         + '<td class="lb-pts">' + u.points + '</td>'
         + '<td>' + renderSeasonRankBadge(u.points, i + 1, 'small') + '</td>'
         + '</tr>';
