@@ -1866,7 +1866,10 @@ body {
   padding: 16px;
   text-align: center;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
+.premium-plan .form-submit { margin-top: auto; }
 .premium-plan.highlight { border-color: #fbbf24; }
 .premium-plan-badge {
   position: absolute;
