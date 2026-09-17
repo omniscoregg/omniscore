@@ -5235,7 +5235,7 @@ body {
   position: absolute;
   inset: -4px;
   border-radius: 50%;
-  background: conic-gradient(from 0deg, #a855f7, #ffffff, #7c3aed, #ffffff, #a855f7);
+  background: conic-gradient(from 0deg, var(--spin-color, #a855f7), #ffffff, var(--spin-color, #a855f7));
   filter: blur(2px);
   animation: premium-spin 3s linear infinite;
   z-index: 0;

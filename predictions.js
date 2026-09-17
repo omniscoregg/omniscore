@@ -601,7 +601,7 @@ async function loadLeaderboard(type, btn) {
             <div class="lb-avatar-initials" style="${avatarUrl ? 'display:none' : 'display:flex'};color:${rankObj.color}">${initials}</div>
           </div>`;
           const avatarHtml = u.premium
-            ? `<div class="premium-frame-outer"><div class="premium-frame-spin"></div>${avatarInner}</div>`
+            ? `<div class="premium-frame-outer"><div class="premium-frame-spin" style="--spin-color:${rankObj.color}"></div>${avatarInner}</div>`
             : avatarInner;
           return `
           <tr class="${u.id === currentUser?.uid ? 'lb-me' : ''}">
