@@ -404,20 +404,23 @@ async function handleCreateLeague() {
     return;
   }
 
-  // Vérifier la limite (1 ligue gratuite)
-  const leagues = await getUserLeagues(user.uid);
-  const myLeagues = leagues.filter(l => l.creatorId === user.uid);
-  if (myLeagues.length >= 1) {
-    const err = document.getElementById('league-form-error');
-    if (err) {
-      err.textContent = 'Limite atteinte : 1 ligue gratuite. Passez Premium pour en créer plus !';
-      err.style.display = 'block';
+  const profile = await window.FirebaseService.getUserProfile(user.uid);
+
+  // Vérifier la limite (1 ligue gratuite, illimité en Premium)
+  if (!profile?.premium) {
+    const leagues   = await getUserLeagues(user.uid);
+    const myLeagues = leagues.filter(l => l.creatorId === user.uid);
+    if (myLeagues.length >= 1) {
+      const err = document.getElementById('league-form-error');
+      if (err) {
+        err.textContent = 'Limite atteinte : 1 ligue gratuite. Passez Premium pour en créer plus !';
+        err.style.display = 'block';
+      }
+      return;
     }
-    return;
   }
 
   try {
-    const profile  = await window.FirebaseService.getUserProfile(user.uid);
     const tournToggle = document.getElementById('league-tourn-toggle');
     let tournament = null;
     if (tournToggle?.checked) {
