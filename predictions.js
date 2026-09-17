@@ -596,10 +596,13 @@ async function loadLeaderboard(type, btn) {
           const frameClass = 'rank-frame-' + rankObj.name.toLowerCase().replace(/[îâêàùé]/g, c => ({'î':'i','â':'a','ê':'e','à':'a','ù':'u','é':'e'}[c]||c));
           const initials  = (u.username || '?')[0].toUpperCase();
           const avatarUrl = avatarMap[u.id];
-          const avatarHtml = `<div class="lb-avatar-frame ${frameClass}${u.premium ? ' premium-ring' : ''}" style="--rank-color:${rankObj.color}">
+          const avatarInner = `<div class="lb-avatar-frame ${frameClass}" style="--rank-color:${rankObj.color}">
             ${avatarUrl ? `<img src="${avatarUrl}" class="lb-avatar-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
             <div class="lb-avatar-initials" style="${avatarUrl ? 'display:none' : 'display:flex'};color:${rankObj.color}">${initials}</div>
           </div>`;
+          const avatarHtml = u.premium
+            ? `<div class="premium-frame-outer"><div class="premium-frame-spin"></div>${avatarInner}</div>`
+            : avatarInner;
           return `
           <tr class="${u.id === currentUser?.uid ? 'lb-me' : ''}">
             <td class="lb-rank">${u.rank}</td>
