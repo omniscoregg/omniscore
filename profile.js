@@ -148,6 +148,12 @@ async function loadProfileContent(user) {
           <div class="profile-email">${profile.email ? profile.email.replace(/(.{2}).*(@.*)/, '$1***$2') : ''}</div>
           <div class="profile-since">Membre depuis ${formatDate(profile.createdAt)}</div>
           ${window.renderSeasonRankBadge ? window.renderSeasonRankBadge(profile.points, rank || 9999, 'normal') : (window.renderRankBadge ? window.renderRankBadge(profile.points, rank || 9999, 'normal') : '')}
+          <div class="profile-premium-slot">
+            ${profile.premium
+              ? '<span class="premium-badge">👑 Premium</span><button class="premium-manage-btn" onclick="openBillingPortal()">Gérer l\'abonnement</button>'
+              : '<button class="premium-cta-btn" onclick="showPremiumModal()">Passer Premium</button>'
+            }
+          </div>
         </div>
         <div class="profile-rank">${rankLabel}</div>
       </div>
@@ -441,6 +447,110 @@ function filterProfileFavTeams(query) {
   });
 }
 window.filterProfileFavTeams = filterProfileFavTeams;
+
+// ----------------------------------------------------------
+//  Premium — modale de tarifs, paiement, portail de gestion
+// ----------------------------------------------------------
+const BILLING_WORKER_URL = 'https://omniscore-billing.omniscoregg.workers.dev';
+const PREMIUM_PRICE_MONTHLY = 'price_1UGa6iBukfxnqd9K7UTw0z57';
+const PREMIUM_PRICE_YEARLY  = 'price_1UGa6hBukfxnqd9KBXJPam7y';
+
+function showPremiumModal() {
+  document.getElementById('premium-modal')?.remove();
+  const user = window.FirebaseService?.getCurrentUser();
+  if (!user) { showAuthModal('login'); return; }
+
+  const modal = document.createElement('div');
+  modal.id        = 'premium-modal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">Omniscore Premium</div>
+        <button class="modal-close" onclick="document.getElementById('premium-modal').remove()">✕</button>
+      </div>
+      <div class="premium-plans">
+        <div class="premium-plan">
+          <div class="premium-plan-name">Mensuel</div>
+          <div class="premium-plan-price">3€<span>/mois</span></div>
+          <button class="form-submit" onclick="startCheckout('${PREMIUM_PRICE_MONTHLY}')">S'abonner</button>
+        </div>
+        <div class="premium-plan highlight">
+          <div class="premium-plan-badge">Meilleure offre</div>
+          <div class="premium-plan-name">Annuel</div>
+          <div class="premium-plan-price">20€<span>/an</span></div>
+          <div class="premium-plan-note">soit 1,67€/mois</div>
+          <button class="form-submit" onclick="startCheckout('${PREMIUM_PRICE_YEARLY}')">S'abonner</button>
+        </div>
+      </div>
+      <ul class="premium-features-list">
+        <li>Pick'ems de tournoi illimités (3/saison en gratuit)</li>
+        <li>Badge et contour d'avatar exclusifs</li>
+        <li>Ligues privées illimitées</li>
+        <li>Statistiques avancées</li>
+        <li>Modification de prédiction avant le début du match</li>
+        <li>Notifications avec délai personnalisable</li>
+        <li>Bilan de saison + historique illimité</li>
+        <li>Joker saisonnier</li>
+      </ul>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+async function startCheckout(priceId) {
+  const user = window.FirebaseService?.getCurrentUser();
+  if (!user) { showAuthModal('login'); return; }
+
+  const btn = event?.target;
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirection...'; }
+
+  try {
+    const profile = await window.FirebaseService.getUserProfile(user.uid);
+    const res = await fetch(BILLING_WORKER_URL + '/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid: user.uid, priceId, email: profile?.email || user.email || '' }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert(data.error || 'Erreur lors de la création du paiement. Réessaie plus tard.');
+      if (btn) { btn.disabled = false; btn.textContent = "S'abonner"; }
+    }
+  } catch(e) {
+    console.error('[Premium] startCheckout:', e);
+    alert('Erreur lors de la création du paiement. Réessaie plus tard.');
+    if (btn) { btn.disabled = false; btn.textContent = "S'abonner"; }
+  }
+}
+
+async function openBillingPortal() {
+  const user = window.FirebaseService?.getCurrentUser();
+  if (!user) return;
+  try {
+    const res = await fetch(BILLING_WORKER_URL + '/create-portal-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid: user.uid }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert(data.error || "Impossible d'ouvrir le portail de gestion.");
+    }
+  } catch(e) {
+    console.error('[Premium] openBillingPortal:', e);
+    alert("Erreur lors de l'ouverture du portail.");
+  }
+}
+
+window.showPremiumModal  = showPremiumModal;
+window.startCheckout     = startCheckout;
+window.openBillingPortal = openBillingPortal;
 
 window.showProfilePage = showProfilePage;
 console.log('[profile] chargé ✓');

@@ -30,6 +30,7 @@ async function init() {
   renderGameFilters();
   loadPreferences(); // Charger les préférences sauvegardées
   showSkeleton();
+  checkPremiumReturn();
   await loadAllData();
   renderMainTabs();
   renderMatches();
@@ -905,3 +906,18 @@ window.handleTeamSearch = handleTeamSearch;
 window.closeTeamSearch  = closeTeamSearch;
 
 document.addEventListener('DOMContentLoaded', init);
+
+function checkPremiumReturn() {
+  const params = new URLSearchParams(location.search);
+  const status = params.get('premium');
+  if (!status) return;
+
+  if (status === 'success') {
+    alert('Paiement réussi ! Ton statut Premium sera actif dans quelques instants.');
+  } else if (status === 'cancel') {
+    alert('Paiement annulé — aucun montant n\'a été prélevé.');
+  }
+  params.delete('premium');
+  const newUrl = location.pathname + (params.toString() ? '?' + params.toString() : '');
+  history.replaceState({}, '', newUrl);
+}
