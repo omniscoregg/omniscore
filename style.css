@@ -6207,3 +6207,8 @@ body {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+.form-input-error {
+  border-color: #f87171 !important;
+  box-shadow: 0 0 0 1px #f8717170;
+}

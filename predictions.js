@@ -278,8 +278,8 @@ function showAuthModal(mode = 'login') {
         <button class="modal-close" onclick="document.getElementById('auth-modal').remove()">✕</button>
       </div>
       ${!isLogin ? `<div class="form-group"><label>Pseudo</label><input type="text" id="auth-username" placeholder="Votre pseudo" class="form-input"></div>` : ''}
-      <div class="form-group"><label>Email</label><input type="email" id="auth-email" placeholder="votre@email.com" class="form-input"></div>
-      <div class="form-group"><label>Mot de passe</label><input type="password" id="auth-password" placeholder="••••••••" class="form-input"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="auth-email" placeholder="votre@email.com" class="form-input" autocomplete="email"></div>
+      <div class="form-group"><label>Mot de passe</label><input type="password" id="auth-password" placeholder="Votre mot de passe" class="form-input" autocomplete="current-password"></div>
       <div id="auth-error" class="form-error" style="display:none"></div>
       <button class="form-submit" onclick="handleAuth()">${isLogin ? 'Se connecter' : 'Créer mon compte'}</button>
       <div class="form-switch">
@@ -293,13 +293,26 @@ function showAuthModal(mode = 'login') {
 }
 
 async function handleAuth() {
-  const email    = document.getElementById('auth-email')?.value?.trim();
-  const password = document.getElementById('auth-password')?.value;
-  const username = document.getElementById('auth-username')?.value?.trim();
-  if (!email || !password) { showFormError('Veuillez remplir tous les champs.'); return; }
+  const emailInput    = document.getElementById('auth-email');
+  const passwordInput = document.getElementById('auth-password');
+  const usernameInput = document.getElementById('auth-username');
+  const email    = emailInput?.value?.trim();
+  const password = passwordInput?.value;
+  const username = usernameInput?.value?.trim();
+
+  // Réinitialiser les bordures d'erreur
+  [emailInput, passwordInput, usernameInput].forEach(el => el?.classList.remove('form-input-error'));
+
+  if (!email || !password) {
+    if (!email) emailInput?.classList.add('form-input-error');
+    if (!password) passwordInput?.classList.add('form-input-error');
+    showFormError('Veuillez remplir tous les champs.');
+    (!email ? emailInput : passwordInput)?.focus();
+    return;
+  }
   try {
     if (authModalMode === 'register') {
-      if (!username) { showFormError('Veuillez choisir un pseudo.'); return; }
+      if (!username) { usernameInput?.classList.add('form-input-error'); usernameInput?.focus(); showFormError('Veuillez choisir un pseudo.'); return; }
       await register(email, password, username);
     } else {
       await login(email, password);
