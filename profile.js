@@ -23,8 +23,7 @@ async function getAvatarHtml(email, username, color, size, points, premium) {
   </div>`;
 
   if (!premium) return frame;
-  const embers = '<span class="flame-tongue"></span><span class="flame-tongue"></span><span class="flame-tongue"></span><span class="smoke-wisp"></span><span class="smoke-wisp"></span><span class="smoke-wisp"></span>';
-  return `<div class="premium-frame-outer"><div class="premium-frame-spin" style="--spin-color:${color}">${embers}</div>${frame}</div>`;
+  return `<div class="premium-frame-outer"><div class="premium-frame-spin" style="--spin-color:${color}"></div>${frame}</div>`;
 }
 
 // MD5 pour Gravatar
