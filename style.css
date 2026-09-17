@@ -2665,8 +2665,8 @@ body {
 /* Mobile landing */
 @media (max-width: 768px) {
   .landing-steps { grid-template-columns: 1fr; }
-  .landing-points-grid { grid-template-columns: repeat(2, 1fr); }
-  .landing-point-card.streak { grid-column: span 2; }
+  .landing-points-grid { grid-template-columns: 1fr; }
+  .landing-point-card.streak { grid-column: auto; }
   .landing-features-grid { grid-template-columns: 1fr; }
   .landing-ranks-strip { gap: 4px; font-size: 11px; }
 }
