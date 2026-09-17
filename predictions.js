@@ -214,12 +214,16 @@ function renderAuthBar() {
     const rankObj    = window.getSeasonRank ? window.getSeasonRank(currentProfile.points || 0) : { name: 'Bronze', color: '#cd7f32' };
     const frameClass = 'rank-frame-' + rankObj.name.toLowerCase().replace(/[îâêàùé]/g, c => ({'î':'i','â':'a','ê':'e','à':'a','ù':'u','é':'e'}[c]||c));
     const initials   = (currentProfile.username || '?')[0].toUpperCase();
+    const isPremium  = !!currentProfile.premium;
 
     el.innerHTML = `
       <div class="auth-user">
         <!-- Avatar cliquable → profil -->
-        <div class="auth-avatar lb-avatar-frame ${frameClass}" id="auth-avatar-wrap" onclick="showProfilePage()" style="cursor:pointer;--rank-color:${rankObj.color};width:30px;height:30px">
-          <div class="lb-avatar-initials" style="display:flex;color:${rankObj.color};font-size:12px">${initials}</div>
+        <div class="auth-avatar lb-avatar-frame ${frameClass}${isPremium ? ' is-premium' : ''}" id="auth-avatar-wrap" onclick="showProfilePage()" style="cursor:pointer;--rank-color:${rankObj.color};width:30px;height:30px">
+          <div class="lb-avatar-photo">
+            <div class="lb-avatar-initials" style="display:flex;color:${rankObj.color};font-size:12px">${initials}</div>
+            ${isPremium ? '<div class="premium-shine"></div>' : ''}
+          </div>
         </div>
         <!-- Pseudo + points : masqués sur mobile -->
         <span class="auth-username desktop-only" onclick="showProfilePage()" style="cursor:pointer">${currentProfile.username}</span>
@@ -252,7 +256,10 @@ function renderAuthBar() {
         const gravatarUrl = 'https://www.gravatar.com/avatar/' + md5(currentProfile.email.trim().toLowerCase()) + '?s=30&d=404';
         const img = new Image();
         img.onload = () => {
-          avatarWrap.innerHTML = `<img src="${gravatarUrl}" class="lb-avatar-img" style="display:block">`;
+          const photoContainer = avatarWrap.querySelector('.lb-avatar-photo');
+          if (photoContainer) {
+            photoContainer.innerHTML = `<img src="${gravatarUrl}" class="lb-avatar-img" style="display:block">${isPremium ? '<div class="premium-shine"></div>' : ''}`;
+          }
         };
         img.src = gravatarUrl;
       }
