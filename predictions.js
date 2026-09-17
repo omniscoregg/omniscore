@@ -600,9 +600,9 @@ async function loadLeaderboard(type, btn) {
             ${avatarUrl ? `<img src="${avatarUrl}" class="lb-avatar-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
             <div class="lb-avatar-initials" style="${avatarUrl ? 'display:none' : 'display:flex'};color:${rankObj.color}">${initials}</div>
           </div>`;
-          const flameTongues = Array.from({ length: 6 }, (_, i) => `<span class="flame-tongue" style="--i:${i}"></span>`).join('');
+          const embers = '<span class="flame-tongue"></span><span class="flame-tongue"></span><span class="flame-tongue"></span><span class="smoke-wisp"></span><span class="smoke-wisp"></span><span class="smoke-wisp"></span>';
           const avatarHtml = u.premium
-            ? `<div class="premium-frame-outer"><div class="premium-frame-spin" style="--spin-color:${rankObj.color}">${flameTongues}</div>${avatarInner}</div>`
+            ? `<div class="premium-frame-outer"><div class="premium-frame-spin" style="--spin-color:${rankObj.color}">${embers}</div>${avatarInner}</div>`
             : avatarInner;
           return `
           <tr class="${u.id === currentUser?.uid ? 'lb-me' : ''}">

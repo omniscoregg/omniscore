@@ -5233,32 +5233,50 @@ body {
 }
 .premium-frame-spin {
   position: absolute;
-  inset: -8px;
+  inset: -3px;
   z-index: 0;
   pointer-events: none;
 }
 .flame-tongue {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 34%;
-  height: 55%;
-  background: linear-gradient(to top, var(--spin-color, #a855f7), #fb923c 65%, #fef08a 100%);
-  border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
-  transform-origin: 50% 130%;
-  transform: translate(-50%, -100%) rotate(calc(var(--i) * 60deg)) translateY(-35%);
-  filter: blur(1.5px);
-  opacity: 0.85;
-  animation: flame-flicker 0.7s ease-in-out infinite alternate;
-  animation-delay: calc(var(--i) * -0.11s);
+  bottom: -1px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fef08a, var(--spin-color, #a855f7) 65%, transparent 100%);
+  filter: blur(1px);
+  animation: flame-flicker 0.6s ease-in-out infinite alternate;
 }
+.flame-tongue:nth-child(1) { left: 18%; animation-delay: 0s; }
+.flame-tongue:nth-child(2) { left: 48%; margin-left: -3.5px; animation-delay: -0.2s; }
+.flame-tongue:nth-child(3) { left: 78%; animation-delay: -0.4s; }
+
+.smoke-wisp {
+  position: absolute;
+  bottom: 2px;
+  width: 3px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(210, 210, 220, 0.55);
+  filter: blur(1.5px);
+  animation: smoke-rise 1.8s ease-out infinite;
+}
+.smoke-wisp:nth-child(4) { left: 18%; animation-delay: -0.6s; }
+.smoke-wisp:nth-child(5) { left: 48%; margin-left: -1.5px; animation-delay: -1.2s; }
+.smoke-wisp:nth-child(6) { left: 78%; animation-delay: 0s; }
+
 .premium-frame-outer .lb-avatar-frame {
   position: relative;
   z-index: 1;
 }
 @keyframes flame-flicker {
-  0%   { transform: translate(-50%, -100%) rotate(calc(var(--i) * 60deg)) translateY(-25%) scale(0.8); opacity: 0.55; }
-  100% { transform: translate(-50%, -100%) rotate(calc(var(--i) * 60deg)) translateY(-45%) scale(1.2); opacity: 1; }
+  0%   { transform: scale(0.75); opacity: 0.55; }
+  100% { transform: scale(1.15); opacity: 1; }
+}
+@keyframes smoke-rise {
+  0%   { transform: translateY(0) scale(0.6); opacity: 0.5; }
+  70%  { opacity: 0.25; }
+  100% { transform: translateY(-14px) scale(1.3); opacity: 0; }
 }
 .lb-avatar-frame.rank-frame-omni    { background: linear-gradient(135deg, #ffffff, #a78bfa, #38bdf8); box-shadow: 0 0 14px #ffffff60; }
 
