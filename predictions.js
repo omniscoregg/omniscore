@@ -70,19 +70,21 @@ async function getLeaderboardByGame(game, limitCount = 20) {
   const snap   = await db.collection('predictions').orderBy('points', 'desc').get();
   const byUser = {};
   snap.docs.map(d => d.data()).filter(p => p.game === game).forEach(p => {
-    if (!byUser[p.uid]) byUser[p.uid] = { uid: p.uid, points: 0, predictions: 0 };
+    if (!byUser[p.uid]) byUser[p.uid] = { uid: p.uid, id: p.uid, points: 0, predictions: 0 };
     byUser[p.uid].points      += p.points;
     byUser[p.uid].predictions += 1;
   });
 
   const sorted = Object.values(byUser).sort((a, b) => b.points - a.points).slice(0, limitCount);
 
-  // Récupérer les usernames depuis la collection users
+  // Récupérer les usernames + statut premium depuis la collection users
   await Promise.all(sorted.map(async u => {
     try {
       const userSnap = await db.collection('users').doc(u.uid).get();
-      u.username = userSnap.exists ? (userSnap.data().username || '—') : '—';
-      u.email    = userSnap.exists ? (userSnap.data().email    || '')  : '';
+      const data = userSnap.exists ? userSnap.data() : {};
+      u.username = data.username || '—';
+      u.email    = data.email    || '';
+      u.premium  = !!data.premium;
     } catch(e) { u.username = '—'; }
   }));
 
