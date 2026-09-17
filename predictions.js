@@ -600,9 +600,30 @@ async function loadLeaderboard(type, btn) {
             ${avatarUrl ? `<img src="${avatarUrl}" class="lb-avatar-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
             <div class="lb-avatar-initials" style="${avatarUrl ? 'display:none' : 'display:flex'};color:${rankObj.color}">${initials}</div>
           </div>`;
-          const avatarHtml = u.premium
-            ? `<div class="premium-frame-outer"><div class="premium-frame-spin" style="--spin-color:${rankObj.color}"></div>${avatarInner}</div>`
-            : avatarInner;
+          let avatarHtml = avatarInner;
+          if (u.premium) {
+            const uid = 'pf' + Math.random().toString(36).slice(2, 9);
+            const flameSvg = `<svg class="premium-flame-svg" viewBox="0 0 100 100">
+              <defs>
+                <linearGradient id="grad-${uid}" x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0%" stop-color="${rankObj.color}"/>
+                  <stop offset="55%" stop-color="#fb923c"/>
+                  <stop offset="100%" stop-color="#fde047"/>
+                </linearGradient>
+              </defs>
+              <g transform="translate(50,50)">
+                <path id="shape-${uid}" d="M0,-44 C5,-35 8,-27 4,-19 C2,-15 -2,-15 -4,-19 C-8,-27 -5,-35 0,-44 Z" fill="url(#grad-${uid})"/>
+                <use href="#shape-${uid}" transform="rotate(45)"/>
+                <use href="#shape-${uid}" transform="rotate(90)"/>
+                <use href="#shape-${uid}" transform="rotate(135)"/>
+                <use href="#shape-${uid}" transform="rotate(180)"/>
+                <use href="#shape-${uid}" transform="rotate(225)"/>
+                <use href="#shape-${uid}" transform="rotate(270)"/>
+                <use href="#shape-${uid}" transform="rotate(315)"/>
+              </g>
+            </svg>`;
+            avatarHtml = `<div class="premium-frame-outer" style="width:36px;height:36px;--spin-color:${rankObj.color}">${flameSvg}${avatarInner}</div>`;
+          }
           return `
           <tr class="${u.id === currentUser?.uid ? 'lb-me' : ''}">
             <td class="lb-rank">${u.rank}</td>

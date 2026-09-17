@@ -23,7 +23,27 @@ async function getAvatarHtml(email, username, color, size, points, premium) {
   </div>`;
 
   if (!premium) return frame;
-  return `<div class="premium-frame-outer"><div class="premium-frame-spin" style="--spin-color:${color}"></div>${frame}</div>`;
+  const uid = 'pf' + Math.random().toString(36).slice(2, 9);
+  const flameSvg = `<svg class="premium-flame-svg" viewBox="0 0 100 100">
+    <defs>
+      <linearGradient id="grad-${uid}" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0%" stop-color="${color}"/>
+        <stop offset="55%" stop-color="#fb923c"/>
+        <stop offset="100%" stop-color="#fde047"/>
+      </linearGradient>
+    </defs>
+    <g transform="translate(50,50)">
+      <path id="shape-${uid}" d="M0,-44 C5,-35 8,-27 4,-19 C2,-15 -2,-15 -4,-19 C-8,-27 -5,-35 0,-44 Z" fill="url(#grad-${uid})"/>
+      <use href="#shape-${uid}" transform="rotate(45)"/>
+      <use href="#shape-${uid}" transform="rotate(90)"/>
+      <use href="#shape-${uid}" transform="rotate(135)"/>
+      <use href="#shape-${uid}" transform="rotate(180)"/>
+      <use href="#shape-${uid}" transform="rotate(225)"/>
+      <use href="#shape-${uid}" transform="rotate(270)"/>
+      <use href="#shape-${uid}" transform="rotate(315)"/>
+    </g>
+  </svg>`;
+  return `<div class="premium-frame-outer" style="width:${size}px;height:${size}px;--spin-color:${color}">${flameSvg}${frame}</div>`;
 }
 
 // MD5 pour Gravatar
