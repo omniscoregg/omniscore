@@ -610,9 +610,11 @@ async function loadLeaderboard(type, btn) {
           const initials  = (u.username || '?')[0].toUpperCase();
           const avatarUrl = avatarMap[u.id];
           const avatarHtml = `<div class="lb-avatar-frame ${frameClass}${u.premium ? ' is-premium' : ''}" style="--rank-color:${rankObj.color}">
-            ${avatarUrl ? `<img src="${avatarUrl}" class="lb-avatar-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
-            <div class="lb-avatar-initials" style="${avatarUrl ? 'display:none' : 'display:flex'};color:${rankObj.color}">${initials}</div>
-            ${u.premium ? '<div class="premium-shine"></div>' : ''}
+            <div class="lb-avatar-photo">
+              ${avatarUrl ? `<img src="${avatarUrl}" class="lb-avatar-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+              <div class="lb-avatar-initials" style="${avatarUrl ? 'display:none' : 'display:flex'};color:${rankObj.color}">${initials}</div>
+              ${u.premium ? '<div class="premium-shine"></div>' : ''}
+            </div>
           </div>`;
           return `
           <tr class="${u.id === currentUser?.uid ? 'lb-me' : ''}">

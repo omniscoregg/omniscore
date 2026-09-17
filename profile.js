@@ -16,11 +16,13 @@ async function getAvatarHtml(email, username, color, size, points, premium) {
   const frameClass = 'rank-frame-' + rankObj.name.toLowerCase().replace(/[îâêàùé]/g, c => ({'î':'i','â':'a','ê':'e','à':'a','ù':'u','é':'e'}[c]||c));
 
   return `<div class="lb-avatar-frame ${frameClass}${premium ? ' is-premium' : ''}" style="width:${size}px;height:${size}px;--rank-color:${color}">
-    ${gravatarUrl ? `<img src="${gravatarUrl}" class="lb-avatar-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="display:block">` : ''}
-    <div class="lb-avatar-initials" style="${gravatarUrl ? 'display:none' : 'display:flex'};color:${color};font-size:${Math.round(size*0.4)}px;font-weight:800;background:${color}20">
-      ${initials}
+    <div class="lb-avatar-photo">
+      ${gravatarUrl ? `<img src="${gravatarUrl}" class="lb-avatar-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="display:block">` : ''}
+      <div class="lb-avatar-initials" style="${gravatarUrl ? 'display:none' : 'display:flex'};color:${color};font-size:${Math.round(size*0.4)}px;font-weight:800;background:${color}20">
+        ${initials}
+      </div>
+      ${premium ? '<div class="premium-shine"></div>' : ''}
     </div>
-    ${premium ? '<div class="premium-shine"></div>' : ''}
   </div>`;
 }
 
