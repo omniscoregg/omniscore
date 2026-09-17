@@ -15,35 +15,13 @@ async function getAvatarHtml(email, username, color, size, points, premium) {
   const rankObj    = window.getSeasonRank ? window.getSeasonRank(points) : { name: 'Bronze', color: '#cd7f32' };
   const frameClass = 'rank-frame-' + rankObj.name.toLowerCase().replace(/[îâêàùé]/g, c => ({'î':'i','â':'a','ê':'e','à':'a','ù':'u','é':'e'}[c]||c));
 
-  const frame = `<div class="lb-avatar-frame ${frameClass}" style="width:${size}px;height:${size}px;--rank-color:${color}">
+  return `<div class="lb-avatar-frame ${frameClass}${premium ? ' is-premium' : ''}" style="width:${size}px;height:${size}px;--rank-color:${color}">
     ${gravatarUrl ? `<img src="${gravatarUrl}" class="lb-avatar-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="display:block">` : ''}
     <div class="lb-avatar-initials" style="${gravatarUrl ? 'display:none' : 'display:flex'};color:${color};font-size:${Math.round(size*0.4)}px;font-weight:800;background:${color}20">
       ${initials}
     </div>
+    ${premium ? '<div class="premium-shine"></div>' : ''}
   </div>`;
-
-  if (!premium) return frame;
-  const uid = 'pf' + Math.random().toString(36).slice(2, 9);
-  const flameSvg = `<svg class="premium-flame-svg" viewBox="0 0 100 100">
-    <defs>
-      <linearGradient id="grad-${uid}" x1="0" y1="1" x2="0" y2="0">
-        <stop offset="0%" stop-color="${color}"/>
-        <stop offset="55%" stop-color="#fb923c"/>
-        <stop offset="100%" stop-color="#fde047"/>
-      </linearGradient>
-    </defs>
-    <g transform="translate(50,50)">
-      <path id="shape-${uid}" d="M0,-27 C3,-30.5 4,-34 2,-37 C1,-38.5 -1,-38.5 -2,-37 C-4,-34 -3,-30.5 0,-27 Z" fill="url(#grad-${uid})"/>
-      <use href="#shape-${uid}" transform="rotate(45)"/>
-      <use href="#shape-${uid}" transform="rotate(90)"/>
-      <use href="#shape-${uid}" transform="rotate(135)"/>
-      <use href="#shape-${uid}" transform="rotate(180)"/>
-      <use href="#shape-${uid}" transform="rotate(225)"/>
-      <use href="#shape-${uid}" transform="rotate(270)"/>
-      <use href="#shape-${uid}" transform="rotate(315)"/>
-    </g>
-  </svg>`;
-  return `<div class="premium-frame-outer" style="width:${size}px;height:${size}px;--spin-color:${color}">${flameSvg}${frame}</div>`;
 }
 
 // MD5 pour Gravatar
