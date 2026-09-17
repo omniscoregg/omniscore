@@ -612,7 +612,7 @@ async function loadLeaderboard(type, btn) {
                 </linearGradient>
               </defs>
               <g transform="translate(50,50)">
-                <path id="shape-${uid}" d="M0,-44 C5,-35 8,-27 4,-19 C2,-15 -2,-15 -4,-19 C-8,-27 -5,-35 0,-44 Z" fill="url(#grad-${uid})"/>
+                <path id="shape-${uid}" d="M0,-27 C3,-30.5 4,-34 2,-37 C1,-38.5 -1,-38.5 -2,-37 C-4,-34 -3,-30.5 0,-27 Z" fill="url(#grad-${uid})"/>
                 <use href="#shape-${uid}" transform="rotate(45)"/>
                 <use href="#shape-${uid}" transform="rotate(90)"/>
                 <use href="#shape-${uid}" transform="rotate(135)"/>
