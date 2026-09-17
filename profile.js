@@ -248,25 +248,32 @@ async function loadProfileContent(user) {
       <div id="season-section-wrap"></div>
 
       <div class="profile-section">
-        <div class="profile-section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <div class="profile-section-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
           <span>Historique</span>
-          <div class="pred-view-toggle">
-            <button class="pred-view-btn active" id="pred-view-list" onclick="switchPredView('list')">Liste</button>
-            <button class="pred-view-btn" id="pred-view-game" onclick="switchPredView('game')">Par jeu</button>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="premium-cta-btn" style="font-size:12px;padding:6px 10px" onclick="showSeasonRecap()">📊 Bilan de saison${profile.premium ? '' : ' 👑'}</button>
+            <div class="pred-view-toggle">
+              <button class="pred-view-btn active" id="pred-view-list" onclick="switchPredView('list')">Liste</button>
+              <button class="pred-view-btn" id="pred-view-game" onclick="switchPredView('game')">Par jeu</button>
+            </div>
           </div>
         </div>
         <div id="pred-history-container">
         ${predictions.length === 0
           ? '<div class="lb-empty">Aucune prédiction pour l\'instant.<br><span style="font-size:12px;color:var(--text3)">Retourne sur la liste des matchs et prédis ton premier résultat !</span></div>'
-          : predictions.slice(0, 20).map(p => renderPredRow(p)).join('')
+          : predictions.slice(0, profile.premium ? predictions.length : 20).map(p => renderPredRow(p)).join('')
+        }
+        ${!profile.premium && predictions.length > 20
+          ? `<div class="lb-empty" style="padding:14px 0"><span style="font-size:12px;color:var(--text3)">Historique limité aux 20 dernières prédictions. </span><button class="premium-cta-btn" style="font-size:12px;padding:5px 10px;margin-top:6px" onclick="showPremiumModal()">Passer Premium pour l'historique illimité</button></div>`
+          : ''
         }
         </div>
       </div>
     `;
 
     renderDailyStreak(dayStreak, nextBonus);
-    _predCache = predictions;
-    _predCache = predictions;
+    _predCache      = predictions;
+    _predIsPremium  = !!profile.premium;
 
     // Avatar Gravatar + cadre rang
     const avatarColor = window.getSeasonRank ? window.getSeasonRank(profile.points || 0).color : '#a78bfa';
@@ -427,8 +434,9 @@ function renderPredHistoryByGame(preds) {
 }
 
 // Switcher de vue
-let _predViewMode = 'list';
-let _predCache = [];
+let _predViewMode   = 'list';
+let _predCache      = [];
+let _predIsPremium  = false;
 function switchPredView(mode) {
   _predViewMode = mode;
   document.querySelectorAll('.pred-view-btn').forEach(b => b.classList.remove('active'));
@@ -436,11 +444,124 @@ function switchPredView(mode) {
   if (btn) btn.classList.add('active');
   const container = document.getElementById('pred-history-container');
   if (!container || _predCache.length === 0) return;
+  const listPreds = _predIsPremium ? _predCache : _predCache.slice(0, 20);
   container.innerHTML = mode === 'game'
     ? renderPredHistoryByGame(_predCache)
-    : renderPredHistoryList(_predCache.slice(0, 20));
+    : renderPredHistoryList(listPreds);
 }
 window.switchPredView = switchPredView;
+
+// ----------------------------------------------------------
+//  Bilan de saison (Premium)
+// ----------------------------------------------------------
+async function showSeasonRecap() {
+  document.getElementById('season-recap-modal')?.remove();
+  const user = window.FirebaseService?.getCurrentUser();
+  if (!user) { showAuthModal('login'); return; }
+
+  const profile = await window.FirebaseService.getUserProfile(user.uid);
+  if (!profile?.premium) { showPremiumModal(); return; }
+
+  const modal = document.createElement('div');
+  modal.id        = 'season-recap-modal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">📊 Bilan de saison</div>
+        <button class="modal-close" onclick="document.getElementById('season-recap-modal').remove()">✕</button>
+      </div>
+      <div id="season-recap-content"><div class="lb-loading">Chargement...</div></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  const content = document.getElementById('season-recap-content');
+  try {
+    const seasonStart = window.getCurrentSeasonStart ? window.getCurrentSeasonStart() : new Date(0);
+    const allPreds = _predCache.length
+      ? _predCache
+      : (window.FirebaseService.getUserPredictions ? await window.FirebaseService.getUserPredictions(user.uid) : []);
+    const seasonPreds = allPreds.filter(p => p.createdAt && new Date(p.createdAt) >= seasonStart);
+
+    const stats = window.computePredictionStats
+      ? window.computePredictionStats(seasonPreds)
+      : { total: seasonPreds.length, correct: 0, perfect: 0, wrong: 0, pending: 0, pct: 0 };
+
+    // Meilleur jeu de la saison (par points)
+    const byGame = {};
+    seasonPreds.forEach(p => {
+      if (!byGame[p.game]) byGame[p.game] = { points: 0, count: 0 };
+      byGame[p.game].points += (p.points || 0);
+      byGame[p.game].count  += 1;
+    });
+    const bestGameEntry  = Object.entries(byGame).sort((a, b) => b[1].points - a[1].points)[0];
+    const bestGameLabel  = bestGameEntry ? (EsportAPI.GAME_CONFIG[bestGameEntry[0]]?.label || bestGameEntry[0]) : '—';
+    const bestGamePoints = bestGameEntry ? bestGameEntry[1].points : 0;
+    const bestGameCount  = bestGameEntry ? bestGameEntry[1].count : 0;
+
+    // Meilleure série de la saison (streak le plus long, pas seulement l'actuelle)
+    const resolvedSeason = seasonPreds
+      .filter(p => p.result !== null)
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    let bestStreak = 0, curStreak = 0;
+    resolvedSeason.forEach(p => {
+      if (p.result === 'correct' || p.result === 'perfect') { curStreak++; bestStreak = Math.max(bestStreak, curStreak); }
+      else curStreak = 0;
+    });
+
+    const seasonPoints = seasonPreds.reduce((sum, p) => sum + (p.points || 0), 0);
+
+    content.innerHTML = `
+      <div class="profile-stats-row">
+        <div class="profile-stat">
+          <div class="profile-stat-value">${stats.total}</div>
+          <div class="profile-stat-label">Prédictions</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value" style="color:#4ade80">${stats.pct}%</div>
+          <div class="profile-stat-label">Réussite</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value" style="color:#fbbf24">${bestStreak}</div>
+          <div class="profile-stat-label">Meilleure série</div>
+        </div>
+      </div>
+
+      <div class="profile-pred-detail centered">
+        <span class="pred-detail-item correct">${stats.correct} correctes</span>
+        <span class="pred-detail-item perfect">${stats.perfect} parfaites</span>
+        <span class="pred-detail-item wrong">${stats.wrong} manquées</span>
+        <span class="pred-detail-item pending">${stats.pending} en attente</span>
+      </div>
+
+      <div class="profile-section" style="margin-top:16px">
+        <div class="profile-section-title">🏆 Meilleur jeu de la saison</div>
+        <div class="pred-game-group">
+          <div class="pred-game-header" style="border-left:3px solid #a78bfa">
+            <div class="pred-game-info">
+              <span class="pred-game-label" style="color:#a78bfa">${bestGameLabel}</span>
+              <span class="pred-game-stats">${bestGameCount} prédictions</span>
+            </div>
+            <div class="pred-game-pct" style="color:#4ade80">${bestGamePoints} pts</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-points-row" style="margin-top:16px">
+        <div class="profile-stat">
+          <div class="profile-stat-value" style="color:#a78bfa;font-size:28px">${seasonPoints}</div>
+          <div class="profile-stat-label">Points cette saison</div>
+        </div>
+      </div>
+    `;
+  } catch(e) {
+    console.error('[SeasonRecap]', e);
+    content.innerHTML = '<div class="lb-empty">Erreur de chargement.</div>';
+  }
+}
+window.showSeasonRecap = showSeasonRecap;
 
 function filterProfileFavTeams(query) {
   const q = query.trim().toLowerCase();
