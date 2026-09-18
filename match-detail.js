@@ -11,6 +11,10 @@ async function showMatchDetail(match, fromFavorites = false) {
   document.getElementById('match-detail-modal')?.remove();
   if (predUnsubscribe) { predUnsubscribe(); predUnsubscribe = null; }
 
+  // Référence au match actuellement affiché — utilisée par confirmDetailPred/confirmEditPrediction
+  // pour rafraîchir la fiche sans devoir la refermer.
+  window._lastOpenedMatch = match;
+
   const colors     = window.GENRE_COLORS?.[match.genre] || { bg: '#1a1e2c', accent: '#a78bfa' };
   const isUpcoming = match.status === 'upcoming';
 
@@ -368,6 +372,17 @@ async function loadPredAction(match, colors, isUpcoming = true) {
       resultHtml  = '<div class="md-pred-result ' + existing.result + '">' + icon + ' ' + label + ' · <strong>' + existing.points + ' pts</strong></div>';
     }
 
+    // Modification de prédiction avant le début du match — réservé aux membres Premium
+    let editHtml = '';
+    if (!existing.result && isUpcoming) {
+      const format = match.format || 'Bo3';
+      const t1esc = match.team1.name.replace(/'/g, "\\'");
+      const t2esc = match.team2.name.replace(/'/g, "\\'");
+      editHtml = window.currentProfile?.premium
+        ? '<button class="pred-edit-btn" onclick="startEditPrediction(\'' + match.id + '\',\'' + match.game + '\',\'' + t1esc + '\',\'' + t2esc + '\',\'' + format + '\')" title="Modifier ma prédiction">✏️ Modifier ma prédiction</button>'
+        : '<button class="pred-edit-btn locked" onclick="showPremiumModal()" title="Modifier sa prédiction (Premium)">✏️ Modifier (Premium 👑)</button>';
+    }
+
     el.innerHTML = '<div class="md-pred-summary">'
       + '<div class="md-pred-summary-label">Votre prédiction</div>'
       + '<div class="md-pred-summary-content">'
@@ -378,6 +393,7 @@ async function loadPredAction(match, colors, isUpcoming = true) {
       + '</div>'
       + '</div>'
       + resultHtml
+      + (editHtml ? '<div style="margin-top:10px">' + editHtml + '</div>' : '')
       + '</div>';
     return;
   }
@@ -422,7 +438,9 @@ async function confirmDetailPred(matchId, game, team1, team2, winner, s1, s2) {
   const user = window.FirebaseService?.getCurrentUser();
   if (!user) { closeMatchDetail(); showAuthModal('login'); return; }
 
-  await window.FirebaseService.savePrediction(user.uid, matchId, game, team1, team2, winner, s1, s2);
+  // Date de début du match — permet ensuite la modif de prédiction Premium (règle Firestore)
+  const matchStartTime = window._lastOpenedMatch?.date || null;
+  await window.FirebaseService.savePrediction(user.uid, matchId, game, team1, team2, winner, s1, s2, matchStartTime);
 
   // Mettre à jour le cache local AVANT le re-render, sinon renderMatches()
   // ne voit pas encore la nouvelle prédiction et le cadre violet n'apparaît pas
@@ -465,6 +483,7 @@ window.handleFavClick     = function(btn) {
 window.closeMatchDetail   = closeMatchDetail;
 window.selectDetailWinner = selectDetailWinner;
 window.confirmDetailPred  = confirmDetailPred;
+window.loadPredAction     = loadPredAction;
 
 window.GENRE_COLORS = {
   moba:    { bg: '#1a1f3a', accent: '#7c88ff' },

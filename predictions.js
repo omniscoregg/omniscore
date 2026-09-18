@@ -706,6 +706,11 @@ async function confirmEditPrediction(s1, s2) {
     document.getElementById('edit-pred-modal')?.remove();
     playPredictionSound();
     if (window.renderMatches) window.renderMatches();
+    // Si la fiche de match détaillée est ouverte sur ce même match, rafraîchir son résumé de prédiction
+    if (document.getElementById('match-detail-modal') && window._lastOpenedMatch
+        && String(window._lastOpenedMatch.id) === String(ctx.matchId) && window.loadPredAction) {
+      window.loadPredAction(window._lastOpenedMatch, window.GENRE_COLORS?.[window._lastOpenedMatch.genre] || { accent: '#a78bfa' }, true);
+    }
   } catch(e) {
     console.error('[Predictions] confirmEditPrediction:', e);
     const err = document.getElementById('edit-pred-error');
