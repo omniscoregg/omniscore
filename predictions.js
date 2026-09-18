@@ -62,8 +62,13 @@ function watchPredictions(matchId, callback) {
 }
 
 async function getLeaderboard(limitCount = 20) {
+  const cacheKey = 'lbGlobal:' + limitCount;
+  const cached   = _cacheGet(cacheKey);
+  if (cached) return cached;
   const snap = await db.collection('users').orderBy('points', 'desc').limit(limitCount).get();
-  return snap.docs.map((d, i) => ({ rank: i + 1, id: d.id, ...d.data() }));
+  const result = snap.docs.map((d, i) => ({ rank: i + 1, id: d.id, ...d.data() }));
+  _cacheSet(cacheKey, result);
+  return result;
 }
 
 // Début de la saison en cours (reset les 1er janvier / mai / septembre,
@@ -76,13 +81,34 @@ function getCurrentSeasonStart() {
 }
 window.getCurrentSeasonStart = getCurrentSeasonStart;
 
+// Cache court (60s) pour éviter de refaire les mêmes lectures coûteuses
+// quand un utilisateur ré-ouvre le classement ou change d'onglet plusieurs fois.
+const _cache = {}; // key -> { at: timestamp, data }
+const CACHE_TTL_MS = 60 * 1000;
+function _cacheGet(key) {
+  const hit = _cache[key];
+  if (hit && (Date.now() - hit.at) < CACHE_TTL_MS) return hit.data;
+  return null;
+}
+function _cacheSet(key, data) { _cache[key] = { at: Date.now(), data }; }
+window._omniInvalidateCache = () => { Object.keys(_cache).forEach(k => delete _cache[k]); };
+
 async function getLeaderboardByGame(game, limitCount = 20) {
-  const snap        = await db.collection('predictions').orderBy('points', 'desc').get();
+  const cacheKey = 'lbGame:' + game + ':' + limitCount;
+  const cached   = _cacheGet(cacheKey);
+  if (cached) return cached;
+
   const seasonStart = getCurrentSeasonStart();
+  // Filtre par jeu ET par saison directement côté Firestore
+  // (nécessite un index composite game + createdAt — Firestore en fournit
+  //  le lien de création automatiquement dans la console si besoin).
+  const snap = await db.collection('predictions')
+    .where('game', '==', game)
+    .where('createdAt', '>=', seasonStart.toISOString())
+    .get();
+
   const byUser = {};
-  snap.docs.map(d => d.data())
-    .filter(p => p.game === game && p.createdAt && new Date(p.createdAt) >= seasonStart)
-    .forEach(p => {
+  snap.docs.map(d => d.data()).forEach(p => {
     if (!byUser[p.uid]) byUser[p.uid] = { uid: p.uid, id: p.uid, points: 0, predictions: 0 };
     byUser[p.uid].points      += p.points;
     byUser[p.uid].predictions += 1;
@@ -101,7 +127,9 @@ async function getLeaderboardByGame(game, limitCount = 20) {
     } catch(e) { u.username = '—'; }
   }));
 
-  return sorted.map((u, i) => ({ rank: i + 1, ...u }));
+  const result = sorted.map((u, i) => ({ rank: i + 1, ...u }));
+  _cacheSet(cacheKey, result);
+  return result;
 }
 
 // ----------------------------------------------------------
@@ -176,11 +204,16 @@ window.FirebaseService = {
   addFavorite, removeFavorite, getFavorites, isFavorite,
   addFavoriteGame, removeFavoriteGame, getFavoriteGames,
   getUserPredictions: async (uid) => {
+    const cacheKey = 'userPreds:' + uid;
+    const cached   = _cacheGet(cacheKey);
+    if (cached) return cached;
     const snap = await db.collection('predictions')
       .where('uid', '==', uid)
       .orderBy('createdAt', 'desc')
       .get();
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const result = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    _cacheSet(cacheKey, result);
+    return result;
   },
   getStreak: async (uid) => {
     const snap = await db.collection('users').doc(uid).get();
@@ -566,6 +599,8 @@ async function predict(matchId, game, team1, team2, winner, score1 = null, score
     await window.FirebaseService.updateDailyActivity(currentUser.uid);
     currentProfile = await getUserProfile(currentUser.uid);
     renderAuthBar();
+    // Nouvelle prédiction = les classements en cache ne sont plus à jour
+    if (window._omniInvalidateCache) window._omniInvalidateCache();
   } catch (err) { console.error('Erreur prédiction:', err); }
 }
 

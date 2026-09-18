@@ -64,17 +64,27 @@ async function getTournamentPrediction(uid, tournamentId) {
 // ----------------------------------------------------------
 //  Compter les pick'ems de tournoi déjà pris cette saison
 // ----------------------------------------------------------
-async function getSeasonTournamentPredictionsCount(uid) {
+// Petit cache court pour éviter de recompter à chaque changement d'onglet jeu
+window._tournCountCache = window._tournCountCache || {}; // uid -> { at, count }
+const TOURN_COUNT_CACHE_TTL_MS = 60 * 1000;
+
+async function getSeasonTournamentPredictionsCount(uid, { skipCache = false } = {}) {
+  const hit = window._tournCountCache[uid];
+  if (!skipCache && hit && (Date.now() - hit.at) < TOURN_COUNT_CACHE_TTL_MS) return hit.count;
+
   try {
     const seasonStart = window.getCurrentSeasonStart ? window.getCurrentSeasonStart() : new Date(0);
+    // Filtre par utilisateur ET par saison directement côté Firestore
+    // (nécessite un index composite uid + createdAt — Firestore fournit
+    //  le lien de création automatiquement dans la console si besoin).
     const snap = await firebase.firestore()
       .collection('tournament_predictions')
       .where('uid', '==', uid)
+      .where('createdAt', '>=', seasonStart.toISOString())
       .get();
-    return snap.docs.filter(d => {
-      const data = d.data();
-      return data.createdAt && new Date(data.createdAt) >= seasonStart;
-    }).length;
+    const count = snap.size;
+    window._tournCountCache[uid] = { at: Date.now(), count };
+    return count;
   } catch(e) {
     console.error('[Tournaments] getSeasonTournamentPredictionsCount:', e);
     return 0;
@@ -330,8 +340,9 @@ async function confirmTournPred(tournId, tournName, gameSlug) {
   if (!store || store.semis.length < 4 || !store.winner) return;
 
   // Re-vérifie la limite au moment de confirmer (sécurité contre plusieurs onglets ouverts)
+  // skipCache: on veut le compte réel, pas une valeur en cache de 60s
   if (!window._tournIsPremium) {
-    const currentCount = await getSeasonTournamentPredictionsCount(user.uid);
+    const currentCount = await getSeasonTournamentPredictionsCount(user.uid, { skipCache: true });
     if (currentCount >= TOURN_FREE_LIMIT) {
       const body = document.getElementById(`tourn-body-${tournId}`);
       if (body) {
@@ -355,6 +366,7 @@ async function confirmTournPred(tournId, tournName, gameSlug) {
   try {
     await saveTournamentPrediction(user.uid, tournId, gameKey, tournName, store.semis, store.winner);
     window._tournSeasonUsed = (window._tournSeasonUsed || 0) + 1;
+    window._tournCountCache[user.uid] = { at: Date.now(), count: window._tournSeasonUsed };
 
     // Son de validation
     if (window.playPredictionSound) playPredictionSound();
