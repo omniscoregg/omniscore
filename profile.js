@@ -161,6 +161,11 @@ async function loadProfileContent(user) {
         <div class="profile-rank">${rankLabel}</div>
       </div>
 
+      <div class="profile-tools-row">
+        <button class="premium-cta-btn" onclick="showSeasonRecap()">📊 Bilan de saison${profile.premium ? '' : ' 👑'}</button>
+        <button class="premium-cta-btn" onclick="showAdvancedStats()">📈 Statistiques avancées${profile.premium ? '' : ' 👑'}</button>
+      </div>
+
       <div class="daily-streak-wrap" id="daily-streak-section"></div>
 
       <div class="profile-stats-row">
@@ -248,14 +253,11 @@ async function loadProfileContent(user) {
       <div id="season-section-wrap"></div>
 
       <div class="profile-section">
-        <div class="profile-section-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div class="profile-section-title" style="display:flex;justify-content:space-between;align-items:center">
           <span>Historique</span>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <button class="premium-cta-btn" style="font-size:12px;padding:6px 10px" onclick="showSeasonRecap()">📊 Bilan de saison${profile.premium ? '' : ' 👑'}</button>
-            <div class="pred-view-toggle">
-              <button class="pred-view-btn active" id="pred-view-list" onclick="switchPredView('list')">Liste</button>
-              <button class="pred-view-btn" id="pred-view-game" onclick="switchPredView('game')">Par jeu</button>
-            </div>
+          <div class="pred-view-toggle">
+            <button class="pred-view-btn active" id="pred-view-list" onclick="switchPredView('list')">Liste</button>
+            <button class="pred-view-btn" id="pred-view-game" onclick="switchPredView('game')">Par jeu</button>
           </div>
         </div>
         <div id="pred-history-container">
@@ -562,6 +564,170 @@ async function showSeasonRecap() {
   }
 }
 window.showSeasonRecap = showSeasonRecap;
+
+// ----------------------------------------------------------
+//  Statistiques avancées (Premium)
+// ----------------------------------------------------------
+async function showAdvancedStats() {
+  document.getElementById('advanced-stats-modal')?.remove();
+  const user = window.FirebaseService?.getCurrentUser();
+  if (!user) { showAuthModal('login'); return; }
+
+  const profile = await window.FirebaseService.getUserProfile(user.uid);
+  if (!profile?.premium) { showPremiumModal(); return; }
+
+  const modal = document.createElement('div');
+  modal.id        = 'advanced-stats-modal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-box wide">
+      <div class="modal-header">
+        <div class="modal-title">📈 Statistiques avancées</div>
+        <button class="modal-close" onclick="document.getElementById('advanced-stats-modal').remove()">✕</button>
+      </div>
+      <div id="advanced-stats-content"><div class="lb-loading">Chargement...</div></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  const content = document.getElementById('advanced-stats-content');
+  try {
+    const predictions = _predCache.length
+      ? _predCache
+      : (window.FirebaseService.getUserPredictions ? await window.FirebaseService.getUserPredictions(user.uid) : []);
+    const tournamentPreds = window.getUserTournamentPredictions ? await window.getUserTournamentPredictions(user.uid) : [];
+
+    // 1. Taux de réussite par jeu (carrière)
+    const byGame = {};
+    predictions.forEach(p => {
+      if (!byGame[p.game]) byGame[p.game] = { total: 0, correct: 0, perfect: 0, wrong: 0, pending: 0 };
+      const g = byGame[p.game];
+      g.total++;
+      if (p.result === 'perfect') { g.correct++; g.perfect++; }
+      else if (p.result === 'correct') { g.correct++; }
+      else if (p.result === 'wrong') { g.wrong++; }
+      else { g.pending++; }
+    });
+    const gameRows = Object.entries(byGame)
+      .map(([game, g]) => {
+        const resolved = g.total - g.pending;
+        const pct = resolved > 0 ? Math.round((g.correct / resolved) * 100) : 0;
+        const cfg = EsportAPI.GAME_CONFIG[game];
+        const colors = window.GENRE_COLORS?.[cfg?.genre] || {};
+        return { game, label: cfg?.label || game, accent: colors.accent || '#a78bfa', ...g, pct };
+      })
+      .sort((a, b) => b.total - a.total);
+
+    const gameRowsHtml = gameRows.length > 0 ? gameRows.map(g => `
+      <div class="pred-game-group">
+        <div class="pred-game-header" style="border-left:3px solid ${g.accent}">
+          <div class="pred-game-info">
+            <span class="pred-game-label" style="color:${g.accent}">${g.label}</span>
+            <span class="pred-game-stats">${g.total} prédictions · ${g.perfect} parfaites</span>
+          </div>
+          <div class="pred-game-pct" style="color:${g.pct >= 60 ? '#4ade80' : g.pct >= 40 ? '#fbbf24' : '#f87171'}">${g.pct}%</div>
+        </div>
+      </div>
+    `).join('') : '<div class="lb-empty">Pas encore de prédictions.</div>';
+
+    // 2. Meilleure série all-time (toute la carrière, pas juste la saison en cours)
+    const resolvedAll = predictions
+      .filter(p => p.result !== null)
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    let bestStreakAll = 0, curStreakAll = 0;
+    resolvedAll.forEach(p => {
+      if (p.result === 'correct' || p.result === 'perfect') { curStreakAll++; bestStreakAll = Math.max(bestStreakAll, curStreakAll); }
+      else curStreakAll = 0;
+    });
+
+    // 3. Évolution des points (par mois, 6 derniers mois actifs)
+    const byMonth = {};
+    predictions.forEach(p => {
+      if (!p.createdAt || !p.points) return;
+      const d   = new Date(p.createdAt);
+      const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      byMonth[key] = (byMonth[key] || 0) + p.points;
+    });
+    const monthKeys    = Object.keys(byMonth).sort().slice(-6);
+    const maxMonthPts  = Math.max(1, ...monthKeys.map(k => byMonth[k]));
+    const monthLabels  = { '01': 'Jan', '02': 'Fév', '03': 'Mar', '04': 'Avr', '05': 'Mai', '06': 'Juin', '07': 'Juil', '08': 'Août', '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Déc' };
+    const evolutionHtml = monthKeys.length > 0
+      ? monthKeys.map(k => {
+          const m   = k.split('-')[1];
+          const pts = byMonth[k];
+          const widthPct = Math.max(4, Math.round((pts / maxMonthPts) * 100));
+          return `
+            <div class="stat-bar-row">
+              <span class="stat-bar-label">${monthLabels[m] || m}</span>
+              <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${widthPct}%"></div></div>
+              <span class="stat-bar-value">${pts} pts</span>
+            </div>`;
+        }).join('')
+      : '<div class="lb-empty">Pas encore assez de données.</div>';
+
+    // 4. Comparaison matchs vs tournois
+    const matchStats    = window.computePredictionStats(predictions);
+    const tournResolved = tournamentPreds.filter(t => t.result !== null);
+    const tournSuccess  = tournamentPreds.filter(t => t.result === 'partial' || t.result === 'perfect').length;
+    const tournPct      = tournResolved.length > 0 ? Math.round((tournSuccess / tournResolved.length) * 100) : 0;
+
+    content.innerHTML = `
+      <div class="profile-section">
+        <div class="profile-stats-row">
+          <div class="profile-stat">
+            <div class="profile-stat-value" style="color:#fbbf24">${bestStreakAll}</div>
+            <div class="profile-stat-label">Meilleure série (carrière)</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value">${predictions.length}</div>
+            <div class="profile-stat-label">Prédictions totales</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value" style="color:#4ade80">${matchStats.pct}%</div>
+            <div class="profile-stat-label">Réussite globale</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">🎮 Réussite par jeu (carrière)</div>
+        ${gameRowsHtml}
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">📊 Évolution des points</div>
+        <div class="stat-bar-chart">${evolutionHtml}</div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">⚔️ Matchs vs Tournois</div>
+        <div class="profile-stats-row">
+          <div class="profile-stat">
+            <div class="profile-stat-value">${matchStats.total}</div>
+            <div class="profile-stat-label">Prédictions de match</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value" style="color:#4ade80">${matchStats.pct}%</div>
+            <div class="profile-stat-label">Réussite matchs</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value">${tournamentPreds.length}</div>
+            <div class="profile-stat-label">Pick'ems tournoi</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value" style="color:#4ade80">${tournPct}%</div>
+            <div class="profile-stat-label">Réussite tournois</div>
+          </div>
+        </div>
+      </div>
+    `;
+  } catch(e) {
+    console.error('[AdvancedStats]', e);
+    content.innerHTML = '<div class="lb-empty">Erreur de chargement.</div>';
+  }
+}
+window.showAdvancedStats = showAdvancedStats;
 
 function filterProfileFavTeams(query) {
   const q = query.trim().toLowerCase();

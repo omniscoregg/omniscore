@@ -92,6 +92,31 @@ async function getSeasonTournamentPredictionsCount(uid, { skipCache = false } = 
 }
 
 // ----------------------------------------------------------
+//  Toutes les prédictions de tournoi d'un utilisateur (stats avancées)
+// ----------------------------------------------------------
+window._tournUserPredsCache = window._tournUserPredsCache || {}; // uid -> { at, data }
+const TOURN_USER_PREDS_CACHE_TTL_MS = 60 * 1000;
+
+async function getUserTournamentPredictions(uid) {
+  const hit = window._tournUserPredsCache[uid];
+  if (hit && (Date.now() - hit.at) < TOURN_USER_PREDS_CACHE_TTL_MS) return hit.data;
+
+  try {
+    const snap = await firebase.firestore()
+      .collection('tournament_predictions')
+      .where('uid', '==', uid)
+      .get();
+    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    window._tournUserPredsCache[uid] = { at: Date.now(), data };
+    return data;
+  } catch(e) {
+    console.error('[Tournaments] getUserTournamentPredictions:', e);
+    return [];
+  }
+}
+window.getUserTournamentPredictions = getUserTournamentPredictions;
+
+// ----------------------------------------------------------
 //  Afficher la page tournois
 // ----------------------------------------------------------
 async function showTournamentsPage() {
@@ -367,6 +392,7 @@ async function confirmTournPred(tournId, tournName, gameSlug) {
     await saveTournamentPrediction(user.uid, tournId, gameKey, tournName, store.semis, store.winner);
     window._tournSeasonUsed = (window._tournSeasonUsed || 0) + 1;
     window._tournCountCache[user.uid] = { at: Date.now(), count: window._tournSeasonUsed };
+    delete window._tournUserPredsCache[user.uid]; // stats avancées à rafraîchir
 
     // Son de validation
     if (window.playPredictionSound) playPredictionSound();
