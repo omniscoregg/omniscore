@@ -34,15 +34,25 @@ async function getUserProfile(uid) {
   return snap.exists ? { id: snap.id, ...snap.data() } : null;
 }
 
-async function savePrediction(uid, matchId, game, team1, team2, predictedWinner, predictedScore1 = null, predictedScore2 = null) {
+async function savePrediction(uid, matchId, game, team1, team2, predictedWinner, predictedScore1 = null, predictedScore2 = null, matchStartTime = null) {
   const predId = `${uid}_${matchId}`;
   await db.collection('predictions').doc(predId).set({
     uid, matchId, game, team1, team2, predictedWinner,
     predictedScore1, predictedScore2,
+    matchStartTime, // ISO string — permet à la règle Firestore de vérifier "avant le début du match" pour la modif Premium
     result: null, points: 0, createdAt: new Date().toISOString(),
   });
   await db.collection('users').doc(uid).update({
     predictions: firebase.firestore.FieldValue.increment(1)
+  });
+}
+
+// Modifier une prédiction existante (Premium, avant le début du match).
+// Ne touche qu'aux champs autorisés côté règles Firestore : predictedWinner/predictedScore1/predictedScore2.
+async function updatePrediction(uid, matchId, predictedWinner, predictedScore1 = null, predictedScore2 = null) {
+  const predId = `${uid}_${matchId}`;
+  await db.collection('predictions').doc(predId).update({
+    predictedWinner, predictedScore1, predictedScore2,
   });
 }
 
@@ -199,7 +209,7 @@ window.computePredictionStats = computePredictionStats;
 window.FirebaseService = {
   register, login, logout,
   getUserProfile, hasPredicted,
-  savePrediction, getPredictionsForMatch, watchPredictions,
+  savePrediction, updatePrediction, getPredictionsForMatch, watchPredictions,
   getLeaderboard, getLeaderboardByGame,
   addFavorite, removeFavorite, getFavorites, isFavorite,
   addFavoriteGame, removeFavoriteGame, getFavoriteGames,
@@ -529,7 +539,16 @@ async function renderPredictionBtn(matchId, game, team1, team2, status, format =
     const resultColors = { correct: '#4ade80', wrong: '#f87171', perfect: '#fbbf24' };
     const color = existing.result ? (resultColors[existing.result] || '') : '';
     const badgeStyle = `color:${color};font-weight:700;border:1px solid ${color}70;box-shadow:0 0 10px ${color}40;border-radius:20px;padding:2px 10px;display:inline-block`;
-    return `<div class="pred-existing">${existing.result ? `<span style="${badgeStyle}">${existing.points} pts</span>` : `Prédit : ${existing.predictedWinner}`}</div>`;
+    const t1esc = team1.replace(/'/g, "\\'");
+    const t2esc = team2.replace(/'/g, "\\'");
+    // Modification de prédiction avant le début du match — réservé aux membres Premium
+    // (le match est encore "upcoming" à ce stade, donc pas encore commencé)
+    const editBtn = existing.result
+      ? ''
+      : currentProfile?.premium
+        ? `<button class="pred-edit-btn" onclick="startEditPrediction('${matchId}','${game}','${t1esc}','${t2esc}','${format}')" title="Modifier ma prédiction">✏️</button>`
+        : `<button class="pred-edit-btn locked" onclick="showPremiumModal()" title="Modifier sa prédiction (Premium)">✏️ 👑</button>`;
+    return `<div class="pred-existing">${existing.result ? `<span style="${badgeStyle}">${existing.points} pts</span>` : `Prédit : ${existing.predictedWinner}`}${editBtn}</div>`;
   }
   return `
     <div class="pred-buttons">
@@ -591,10 +610,19 @@ function selectPredTeam(btn, matchId, game, team1, team2, winner, format = 'Bo3'
 // Store local des prédictions pour affichage pastilles
 window._predStore = window._predStore || {};
 
+// Retrouve la date de début d'un match dans le store local (utilisé pour
+// autoriser/bloquer côté Firestore la modification de prédiction Premium).
+function getMatchStartTime(matchId) {
+  if (!window.matchStore || typeof window.matchStore.get !== 'function') return null;
+  const m = window.matchStore.get(matchId) || window.matchStore.get(String(matchId)) || window.matchStore.get(Number(matchId));
+  return m?.date || null;
+}
+
 async function predict(matchId, game, team1, team2, winner, score1 = null, score2 = null) {
   if (!currentUser) { showAuthModal('login'); return; }
   try {
-    await savePrediction(currentUser.uid, matchId, game, team1, team2, winner, score1, score2);
+    const matchStartTime = getMatchStartTime(matchId);
+    await savePrediction(currentUser.uid, matchId, game, team1, team2, winner, score1, score2, matchStartTime);
     window._predStore[matchId] = { winner, score1, score2 };
     await window.FirebaseService.updateDailyActivity(currentUser.uid);
     currentProfile = await getUserProfile(currentUser.uid);
@@ -607,6 +635,87 @@ async function predict(matchId, game, team1, team2, winner, score1 = null, score
 function selectPredTeamGlobal(btn, matchId, game, team1, team2, winner, format = 'Bo3') {
   selectPredTeam(btn, matchId, game, team1, team2, winner, format);
 }
+
+// ----------------------------------------------------------
+//  Modifier une prédiction existante (Premium, avant le début du match)
+// ----------------------------------------------------------
+function startEditPrediction(matchId, game, team1, team2, format) {
+  document.getElementById('edit-pred-modal')?.remove();
+  const modal = document.createElement('div');
+  modal.id        = 'edit-pred-modal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">✏️ Modifier ma prédiction</div>
+        <button class="modal-close" onclick="document.getElementById('edit-pred-modal').remove()">✕</button>
+      </div>
+      <span class="pred-label">Qui va gagner ?</span>
+      <div class="pred-teams-row" style="margin:8px 0 12px">
+        <button class="pred-btn" id="edit-pred-team1" onclick="selectEditTeam('${team1.replace(/'/g, "\\'")}')">${team1}</button>
+        <button class="pred-btn" id="edit-pred-team2" onclick="selectEditTeam('${team2.replace(/'/g, "\\'")}')">${team2}</button>
+      </div>
+      <div id="edit-pred-score-row"></div>
+      <div id="edit-pred-error" class="form-error" style="display:none;margin-top:8px"></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+  window._editPredCtx = { matchId, game, team1, team2, format, winner: null };
+}
+window.startEditPrediction = startEditPrediction;
+
+function selectEditTeam(winner) {
+  const ctx = window._editPredCtx;
+  if (!ctx) return;
+  ctx.winner = winner;
+
+  const btn1 = document.getElementById('edit-pred-team1');
+  const btn2 = document.getElementById('edit-pred-team2');
+  [btn1, btn2].forEach(b => b?.classList.remove('selected'));
+  (winner === ctx.team1 ? btn1 : btn2)?.classList.add('selected');
+
+  const validScores   = getValidScores(ctx.format);
+  const isTeam1Winner  = winner === ctx.team1;
+  const btns = validScores.map(([w, l]) => {
+    const s1 = isTeam1Winner ? w : l;
+    const s2 = isTeam1Winner ? l : w;
+    return `<button class="score-choice-btn" onclick="confirmEditPrediction(${s1},${s2})">${s1} - ${s2}</button>`;
+  }).join('');
+
+  const scoreRow = document.getElementById('edit-pred-score-row');
+  if (scoreRow) {
+    scoreRow.innerHTML = `
+      <span class="pred-score-label">Score prédit <span style="color:var(--text3);font-size:10px">(optionnel)</span></span>
+      <div class="score-choice-btns">${btns}</div>
+      <button class="score-skip-btn" onclick="confirmEditPrediction(null,null)">Sans score</button>
+    `;
+  }
+}
+window.selectEditTeam = selectEditTeam;
+
+async function confirmEditPrediction(s1, s2) {
+  const ctx = window._editPredCtx;
+  if (!ctx || !ctx.winner || !currentUser) return;
+
+  try {
+    await window.FirebaseService.updatePrediction(currentUser.uid, ctx.matchId, ctx.winner, s1, s2);
+    window._predStore[ctx.matchId] = { winner: ctx.winner, score1: s1, score2: s2 };
+    if (window._omniInvalidateCache) window._omniInvalidateCache();
+    document.getElementById('edit-pred-modal')?.remove();
+    playPredictionSound();
+    if (window.renderMatches) window.renderMatches();
+  } catch(e) {
+    console.error('[Predictions] confirmEditPrediction:', e);
+    const err = document.getElementById('edit-pred-error');
+    if (err) {
+      err.textContent = "Impossible de modifier cette prédiction (le match a peut-être déjà commencé).";
+      err.style.display = 'block';
+    }
+  }
+}
+window.confirmEditPrediction = confirmEditPrediction;
 
 // ----------------------------------------------------------
 //  Classement

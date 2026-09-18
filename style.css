@@ -738,7 +738,28 @@ body {
   border-top: 1px solid var(--border);
   font-size: 12px;
   color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+.pred-edit-btn {
+  background: none;
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  color: var(--text3);
+  font-size: 11px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.pred-edit-btn:hover { color: var(--text); border-color: var(--accent); }
+.pred-edit-btn.locked {
+  border-color: rgba(251,191,36,0.35);
+  background: rgba(251,191,36,0.08);
+  color: #fbbf24;
+  font-weight: 700;
+}
+.pred-edit-btn.locked:hover { filter: brightness(1.1); }
 
 /* ----------------------------------------------------------
    Classement
@@ -6162,6 +6183,32 @@ body {
   font-family: inherit;
 }
 .notif-close-btn:hover { color: var(--text); }
+
+.notif-delay-select {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--text2);
+  cursor: pointer;
+  font-family: inherit;
+  max-width: 100px;
+}
+.notif-delay-select:hover { border-color: var(--accent); }
+
+.notif-delay-btn.locked {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(251,191,36,0.35);
+  background: rgba(251,191,36,0.08);
+  color: #fbbf24;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+}
+.notif-delay-btn.locked:hover { filter: brightness(1.1); }
 
 .notif-list {
   overflow-y: auto;
