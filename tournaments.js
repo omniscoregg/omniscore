@@ -5,6 +5,7 @@
 // ============================================================
 
 const TOURN_CACHE_URL  = 'https://omniscore-cache.omniscoregg.workers.dev';
+const TOURN_FREE_LIMIT = 3; // pick'ems de tournoi gratuits par saison (illimité en Premium)
 
 // ----------------------------------------------------------
 //  Récupérer les tournois en cours + à venir
@@ -58,6 +59,26 @@ async function getTournamentPrediction(uid, tournamentId) {
       .get();
     return snap.exists ? snap.data() : null;
   } catch(e) { return null; }
+}
+
+// ----------------------------------------------------------
+//  Compter les pick'ems de tournoi déjà pris cette saison
+// ----------------------------------------------------------
+async function getSeasonTournamentPredictionsCount(uid) {
+  try {
+    const seasonStart = window.getCurrentSeasonStart ? window.getCurrentSeasonStart() : new Date(0);
+    const snap = await firebase.firestore()
+      .collection('tournament_predictions')
+      .where('uid', '==', uid)
+      .get();
+    return snap.docs.filter(d => {
+      const data = d.data();
+      return data.createdAt && new Date(data.createdAt) >= seasonStart;
+    }).length;
+  } catch(e) {
+    console.error('[Tournaments] getSeasonTournamentPredictionsCount:', e);
+    return 0;
+  }
 }
 
 // ----------------------------------------------------------
@@ -139,7 +160,17 @@ async function loadTournamentsByGame(gameKey) {
     return;
   }
 
-  content.innerHTML = tournaments.map(t => {
+  let usageBannerHtml = '';
+  if (user) {
+    const profile = await window.FirebaseService.getUserProfile(user.uid);
+    window._tournIsPremium  = !!profile?.premium;
+    window._tournSeasonUsed = window._tournIsPremium ? 0 : await getSeasonTournamentPredictionsCount(user.uid);
+    usageBannerHtml = window._tournIsPremium
+      ? '<div class="tourn-usage-banner premium">👑 Pick\'ems de tournoi illimités</div>'
+      : `<div class="tourn-usage-banner">${window._tournSeasonUsed}/${TOURN_FREE_LIMIT} pick'ems de tournoi utilisés cette saison</div>`;
+  }
+
+  content.innerHTML = usageBannerHtml + tournaments.map(t => {
     const isRunning = t.begin_at && new Date(t.begin_at) <= new Date();
     const date = t.begin_at ? new Date(t.begin_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '—';
     const teams = (t.teams || []).slice(0, 16);
@@ -176,6 +207,19 @@ async function loadTournamentPredForm(t, uid, accent) {
   if (existing) {
     // Afficher la prédiction existante
     body.innerHTML = renderExistingPred(existing, accent);
+    return;
+  }
+
+  // Limite atteinte (gratuit) et pas encore de prédiction sur CE tournoi → verrouillé
+  const isPremium  = !!window._tournIsPremium;
+  const seasonUsed = window._tournSeasonUsed || 0;
+  if (!isPremium && seasonUsed >= TOURN_FREE_LIMIT) {
+    body.innerHTML = `
+      <div class="tourn-locked">
+        <div class="tourn-locked-text">🔒 Limite de ${TOURN_FREE_LIMIT} pick'ems de tournoi atteinte pour cette saison.</div>
+        <button class="premium-cta-btn" onclick="showPremiumModal()">Passer Premium pour des pick'ems illimités</button>
+      </div>
+    `;
     return;
   }
 
@@ -285,6 +329,23 @@ async function confirmTournPred(tournId, tournName, gameSlug) {
   const store = window._tournPreds?.[tournId];
   if (!store || store.semis.length < 4 || !store.winner) return;
 
+  // Re-vérifie la limite au moment de confirmer (sécurité contre plusieurs onglets ouverts)
+  if (!window._tournIsPremium) {
+    const currentCount = await getSeasonTournamentPredictionsCount(user.uid);
+    if (currentCount >= TOURN_FREE_LIMIT) {
+      const body = document.getElementById(`tourn-body-${tournId}`);
+      if (body) {
+        body.innerHTML = `
+          <div class="tourn-locked">
+            <div class="tourn-locked-text">🔒 Limite de ${TOURN_FREE_LIMIT} pick'ems de tournoi atteinte pour cette saison.</div>
+            <button class="premium-cta-btn" onclick="showPremiumModal()">Passer Premium pour des pick'ems illimités</button>
+          </div>
+        `;
+      }
+      return;
+    }
+  }
+
   const btn = document.getElementById(`confirm-${tournId}`);
   if (btn) { btn.disabled = true; btn.textContent = 'Sauvegarde...'; }
 
@@ -293,6 +354,7 @@ async function confirmTournPred(tournId, tournName, gameSlug) {
 
   try {
     await saveTournamentPrediction(user.uid, tournId, gameKey, tournName, store.semis, store.winner);
+    window._tournSeasonUsed = (window._tournSeasonUsed || 0) + 1;
 
     // Son de validation
     if (window.playPredictionSound) playPredictionSound();
