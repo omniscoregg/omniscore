@@ -6326,6 +6326,22 @@ body {
 }
 .share-btn-small:hover { color: var(--accent); border-color: var(--accent); }
 
+/* Bouton édition prédiction — carte match (liste) */
+.pred-pill-edit {
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 6px;
+  margin-left: auto;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.pred-pill-edit:hover { color: var(--accent); }
+.pred-pill-edit.locked { color: #fbbf2490; }
+.pred-pill-edit.locked:hover { color: #fbbf24; }
+
 /* Bouton partage carte match */
 .share-btn-match {
   background: none;

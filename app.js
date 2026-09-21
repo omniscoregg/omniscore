@@ -378,7 +378,7 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
   }
 
   // One-tap prediction : boutons directement sur les équipes
-  let tapBtn1 = '', tapBtn2 = '';
+  let tapBtn1 = '', tapBtn2 = '', editPillBtn = '';
   if (isUpcoming && !isDemo) {
     if (!window.FirebaseService?.getCurrentUser()) {
       tapBtn1 = '<button class="onetap-btn" onclick="event.stopPropagation();showAuthModal(&#39;login&#39;)" title="Connectez-vous">🎯</button>';
@@ -400,6 +400,18 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
       const scoreStr2 = predData.score2 !== null && predData.score2 !== undefined ? predData.score2 : '';
       tapBtn1 = '<span class="pred-pill-result ' + (isWinner1 ? 'win' : 'lose') + '">' + (scoreStr1 !== '' ? scoreStr1 + ' ' : '') + '<span class="pred-pill-dot filled"></span></span>';
       tapBtn2 = '<span class="pred-pill-result ' + (!isWinner1 ? 'win' : 'lose') + '"><span class="pred-pill-dot filled"></span>' + (scoreStr2 !== '' ? ' ' + scoreStr2 : '') + '</span>';
+
+      // Bouton d'édition (Premium, uniquement si le match n'est pas encore résolu)
+      if (!predData.result && window.startEditPrediction) {
+        const gm  = String(m.game);
+        const t2  = String(m.team2?.name || '');
+        const fmt = m.format || 'Bo3';
+        const t1esc = t1.replace(/'/g, "\\'");
+        const t2esc = t2.replace(/'/g, "\\'");
+        editPillBtn = window.currentProfile?.premium
+          ? '<button class="pred-pill-edit" onclick="event.stopPropagation();startEditPrediction(\'' + id + '\',\'' + gm + '\',\'' + t1esc + '\',\'' + t2esc + '\',\'' + fmt + '\')" title="Modifier ma prédiction">✏️</button>'
+          : '<button class="pred-pill-edit locked" onclick="event.stopPropagation();showPremiumModal()" title="Modifier sa prédiction (Premium)">✏️ 👑</button>';
+      }
     }
   }
 
@@ -429,6 +441,7 @@ async function renderMatchCard(m, isUpcoming = false, isLive = false) {
       <div class="match-bottom">
         ${timeInfo ? `<span class="match-time-left">${timeInfo}</span>` : ''}
         <span class="match-tournament-right">${m.tournament} · ${m.format}</span>
+        ${editPillBtn}
         ${window._resolvedStore?.[String(m.id)] ? `<button class="share-btn-match" onclick="event.stopPropagation();shareMatch('${m.id}')" title="Partager">📤</button>` : ''}
       </div>
     </div>
