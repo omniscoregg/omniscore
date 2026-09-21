@@ -48,12 +48,15 @@ async function savePrediction(uid, matchId, game, team1, team2, predictedWinner,
 }
 
 // Modifier une prédiction existante (Premium, avant le début du match).
-// Ne touche qu'aux champs autorisés côté règles Firestore : predictedWinner/predictedScore1/predictedScore2.
+// Envoie aussi matchStartTime : pour les prédictions créées avant l'ajout de ce
+// champ, ça permet de le renseigner rétroactivement (la règle Firestore l'autorise
+// une seule fois, quand le champ est absent du document).
 async function updatePrediction(uid, matchId, predictedWinner, predictedScore1 = null, predictedScore2 = null) {
   const predId = `${uid}_${matchId}`;
-  await db.collection('predictions').doc(predId).update({
-    predictedWinner, predictedScore1, predictedScore2,
-  });
+  const matchStartTime = getMatchStartTime(matchId);
+  const payload = { predictedWinner, predictedScore1, predictedScore2 };
+  if (matchStartTime) payload.matchStartTime = matchStartTime;
+  await db.collection('predictions').doc(predId).update(payload);
 }
 
 async function hasPredicted(uid, matchId) {
