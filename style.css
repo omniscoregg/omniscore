@@ -808,6 +808,7 @@ body {
 
 .md-team {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -824,7 +825,7 @@ body {
   font-size: 14px; font-weight: 700;
 }
 
-.md-team-name { font-size: 14px; font-weight: 600; color: var(--text2); }
+.md-team-name { font-size: 14px; font-weight: 600; color: var(--text2); overflow-wrap: anywhere; word-break: break-word; }
 .md-team-name.winner { color: var(--text); }
 
 .md-score-block { text-align: center; flex-shrink: 0; }
@@ -2843,6 +2844,7 @@ body {
   font-size: 11px;
   padding: 2px 4px;
   border-radius: 4px;
+  min-width: 0;
 }
 
 .form-row.win {
