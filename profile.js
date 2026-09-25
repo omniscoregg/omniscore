@@ -133,7 +133,7 @@ async function loadProfileContent(user) {
 
     const stats   = window.computePredictionStats(predictions);
     const total   = stats.total;
-    const correct = stats.correct;
+    const correct = stats.correct - stats.perfect;
     const perfect = stats.perfect;
     const wrong   = stats.wrong;
     const pending = stats.pending;
@@ -532,7 +532,7 @@ async function showSeasonRecap() {
       </div>
 
       <div class="profile-pred-detail centered">
-        <span class="pred-detail-item correct">${stats.correct} correctes</span>
+        <span class="pred-detail-item correct">${stats.correct - stats.perfect} correctes</span>
         <span class="pred-detail-item perfect">${stats.perfect} parfaites</span>
         <span class="pred-detail-item wrong">${stats.wrong} manquées</span>
         <span class="pred-detail-item pending">${stats.pending} en attente</span>
